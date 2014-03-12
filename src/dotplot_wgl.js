@@ -19,10 +19,10 @@
  *  along with dotplot_wgl.  If not, see <http://www.gnu.org/licenses/>
  *
  * Authors:
- * A
- * B
- * C
- * D
+ * Rania Assab
+ * Aurélien Luciani
+ * Quentin Riché-Piotaix
+ * Mathieu Schaeffer
  *
  *
  */
