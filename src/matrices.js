@@ -32,19 +32,26 @@ function Matrix(parameters) {
         var amplitude = max - min;
         //fill matrices;
         var initSeq = (this.dna ? dnaSeq : aaSeq);
-        for (var i = 0; i < parameters.matrix.length; i++) {
+        var initSeq=this.dna;
+        if (dnaSeq){
+            throw "Choose identity matrix";
+        }
+        else{
+            for (var i = 0; i < parameters.matrix.length; i++) {
             this.internalMatrix[initSeq[i]] = {};
             this.scoreMatrix[initSeq[i]] = {};
-            for (var j = 0; j < parameters.matrix[i].length; j++) {
-                var value = parameters.matrix[i][j];
-                this.internalMatrix[initSeq[i]][initSeq[j]] = Math.round((value - min) * 255 / amplitude);
-                this.scoreMatrix[initSeq[i]][initSeq[j]] = value;
+                for (var j = 0; j < parameters.matrix[i].length; j++) {
+                    var value = parameters.matrix[i][j];
+                    this.internalMatrix[initSeq[i]][initSeq[j]] = Math.round((value - min) * 255 / amplitude);
+                    this.scoreMatrix[initSeq[i]][initSeq[j]] = value;
+                }
             }
-        }
-        this.score = function(el1, el2) {
-            return this.internalMatrix[el1][el2];
-        };
-    } else {//suppose we want identity matrix
+            this.score = function(el1, el2) {
+                return this.internalMatrix[el1][el2];
+            };
+        } 
+    } 
+    else {//suppose we want identity matrix
         var initSeq = (parameters.dna ? dnaSeq : aaSeq);
         this.dna = parameters.dna;
         for (var i = 0; i < initSeq.length; i++) {
@@ -68,6 +75,34 @@ var mat1 = new Matrix({
     dna: true
 });
 
+var mat2 = new Matrix({
+    name: "Blosum30 matrix",
+    matrix: [
+        [ 4, -1,  0,  0, -3,  1,  0,  0, -2,  0, -1,  0,  1, -2, -1,  1,  1, -5, -4,  1,  0,  0,  0],
+        [-1,  8, -2, -1, -2,  3, -1, -2, -1, -3, -2,  1,  0, -1, -1, -1, -3,  0,  0, -1, -2,  0, -1],
+        [ 0, -2,  8,  1, -1, -1, -1,  0, -1,  0, -2,  0,  0, -1, -3,  0,  1, -7, -4, -2,  4, -1,  0],
+        [ 0, -1,  1,  9, -3, -1,  1, -1, -2, -4, -1,  0, -3, -5, -1,  0, -1, -4, -1, -2,  5,  0, -1],
+        [-3, -2, -1, -3, 17, -2,  1, -4, -5, -2,  0, -3, -2, -3, -3, -2, -2, -2, -6, -2, -2,  0, -2],
+        [ 1,  3, -1, -1, -2,  8,  2, -2,  0, -2, -2,  0, -1, -3,  0, -1,  0, -1, -1, -3, -1,  4,  0],
+        [ 0, -1, -1,  1,  1,  2,  6, -2,  0, -3, -1,  2, -1, -4,  1,  0, -2, -1, -2, -3,  0,  5, -1],
+        [ 0, -2,  0, -1, -4, -2, -2,  8, -3, -1, -2, -1, -2, -3, -1,  0, -2,  1, -3, -3,  0, -2, -1],
+        [-2, -1, -1, -2, -5,  0,  0, -3, 14, -2, -1, -2,  2, -3,  1, -1, -2, -5,  0, -3, -2,  0, -1],
+        [ 0, -3,  0, -4, -2, -2, -3, -1, -2,  6,  2, -2,  1,  0, -3, -1,  0, -3, -1,  4, -2, -3,  0],
+        [-1, -2, -2, -1,  0, -2, -1, -2, -1,  2,  4, -2,  2,  2, -3, -2,  0, -2,  3,  1, -1, -1,  0],
+        [ 0,  1,  0,  0, -3,  0,  2, -1, -2, -2, -2,  4,  2, -1,  1,  0, -1, -2, -1, -2,  0,  1,  0],
+        [ 1,  0,  0, -3, -2, -1, -1, -2,  2,  1,  2,  2,  6, -2, -4, -2,  0, -3, -1,  0, -2, -1,  0],
+        [-2, -1, -1, -5, -3, -3, -4, -3, -3,  0,  2, -1, -2, 10, -4, -1, -2,  1,  3,  1, -3, -4, -1],
+        [-1, -1, -3, -1, -3,  0,  1, -1,  1, -3, -3,  1, -4, -4, 11, -1,  0, -3, -2, -4, -2,  0, -1],
+        [ 1, -1,  0,  0, -2, -1,  0,  0, -1, -1, -2,  0, -2, -1, -1,  4,  2, -3, -2, -1,  0, -1,  0],
+        [ 1, -3,  1, -1, -2,  0, -2, -2, -2,  0,  0, -1,  0, -2,  0,  2,  5, -5, -1,  1,  0, -1,  0],
+        [-5,  0, -7, -4, -2, -1, -1,  1, -5, -3, -2, -2, -3,  1, -3, -3, -5, 20,  5, -3, -5, -1, -2],
+        [-4,  0, -4, -1, -6, -1, -2, -3,  0, -1,  3, -1, -1,  3, -2, -2, -1,  5,  9,  1, -3, -2, -1],
+        [ 1, -1, -2, -2, -2, -3, -3, -3, -3,  4,  1, -2,  0,  1, -4, -1,  1, -3,  1,  5, -2, -3,  0],
+        [ 0, -2,  4,  5, -2, -1,  0,  0, -2, -2, -1,  0, -2, -3, -2,  0,  0, -5, -3, -2,  5,  0, -1],
+        [ 0,  0, -1,  0,  0,  4,  5, -2,  0, -3, -1,  1, -1, -4,  0, -1, -1, -1, -2, -3,  0,  4,  0],
+        [ 0, -1,  0, -1, -2,  0, -1, -1, -1,  0,  0,  0,  0, -1, -1,  0,  0, -2, -1,  0, -1,  0, -1]
+    ]
+});
 
 var mat4 = new Matrix({
     name: "Blosum62 matrix",
@@ -136,5 +171,5 @@ console.log(mat1.scoreMatrix);
 console.log(mat2.internalMatrix);
 console.log(mat2.scoreMatrix);
 
-//Alors blosum 30, 45, 62ok4, 65, 10
+//Alors blosum 30ok, 45, 62ok4, 65, 10
 //Pam 30, 80, 120, 160, 200, 220, 250ok13
