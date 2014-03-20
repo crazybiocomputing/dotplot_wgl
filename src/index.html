@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <meta name='viewport' content='width=device-width'>
+    <meta charset='utf-8'>
+    <link rel='stylesheet' href='stylesheets/style.css'>
+</head>
+<body>
+    <section id='main' class='active-section'>
+        <label for='window'>Window size: </label>
+        <input type='number' name='window' id='window' min='1' step='1' value='1'><br>
+        <input type='button' id='webgl' value='Render WebGL graph' disabled>
+        <div id='container'>
+            <canvas id='canvas'></canvas>
+        </div>
+        <input type='button' id='download' value='Download as png file'>
+        <a id='ghostAnchor'></a>
+    </section>
+    <section id='settings'>
+        Settings
+    </section>
+    <section id='matrices'>
+        List of available matrices
+    </section>
+    <section id='newMatrix'>
+        Add a new matrix
+    </section>
+    <section id='sequences'>
+        List of recorded sequences
+    </section>
+    <section id='newSequence'>
+        Add a new sequence
+    </section>
+    <script src='scripts/functions.js'></script>
+    <script src='scripts/matrices.js'></script>
+    <script src='scripts/viewer.js'></script>
+    <script src='scripts/interface.js'></script>
+</body>
+</html>

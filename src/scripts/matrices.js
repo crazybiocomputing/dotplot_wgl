@@ -29,27 +29,27 @@ function Matrix(parameters) {
                 maxValue = Math.max(maxValue, parameters.matrix[i][j]);
             }
         }
-        var amplitude = max - min;
+        var amplitude = maxValue - minValue;
         //fill matrices;
-        var initSeq=this.dna;
+        var initSeq = this.dna;
         if (dnaSeq){
             throw "Choose identity matrix";
         }
         else{
             for (var i = 0; i < parameters.matrix.length; i++) {
-            this.internalMatrix[initSeq[i]] = {};
-            this.scoreMatrix[initSeq[i]] = {};
+                this.internalMatrix[initSeq[i]] = {};
+                this.scoreMatrix[initSeq[i]] = {};
                 for (var j = 0; j < parameters.matrix[i].length; j++) {
                     var value = parameters.matrix[i][j];
-                    this.internalMatrix[initSeq[i]][initSeq[j]] = Math.round((value - min) * 255 / amplitude);
+                    this.internalMatrix[initSeq[i]][initSeq[j]] = Math.round((value - minValue) * 255 / amplitude);
                     this.scoreMatrix[initSeq[i]][initSeq[j]] = value;
                 }
             }
             this.score = function(el1, el2) {
                 return this.internalMatrix[el1][el2];
             };
-        } 
-    } 
+        }
+    }
     else {//suppose we want identity matrix
         var initSeq = (parameters.dna ? dnaSeq : aaSeq);
         this.dna = parameters.dna;
@@ -187,13 +187,13 @@ var mat13 = new Matrix({
         [ 0, -1,  2,  3, -4,  1,  3,  0,  1, -2, -3,  1, -2, -4, -1,  0,  0, -5, -3, -2,  3,  2, -1],
         [ 0,  0,  1,  3, -5,  3,  3,  0,  2, -2, -3,  0, -2, -5,  0,  0, -1, -6, -4, -2,  2,  3, -1],
         [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
-   ]
-};
-console.log("A-A 255 255: " + mat1.score("A", "A") + " " + mat2.score("A", "A");
-console.log("X-X 45  255: " + mat1.score("X", "X") + " " + mat2.score("X", "X");
-console.log("A-X 0     0: " + mat1.score("A", "X") + " " + mat2.score("A", "X");
-console.log("G-A 135   0: " + mat1.score("G", "A") + " " + mat2.score("G", "A");
-console.log("A-T 180   0: " + mat1.score("A", "T") + " " + mat2.score("A", "T");
+    ]
+});
+console.log("A-A 255 255: " + mat1.score("A", "A") + " " + mat2.score("A", "A"));
+console.log("X-X 45  255: " + mat1.score("X", "X") + " " + mat2.score("X", "X"));
+console.log("A-X 0     0: " + mat1.score("A", "X") + " " + mat2.score("A", "X"));
+console.log("G-A 135   0: " + mat1.score("G", "A") + " " + mat2.score("G", "A"));
+console.log("A-T 180   0: " + mat1.score("A", "T") + " " + mat2.score("A", "T"));
 console.log(mat1.internalMatrix);
 console.log(mat1.scoreMatrix);
 console.log(mat2.internalMatrix);
