@@ -76,14 +76,12 @@ var webgl = function(canvas, shaders) {
     console.time("1");
 
     var WINDOW_SIZE = Math.floor($("window").value);
-    var WIDTH = STRING1.length;
-    console.log("sequence 1: " + WIDTH);
-    var HEIGHT = STRING2.length;
-    console.log("sequence 2: " + HEIGHT);
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
-    canvas.style.width = WIDTH + "px";
-    canvas.style.height = HEIGHT + "px";
+    console.log("sequence 1: " + w);
+    console.log("sequence 2: " + h);
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
 
     var gl = canvas.getContext(
         "webgl", {alpha: false, preserveDrawingBuffer: true}
@@ -119,7 +117,7 @@ var webgl = function(canvas, shaders) {
     gl.uniform1i(program.utex2, 2);
 
     program.sizesUniform = gl.getUniformLocation(program, "uSizes");
-    gl.uniform2f(program.sizesUniform, WIDTH, HEIGHT);
+    gl.uniform2f(program.sizesUniform, w, h);
 
     program.windowUniform = gl.getUniformLocation(program, "uWindow");
     gl.uniform1i(program.windowUniform, WINDOW_SIZE);
@@ -145,7 +143,7 @@ var webgl = function(canvas, shaders) {
     var tex1 = gl.createTexture();
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, tex1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, WIDTH, HEIGHT, 0, gl.RGB, gl.UNSIGNED_BYTE, texture1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, h, 0, gl.RGB, gl.UNSIGNED_BYTE, texture1);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -154,7 +152,7 @@ var webgl = function(canvas, shaders) {
     var tex2 = gl.createTexture();
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, tex2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, WIDTH, HEIGHT, 0, gl.RGB, gl.UNSIGNED_BYTE, texture2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, h, 0, gl.RGB, gl.UNSIGNED_BYTE, texture2);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -163,8 +161,8 @@ var webgl = function(canvas, shaders) {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     //data for the histogram
-    var hist = new Uint8Array(WIDTH * HEIGHT * 4);
-    gl.readPixels(0, 0, WIDTH, HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, hist);
+    var hist = new Uint8Array((w + 1 - WINDOW_SIZE) * (h + 1 - WINDOW_SIZE) * 4);
+    gl.readPixels(0, 0, (w + 1 - WINDOW_SIZE), (h + 1 - WINDOW_SIZE), gl.RGBA, gl.UNSIGNED_BYTE, hist);
     
     var webglInput = $("webgl");
     webglInput.value = "Render WebGL graph";
