@@ -13,7 +13,9 @@
     "globalstrict": true,
     "globals": {
         "$": false,
-        "loadShaders": false
+        "loadShaders": false,
+        "setupApplication": false,
+        "loadAssets": false
     },
     "lastsemic": true,
     "browser": true,

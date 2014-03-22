@@ -15,26 +15,30 @@
             <canvas id='canvas'></canvas>
         </div>
         <input type='button' id='download' value='Download as png file'>
-        <a id='ghostAnchor'></a>
+        <a id='ghost-anchor'></a>
     </section>
     <section id='settings'>
-        Settings
+        <h1>Settings</h1>
+        <label for='clean-up'>Remove all cached data and reload: </label>
+        <input type='button' name='clean-up' id='clean-up' value='Remove all'>
     </section>
     <section id='matrices'>
-        List of available matrices
+        <h1>List of available matrices</h1>
     </section>
-    <section id='newMatrix'>
-        Add a new matrix
+    <section id='new-matrix'>
+        <h1>Add a new matrix</h1>
     </section>
     <section id='sequences'>
-        List of recorded sequences
+        <h1>List of recorded sequences</h1>
     </section>
-    <section id='newSequence'>
-        Add a new sequence
+    <section id='new-sequence'>
+        <h1>Add a new sequence</h1>
     </section>
     <script src='scripts/functions.js'></script>
     <script src='scripts/matrices.js'></script>
+    <script src='scripts/firstVisit.js'></script>
     <script src='scripts/viewer.js'></script>
     <script src='scripts/interface.js'></script>
+    <script src='scripts/dotplot_wgl.js'></script>
 </body>
 </html>

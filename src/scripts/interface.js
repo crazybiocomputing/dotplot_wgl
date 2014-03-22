@@ -34,11 +34,13 @@ window.addEventListener("DOMContentLoaded", function() {
 
     //declaring listeners
     canvas.addEventListener("click", function(e) {
+        e.preventDefault();
         console.log("pixel clicked at x: " + e.layerX + ", y: " + e.layerY);
     }, false);
 
-    $("download").addEventListener("click", function() {
-        var ghostAnchor = $("ghostAnchor");
+    $("download").addEventListener("click", function(e) {
+        e.preventDefault();
+        var ghostAnchor = $("ghost-anchor");
         ghostAnchor.download = "image.png";
         try {
             canvas.toBlob(function(blob) {
@@ -50,6 +52,12 @@ window.addEventListener("DOMContentLoaded", function() {
             ghostAnchor.href = canvas.toDataURL();
             ghostAnchor.click();
         }
+    }, false);
+
+    $("clean-up").addEventListener("click", function(e) {
+        e.preventDefault();
+        localStorage.removeItem("alreadyVisited");
+        location.reload();
     }, false);
 
 }, false);

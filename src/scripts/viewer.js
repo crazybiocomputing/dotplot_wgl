@@ -175,7 +175,8 @@ window.addEventListener("DOMContentLoaded", function() {
 
     loadShaders(["dotplot.vertex.shader", "DNADNA.fragment.shader"], function(shaders) {
         var webglInput = $("webgl");
-        webglInput.addEventListener("click", function() {
+        webglInput.addEventListener("click", function(e) {
+            e.preventDefault();
             webglInput.disabled = true;
             webglInput.value = "Rendering…";
             webgl(canvas, shaders);

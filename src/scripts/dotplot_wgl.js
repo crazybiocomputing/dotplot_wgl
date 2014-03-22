@@ -26,3 +26,12 @@
  *
  *
  */
+
+"use strict";
+
+if (localStorage.getItem("alreadyVisited")) {
+    //loadAssets();
+} else {
+    console.log("setting up application");
+    setupApplication();
+}
