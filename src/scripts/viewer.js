@@ -80,12 +80,10 @@ var webgl = function(canvas, shaders) {
     console.log("sequence 1: " + WIDTH);
     var HEIGHT = STRING2.length;
     console.log("sequence 2: " + HEIGHT);
-    var WIDTH_WINDOW = WIDTH + 1 - WINDOW_SIZE,
-        HEIGHT_WINDOW = HEIGHT + 1 - WINDOW_SIZE;
-    canvas.width = WIDTH_WINDOW;
-    canvas.height = HEIGHT_WINDOW;
-    canvas.style.width = WIDTH_WINDOW + "px";
-    canvas.style.height = HEIGHT_WINDOW + "px";
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    canvas.style.width = WIDTH + "px";
+    canvas.style.height = HEIGHT + "px";
 
     var gl = canvas.getContext(
         "webgl", {alpha: false, preserveDrawingBuffer: true}
@@ -177,7 +175,7 @@ var webgl = function(canvas, shaders) {
 window.addEventListener("DOMContentLoaded", function() {
     var canvas = $("canvas");
 
-    loadShaders(["1.vertex.shader", "1.fragment.shader"], function(shaders) {
+    loadShaders(["dotplot.vertex.shader", "DNADNA.fragment.shader"], function(shaders) {
         var webglInput = $("webgl");
         webglInput.addEventListener("click", function() {
             webglInput.disabled = true;
