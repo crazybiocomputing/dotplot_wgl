@@ -1,21 +1,30 @@
 body {
     margin: 0;
-    width: 100%;
-    height: 100%;
 }
 
-a {
-    color: blue;
-    text-decoration: underline;
+nav {
+    display: flex;
+}
+
+nav > a {
+    margin: 0.1em;
+    padding: 0.4em;
+    border: thin outset darkgrey;
+    background: lightblue;
+    text-align: center;
     cursor: pointer;
+    flex: auto;
+}
+
+nav > a:active {
+    border-style: inset;
 }
 
 section {
     position: fixed;
     overflow: auto;
-    padding: 1%;
-    width: 98%;
-    height: 98%;
+    width: 100%;
+    height: 100%;
     background-color: #d4d4d4;
     transition: -webkit-transform 0.5s ease-in-out;
     transition: -moz-transform 0.5s ease-in-out;
@@ -31,11 +40,24 @@ section {
     transform: translate3d(0, 0, 0);
 }
 
+#container-hist {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 #container {
     overflow: scroll;
-    width: 500px;
-    height: 400px;
     background-color: #808080;
+    flex-grow: 1;
+}
+
+#hist {
+    margin: auto;
+}
+
+#container, #hist {
+    min-width: 255px;
+    height: 400px;
 }
 
 canvas {

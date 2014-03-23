@@ -17,8 +17,13 @@
         <label for='window'>Window size: </label>
         <input type='number' name='window' id='window' min='1' step='1' value='1'><br>
         <input type='button' id='webgl' value='Render WebGL graph' disabled>
-        <div id='container'>
-            <canvas id='canvas' width="0" height="0"></canvas>
+        <div id='container-hist'>
+            <div id='container'>
+                <canvas id='canvas' width="0" height="0"></canvas>
+            </div>
+            <div id='hist'>
+                Histogram
+            </div>
         </div>
         <input type='button' id='download' value='Download as png file'>
         <a id='ghost-anchor'></a>
