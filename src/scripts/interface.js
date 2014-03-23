@@ -60,4 +60,13 @@ window.addEventListener("DOMContentLoaded", function() {
         location.reload();
     }, false);
 
+    //nav buttons
+    var nav = function(e) {
+        e.preventDefault();
+        $(e.target.dataset.target).classList.toggle("active-section");
+    };
+    Array.prototype.forEach.call((document.getElementsByClassName("internal-nav")), function(anchor) {
+        anchor.addEventListener("click", nav, false);
+    });
+
 }, false);
