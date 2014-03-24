@@ -32,7 +32,7 @@
 //var STRING1 = "MAAPSRTTLMPPPFRLQLRLLILPILLLLRHDAVHAEPYSGGFGSSAVSSGGLGSVGIHIPGGGVGVITEARCPRVCSCTGLNVDCSHRGLTSVPRKISADVERLELQGNNLTVIYETDFQRLTKLRMLQLTDNQIHTIERNSFQDLVSLERLDISNNVITTVGRRVFKGAQSLRSLQLDNNQITCLDEHAFKGLVELEILTLNNNNLTSLPHNIFGGLGRLRALRLSDNPFACDCHLSWLSRFLRSATRLAPYTRCQSPSQLKGQNVADLHDQEFKCSGLTEHAPMECGAENSCPHPCRCADGIVDCREKSLTSVPVTLPDDTTDVRLEQNFITELPPKSFSSFRRLRRIDLSNNNISRIAHDALSGLKQLTTLVLYGNKIKDLPSGVFKGLGSLRLLLLNANEISCIRKDAFRDLHSLSLLSLYDNNIQSLANGTFDAMKSMKTVHLAKNPFICDCNLRWLADYLHKNPIETSGARCESPKRMHRRRIESLREEKFKCSWGELRMKLSGECRMDSDCPAMCHCEGTTVDCTGRRLKEIPRDIPLHTTELLLNDNELGRISSDGLFGRLPHLVKLELKRNQLTGIEPNAFEGASHIQELQLGENKIKEISNKMFLGLHQLKTLNLYDNQISCVMPGSFEHLNSLTSLNLASNPFNCNCHLAWFAECVRKKSLNGGAARCGAPSKVRDVQIKDLPHSEFKCSSENSEGCLGDGYCPPSCTCTGTVVACSRNQLKEIPRGIPAETSELYLESNEIEQIHYERIRHLRSLTRLDLSNNQITILSNYTFANLTKLSTLIISYNKLQCLQRHALSGLNNLRVVSLHGNRISMLPEGSFEDLKSLTHIALGSNPLYCDCGLKWFSDWIKLDYVEPGIARCAEPEQMKDKLILSTPSSSFVCRGRVRNDILAKCNACFEQPCQNQAQCVALPQREYQCLCQPGYHGKHCEFMIDACYGNPCRNNATCTVLEEGRFSCQCAPGYTGARCETNIDDCLGEIKCQNNATCIDGVESYKCECQPGFSGEFCDTKIQFCSPEFNPCANGAKCMDHFTHYSCDCQAGFHGTNCTDNIDDCQNHMCQNGGTCVDGINDYQCRCPDDYTGKYCEGHNMISMMYPQTSPCQNHECKHGVCFQPNAQGSDYLCRCHPGYTGKWCEYLTSISFVHNNSFVELEPLRTRPEANVTIVFSSAEQNGILMYDGQDAHLAVELFNGRIRVSYDVGNHPVSTMYSFEMVADGKYHAVELLAIKKNFTLRVDRGLARSIINEGSNDYLKLTTPMFLGGLPVDPAQQAYKNWQIRNLTSFKGCMKEVWINHKLVDFGNAQRQQKITPGCALLEGEQQEEEDDEQDFMDETPHIKEEPVDPCLENKCRRGSRCVPNSNARDGYQCKCKHGQRGRYCDQGEGSTEPPTVTAASTCRKEQVREYYTENDCRSRQPLKYAKCVGGCGNQCCAAKIVRRRKVRMVCSNNRKYIKNLDIVRKCGCTKKCYY";
 var STRING1 = "ABCDCBDCCDBDBCAABCBCAABAABCDCADCADDABBACDABADDCADABBADAC";
 STRING1 += STRING1 + STRING1 + STRING1;
-var STRING2 = STRING1;
+var STRING2 = STRING1 + STRING1;
 
 var w = STRING1.length,
     h = STRING2.length;
@@ -47,22 +47,19 @@ console.time("load");
         idMat[(i*w+j)*4+2] = value;
     }
 }*/
-var texture1 = new Uint8Array(w * h * 3);
-var texture2 = new Uint8Array(w * h * 3);
-for (var i = 0; i < w; i++) {
+var texture1 = new Uint8Array(w);
+var texture2 = new Uint8Array(h);
+for (var i = 0; i < texture1.length; i++) {
+    texture1[i] = (STRING1.charCodeAt(i) - 65) * (255 / 5);
+}
+for (var i = 0; i < texture2.length; i++) {
+    texture2[i] = (STRING2.charCodeAt(i) - 65) * (255 / 5);
+}
+/*for (var i = 0; i < w; i++) {
     for (var j = 0; j < h; j++) {
-        var value = (STRING1.charCodeAt(i) - 65) * (255 / 5);
-        texture1[(i * h + j) * 3] = value;
-        //texture1[(i * w + j) * 3 + 1] = value;
-        //texture1[(i * w + j) * 3 + 2] = value;
+        texture2[i * h + j] = (STRING1.charCodeAt(i) - 65) * (255 / 5);
     }
-}
-for (var i = 0; i < texture2.length; i += 3) {
-    var value = (STRING2.charCodeAt((i / 3) % h) - 65) * (255 / 5);
-    texture2[i] = value;
-    //texture2[i + 1] = value;
-    //texture2[i + 2] = value;
-}
+}*/
 //Identity matrix
 var matrix = new Uint8Array(5 * 5 * 4);
 matrix[0] = 255;
@@ -70,6 +67,12 @@ matrix[24] = 255;
 matrix[48] = 255;
 matrix[72] = 255;
 matrix[96] = 255;
+/*matrix[0] = 255;
+matrix[6] = 255;
+matrix[12] = 255;
+matrix[18] = 255;
+matrix[24] = 255;*/
+
 console.timeEnd("load");
 
 var webgl = function(canvas, shaders) {
@@ -125,8 +128,8 @@ var webgl = function(canvas, shaders) {
     var texCoordLocation = gl.getAttribLocation(program, "aTexCoord");
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        0, 0, 0, 1, 1, 1,
-        0, 0, 1, 1, 1, 0
+        0, 0, 1, 0, 1, 1,
+        0, 0, 1, 1, 0, 1
     ]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(texCoordLocation);
     gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
@@ -143,7 +146,7 @@ var webgl = function(canvas, shaders) {
     var tex1 = gl.createTexture();
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, tex1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, h, 0, gl.RGB, gl.UNSIGNED_BYTE, texture1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture1);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -152,7 +155,7 @@ var webgl = function(canvas, shaders) {
     var tex2 = gl.createTexture();
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, tex2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, h, 0, gl.RGB, gl.UNSIGNED_BYTE, texture2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture2);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);

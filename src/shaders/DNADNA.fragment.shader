@@ -14,6 +14,7 @@ void main() {
         vTexCoord.y > (uSizes.y - float(uWindow - 1)) * onePixel.y
     ) {
         color = vec4(1.0, 0.2, 0.2, 1.0);
+        //discard;
     } else {
         for (int i = 0; i != -1; i++) {
             if (i == uWindow) {
@@ -21,10 +22,10 @@ void main() {
             }
             color += vec4(texture2D(uSamplerMat, vec2(
                 texture2D(
-                    uSampler1, vTexCoord - float(i + 1 - uWindow) * onePixel
+                    uSampler1, vTexCoord.xy - float(i + 1 - uWindow) * onePixel.xy
                 ).r,
                 texture2D(
-                    uSampler2, vTexCoord - float(i + 1 - uWindow) * onePixel
+                    uSampler2, vTexCoord.yx - float(i + 1 - uWindow) * onePixel.yx
                 ).r
             )).rrr / float(uWindow), 1.0);
         }
