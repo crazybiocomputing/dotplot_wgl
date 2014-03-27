@@ -13,8 +13,7 @@ void main() {
         vTexCoord.x > (uSizes.x - float(uWindow - 1)) * onePixel.x ||
         vTexCoord.y > (uSizes.y - float(uWindow - 1)) * onePixel.y
     ) {
-        color = vec4(1.0, 0.2, 0.2, 1.0);
-        //discard;
+        discard;
     } else {
         for (int i = 0; i != -1; i++) {
             if (i == uWindow) {

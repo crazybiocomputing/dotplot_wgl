@@ -10,7 +10,6 @@
     <section id='main' class='active-section'>
         <nav>
             <a data-target="settings" class="internal-nav">Settings</a>
-            <a data-target="matrices"  class="internal-nav">Matrices</a>
             <a data-target="sequences"  class="internal-nav">Sequences</a>
         </nav>
         <h1>Dotplot_wgl</h1>
@@ -18,11 +17,11 @@
         <input type='number' name='window' id='window' min='1' step='1' value='1'><br>
         <input type='button' id='webgl' value='Render WebGL graph' disabled>
         <div id='container-hist'>
-            <div id='container'>
-                <canvas id='canvas' width="0" height="0"></canvas>
-            </div>
             <div id='hist'>
                 Histogram
+            </div>
+            <div id='container'>
+                <canvas id='canvas' width="0" height="0"></canvas>
             </div>
         </div>
         <input type='button' id='download' value='Download as png file'>
@@ -35,19 +34,6 @@
         <h1>Settings</h1>
         <label for='clean-up'>Remove all cached data and reload: </label>
         <input type='button' name='clean-up' id='clean-up' value='Remove all'>
-    </section>
-    <section id='matrices'>
-        <nav>
-            <a data-target="matrices" class="internal-nav">Back</a>
-            <a data-target="new-matrix" class="internal-nav">Add a new matrix</a>
-        </nav>
-        <h1>List of available matrices</h1>
-    </section>
-    <section id='new-matrix'>
-        <nav>
-            <a data-target="new-matrix" class="internal-nav">Back</a>
-        </nav>
-        <h1>Add a new matrix</h1>
     </section>
     <section id='sequences'>
         <nav>

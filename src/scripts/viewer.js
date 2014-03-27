@@ -38,15 +38,6 @@ var w = STRING1.length,
     h = STRING2.length;
 
 console.time("load");
-//var idMat = new Uint8Array(w * h * 4);
-/*for (var i = 0; i < w; i++) {
-    for (var j = 0; j < h; j++) {
-        var value = STRING1.charCodeAt(i) === STRING2.charCodeAt(j) ? 255 : 0;
-        idMat[(i*w+j)*4] = value;
-        idMat[(i*w+j)*4+1] = value;
-        idMat[(i*w+j)*4+2] = value;
-    }
-}*/
 var texture1 = new Uint8Array(w);
 var texture2 = new Uint8Array(h);
 for (var i = 0; i < texture1.length; i++) {
@@ -55,11 +46,7 @@ for (var i = 0; i < texture1.length; i++) {
 for (var i = 0; i < texture2.length; i++) {
     texture2[i] = (STRING2.charCodeAt(i) - 65) * (255 / 5);
 }
-/*for (var i = 0; i < w; i++) {
-    for (var j = 0; j < h; j++) {
-        texture2[i * h + j] = (STRING1.charCodeAt(i) - 65) * (255 / 5);
-    }
-}*/
+
 //Identity matrix
 var matrix = new Uint8Array(5 * 5 * 4);
 matrix[0] = 255;
@@ -67,11 +54,6 @@ matrix[24] = 255;
 matrix[48] = 255;
 matrix[72] = 255;
 matrix[96] = 255;
-/*matrix[0] = 255;
-matrix[6] = 255;
-matrix[12] = 255;
-matrix[18] = 255;
-matrix[24] = 255;*/
 
 console.timeEnd("load");
 
@@ -91,6 +73,8 @@ var webgl = function(canvas, shaders) {
     ) || canvas.getContext(
         "experimental-webgl", {alpha: false, preserveDrawingBuffer: true}
     );
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     var program = gl.createProgram();
 
     for (var i = 0; i < shaders.length; i++) {
