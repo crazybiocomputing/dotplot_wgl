@@ -1,0 +1,17 @@
+CACHE MANIFEST
+# 2014-03-28 v2
+
+NETWORK:
+*
+
+CACHE:
+#
+#stylesheets/style.css
+#
+#scripts/main.js
+#scripts/viewer.js
+#
+#shaders/dotplot.vertex.shader
+#
+#dnaMatrices.texture
+#proteinMatrices.texture

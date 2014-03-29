@@ -1,5 +1,4 @@
 /*
- *
  *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
  *  Copyright (C) 2014  Jean-Christophe Taveau.
  *
@@ -23,43 +22,33 @@
  * Aurélien Luciani
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
- *
- *
  */
+
+/*jshint -W020*/
 
 "use strict";
 
-/*exported setupApplication*/
-function setupApplication() {
-
-    //TODO Create Matrix objects here
+(function() {
     //TODO Provide demo sequences
-    var matrices = [{name: "blosum 150"}];
-    var sequencesMetadata = [{key: 1, name: "demo sequence", nucleic: true}];
-    var sequences = [{key: 1, sequence: "actatctatcg"}];
+    var sequencesMetadata = [{key: 1, name: "demo sequence", protein: false}];
+    var sequences = [{key: 1, typedArray: new Uint8Array(8)}];
 
     window.indexedDB.deleteDatabase("dotplot");
-    var request = window.indexedDB.open("dotplot", 1);
+    var request = window.indexedDB.open("dotplot", dbVersion);
 
     request.addEventListener("error", function(e) {
         console.log("Error opening the DB");
         console.log(e);
-        //load the application anyway
-        loadAssets(matrices);
+        alert("Error opening the DB");
     }, false);
 
     request.addEventListener("success", function(e) {
         console.log("Success opening the DB");
-        var db = e.target.result;
+        db = e.target.result;
         var transaction = db.transaction(
-            ["matrices", "sequencesMetadata", "sequences"],
+            ["sequencesMetadata", "sequences"],
             "readwrite"
         );
-
-        var matricesOS = transaction.objectStore("matrices");
-        for (var i = 0; i < matrices.length; i++) {
-            matricesOS.add(matrices[i]);
-        }
 
         var sequencesMetadataOS = transaction.objectStore("sequencesMetadata");
         var sequencesOS = transaction.objectStore("sequences");
@@ -71,19 +60,14 @@ function setupApplication() {
         transaction.addEventListener("complete", function() {
             console.log("objects stored in DB");
             localStorage.setItem("alreadyVisited", true);
-            //loadAssets(matrices);
+            loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
         }, false);
 
     }, false);
 
     request.addEventListener("upgradeneeded", function(e) {
         console.log("Upgrading the DB...");
-        var db = e.target.result;
-
-        if (db.objectStoreNames.contains("matrices")) {
-            db.deleteObjectStore("matrices");
-        }
-        db.createObjectStore("matrices", {autoIncrement: true});
+        db = e.target.result;
 
         if (db.objectStoreNames.contains("sequencesMetadata")) {
             db.deleteObjectStore("sequencesMetadata");
@@ -95,4 +79,4 @@ function setupApplication() {
         }
         db.createObjectStore("sequences", {keyPath: "key"});
     }, false);
-}
+})();

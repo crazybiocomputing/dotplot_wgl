@@ -5,6 +5,9 @@
     <meta name='viewport' content='width=device-width'>
     <meta charset='utf-8'>
     <link rel='stylesheet' href='stylesheets/style.css'>
+    <script src='scripts/interface.js' async></script>
+    <script src='scripts/global.js'></script>
+    <script src='scripts/main.js'></script>
 </head>
 <body>
     <section id='main' class='active-section'>
@@ -13,6 +16,12 @@
             <a data-target="sequences"  class="internal-nav">Sequences</a>
         </nav>
         <h1>Dotplot_wgl</h1>
+        <select id='seq1'>
+            <option disabled>No sequence</option>
+        </select>
+        <select id='seq2'>
+            <option disabled>No sequence</option>
+        </select><br>
         <label for='window'>Window size: </label>
         <input type='number' name='window' id='window' min='1' step='1' value='1'><br>
         <input type='button' id='webgl' value='Render WebGL graph' disabled>
@@ -48,11 +57,5 @@
         </nav>
         <h1>Add a new sequence</h1>
     </section>
-    <script src='scripts/functions.js'></script>
-    <script src='scripts/matrices.js'></script>
-    <script src='scripts/firstVisit.js'></script>
-    <script src='scripts/viewer.js'></script>
-    <script src='scripts/interface.js'></script>
-    <script src='scripts/dotplot_wgl.js'></script>
 </body>
 </html>

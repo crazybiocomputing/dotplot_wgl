@@ -1,5 +1,4 @@
 /*
- *
  *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
  *  Copyright (C) 2014  Jean-Christophe Taveau.
  *
@@ -23,9 +22,9 @@
  * Aurélien Luciani
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
- *
- *
  */
+
+/*global DOMLoaded: false*/
 
 "use strict";
 
@@ -157,7 +156,7 @@ var webgl = function(canvas, shaders) {
     console.timeEnd("1");
 };
 
-window.addEventListener("DOMContentLoaded", function() {
+var doWhenDOMHasLoaded = function() {
     var canvas = $("canvas");
 
     loadShaders(["dotplot.vertex.shader", "DNADNA.fragment.shader"], function(shaders) {
@@ -170,5 +169,10 @@ window.addEventListener("DOMContentLoaded", function() {
         }, false);
         webglInput.disabled = false;
     });
+};
 
-}, false);
+if (DOMLoaded) {
+    doWhenDOMHasLoaded();
+} else {
+    window.addEventListener("DOMContentLoaded", doWhenDOMHasLoaded, false);
+}

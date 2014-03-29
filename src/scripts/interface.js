@@ -1,5 +1,4 @@
 /*
- *
  *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
  *  Copyright (C) 2014  Jean-Christophe Taveau.
  *
@@ -23,13 +22,14 @@
  * Aurélien Luciani
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
- *
- *
  */
 
 "use strict";
 
 window.addEventListener("DOMContentLoaded", function() {
+    var $ = function(id) {
+        return document.getElementById(id);
+    };
     var canvas = $("canvas");
 
     //declaring listeners
@@ -68,5 +68,4 @@ window.addEventListener("DOMContentLoaded", function() {
     Array.prototype.forEach.call((document.getElementsByClassName("internal-nav")), function(anchor) {
         anchor.addEventListener("click", nav, false);
     });
-
 }, false);

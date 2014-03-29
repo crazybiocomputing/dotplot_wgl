@@ -40,6 +40,14 @@ section {
     transform: translate3d(0, 0, 0);
 }
 
+option[data-type="dna"] {
+    background: lightgreen;
+}
+
+option[data-type="protein"] {
+    background: lightblue;
+}
+
 #container-hist {
     display: flex;
     flex-wrap: wrap-reverse;

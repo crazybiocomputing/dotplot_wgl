@@ -1,32 +1,58 @@
+/*
+ *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
+ *  Copyright (C) 2014  Jean-Christophe Taveau.
+ *
+ *  This file is part of dotplot_wgl.
+ *
+ *  dotplot_wgl is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  dotplot_wgl is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with dotplot_wgl.  If not, see <http://www.gnu.org/licenses/>
+ *
+ * Authors:
+ * Rania Assab
+ * Aurélien Luciani
+ * Quentin Riché-Piotaix
+ * Mathieu Schaeffer
+ */
+
 "use strict";
 
 /*exported Matrix*/
-//parameters: matrix[, name][, dna]
-function Matrix(parameters) {
+//params: matrix[, name][, dna]
+function Matrix(params) {
     var dnaSeq = ["A", "C", "G", "T", "X"];
     var aaSeq = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V","B","Z","X"];
     this.internalMatrix = {};
     this.scoreMatrix = {};
-    if (typeof parameters.name === "undefined") {
+    if (typeof params.name === "undefined") {
         this.name = "custom";
     } else {
-        this.name = parameters.name;
+        this.name = params.name;
     }
-    if (Array.isArray(parameters.matrix)) {
-        if (parameters.matrix.length === dnaSeq.length) {
+    if (Array.isArray(params.matrix)) {
+        if (params.matrix.length === dnaSeq.length) {
             this.dna = true;
-        } else if (parameters.matrix.length === aaSeq.length) {
+        } else if (params.matrix.length === aaSeq.length) {
             this.dna = false;
         } else {
             throw "matrix not valid";
         }
         //find min/max and define amplitude
-        var minValue = parameters.matrix[0][0];
+        var minValue = params.matrix[0][0];
         var maxValue = minValue;
-        for (var i = 0; i < parameters.matrix.length; i++) {
-            for (var j = 0; j < parameters.matrix[i].length; j++) {
-                minValue = Math.min(minValue, parameters.matrix[i][j]);
-                maxValue = Math.max(maxValue, parameters.matrix[i][j]);
+        for (var i = 0; i < params.matrix.length; i++) {
+            for (var j = 0; j < params.matrix[i].length; j++) {
+                minValue = Math.min(minValue, params.matrix[i][j]);
+                maxValue = Math.max(maxValue, params.matrix[i][j]);
             }
         }
         var amplitude = maxValue - minValue;
@@ -36,11 +62,11 @@ function Matrix(parameters) {
             throw "Choose identity matrix";
         }
         else{
-            for (var i = 0; i < parameters.matrix.length; i++) {
+            for (var i = 0; i < params.matrix.length; i++) {
                 this.internalMatrix[initSeq[i]] = {};
                 this.scoreMatrix[initSeq[i]] = {};
-                for (var j = 0; j < parameters.matrix[i].length; j++) {
-                    var value = parameters.matrix[i][j];
+                for (var j = 0; j < params.matrix[i].length; j++) {
+                    var value = params.matrix[i][j];
                     this.internalMatrix[initSeq[i]][initSeq[j]] = Math.round((value - minValue) * 255 / amplitude);
                     this.scoreMatrix[initSeq[i]][initSeq[j]] = value;
                 }
@@ -51,8 +77,8 @@ function Matrix(parameters) {
         }
     }
     else {//suppose we want identity matrix
-        var initSeq = (parameters.dna ? dnaSeq : aaSeq);
-        this.dna = parameters.dna;
+        var initSeq = (params.dna ? dnaSeq : aaSeq);
+        this.dna = params.dna;
         for (var i = 0; i < initSeq.length; i++) {
             this.internalMatrix[initSeq[i]] = {};
             this.scoreMatrix[initSeq[i]] = {};

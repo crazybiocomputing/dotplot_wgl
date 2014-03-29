@@ -14,8 +14,9 @@
     "globals": {
         "$": false,
         "loadShaders": false,
-        "setupApplication": false,
-        "loadAssets": false
+        "loadScripts": false,
+        "db": false,
+        "dbVersion": false
     },
     "lastsemic": true,
     "browser": true,

@@ -1,5 +1,4 @@
 /*
- *
  *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
  *  Copyright (C) 2014  Jean-Christophe Taveau.
  *
@@ -23,21 +22,47 @@
  * Aurélien Luciani
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
- *
- *
  */
 
-//miscellaneous functions to be used across the whole application
+/*jshint -W079*/
+
+//miscellaneous functions and variables to be used across the whole application
 "use strict";
+
+window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+
+/*exported dbVersion*/
+var dbVersion = 1;
+/*exported db*/
+var db;
+
+/*exported DOMLoaded*/
+var DOMLoaded = false;
+document.addEventListener("DOMContentLoaded", function() {
+    DOMLoaded = true;
+}, false);
 
 /*exported $*/
 //shortcut for getElementById
-function $(id) {
+var $ = function(id) {
     return document.getElementById(id);
-}
+};
+
+/*exported loadScripts*/
+//loads scripts to be executed in order
+var loadScripts = function(scriptURLs) {
+    scriptURLs.forEach(function(url) {
+        var script = document.createElement("script");
+        script.async = false;
+        script.src = url;
+        document.head.appendChild(script);
+    });
+};
 
 //makes async requests
-function xhr2(url, callback) {
+var xhr2 = function(url, callback) {
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.responseType = "text";
@@ -47,11 +72,11 @@ function xhr2(url, callback) {
         }
     };
     req.send();
-}
+};
 
 /*exported loadShaders*/
 //loads shaders from the server
-function loadShaders (shaders, callback) {
+var loadShaders = function(shaders, callback) {
     var responses = [];
     var aggregateResponses = function(shaderText) {
         responses.push(shaderText);
@@ -62,5 +87,4 @@ function loadShaders (shaders, callback) {
     for (var i = 0; i < shaders.length; i++) {
         xhr2("shaders/" + shaders[i], aggregateResponses);
     }
-}
-
+};
