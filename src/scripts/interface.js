@@ -27,10 +27,7 @@
 "use strict";
 
 window.addEventListener("DOMContentLoaded", function() {
-    var $ = function(id) {
-        return document.getElementById(id);
-    };
-    var canvas = $("canvas");
+    var canvas = g.$("canvas");
 
     //declaring listeners
     canvas.addEventListener("click", function(e) {
@@ -38,9 +35,9 @@ window.addEventListener("DOMContentLoaded", function() {
         console.log("pixel clicked at x: " + e.layerX + ", y: " + e.layerY);
     }, false);
 
-    $("download").addEventListener("click", function(e) {
+    g.$("download").addEventListener("click", function(e) {
         e.preventDefault();
-        var ghostAnchor = $("ghost-anchor");
+        var ghostAnchor = g.$("ghost-anchor");
         ghostAnchor.download = "image.png";
         try {
             canvas.toBlob(function(blob) {
@@ -54,7 +51,7 @@ window.addEventListener("DOMContentLoaded", function() {
         }
     }, false);
 
-    $("clean-up").addEventListener("click", function(e) {
+    g.$("clean-up").addEventListener("click", function(e) {
         e.preventDefault();
         localStorage.removeItem("alreadyVisited");
         location.reload();
@@ -63,9 +60,19 @@ window.addEventListener("DOMContentLoaded", function() {
     //nav buttons
     var nav = function(e) {
         e.preventDefault();
-        $(e.target.dataset.target).classList.toggle("active-section");
+        g.$(e.target.dataset.target).classList.toggle("active-section");
     };
     Array.prototype.forEach.call((document.getElementsByClassName("internal-nav")), function(anchor) {
         anchor.addEventListener("click", nav, false);
     });
+
+    g.$("sequence-list").addEventListener("click", function(e) {
+        if (e.target.tagName === "DIV") {
+            g.seqMan.remove(parseInt(e.target.dataset.key));
+        }
+    }, false);
+
+    try {
+        g.seqMan.updateDOM();
+    } catch(err) {}
 }, false);

@@ -26,70 +26,108 @@
 
 "use strict";
 
-//params: name, protein, (key | typedArray)
-var Sequence = function(params) {
-    if (!params.key) {
-        //store params.typedArray to IndexedDB
-        //get resulting id
-        this.key = 1;
-    } else {
-        this.key = params.key;
-    }
-    this.name = params.name;
-    this.protein = params.protein;
-};
+g.seqMan.sequences = [];
 
-var SequenceManager = function() {
-    this.sequences = [];
-    var addClean = function(cleaned, key) {
-        if (key) {
-            this.sequences.push(new Sequence(cleaned));
-            this.updateDOM();
-        } else {
-            //store to indexeddb
-            //get key
-            //store to indexeddb
-            //add to this.sequences
-        }
-    };
-    this.add = function(rawInput, proposedNames) {
-        var w = new Worker("scripts/workers/seqInput.js");
-        w.addEventListener("message", function(message) {
-            console.log("Adding a sequences");
-            addClean(message, false);
-        }, false);
-        w.postMessage({
-            rawInput: rawInput,
-            proposedNames: proposedNames
+g.seqMan.addClean = function(cleaned) {
+    var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
+    var seqOS = trans.objectStore("sequences");
+    var request1 = seqOS.add(cleaned.typedArray);
+    request1.onsuccess = function(e) {
+        var seqMetaOS = trans.objectStore("sequencesMetadata");
+        var seqTemp = {
+            name: cleaned.name,
+            protein: cleaned.protein,
+            size: cleaned.size,
+            key: e.target.result
+        };
+        var request2 = seqMetaOS.add(seqTemp);
+        request2.onsuccess(function(){
+            g.seqMan.sequences.push(seqTemp);
+            g.seqMan.updateDOM();
+            console.log("added a sequence");
         });
     };
-    this.updateDOM = function() {
-        var options = document.createDocumentFragment();
-        this.sequences.forEach(function(sequence) {
+};
+
+g.seqMan.add = function(rawInput, proposedNames) {
+    var w = new Worker("scripts/workers/seqInput.js");
+    w.addEventListener("message", function(message) {
+        console.log("Adding a sequences");
+        g.seqMan.addClean(message, false);
+    }, false);
+    w.postMessage({
+        rawInput: rawInput,
+        proposedNames: proposedNames
+    });
+};
+
+g.seqMan.updateDOM = function() {
+    var options = document.createDocumentFragment();
+    var list = document.createDocumentFragment();
+    if (g.seqMan.sequences.length) {
+        g.seqMan.sequences.forEach(function(sequence) {
             var option = document.createElement("option");
             option.value = sequence.key;
             option.textContent = sequence.name;
             option.dataset.type = (sequence.protein ? "protein" : "dna");
             options.appendChild(option);
+            var close = document.createElement("div");
+            close.textContent = "remove";
+            close.dataset.key = sequence.key;
+            var item = document.createElement("li");
+            item.textContent = sequence.name + ", size: " + sequence.size;
+            item.dataset.type = (sequence.protein ? "protein" : "dna");
+            item.appendChild(close);
+            list.appendChild(item);
         });
-        [$("seq1"), $("seq2")].forEach(function(seqSelect) {
-            while(seqSelect.firstChild) {
-                seqSelect.removeChild(seqSelect.firstChild);
-            }
-            seqSelect.appendChild(options.cloneNode(true));
-        });
-    };
+    } else {
+        var option = document.createElement("option");
+        option.textContent = "No sequence";
+        option.disabled = true;
+        options.appendChild(option);
+    }
+    [g.$("seq1"), g.$("seq2")].forEach(function(seqSelect) {
+        while (seqSelect.firstChild) {
+            seqSelect.removeChild(seqSelect.firstChild);
+        }
+        seqSelect.appendChild(options.cloneNode(true));
+    });
+    var listDOM = g.$("sequence-list");
+    while (listDOM.firstChild) {
+        listDOM.removeChild(listDOM.firstChild);
+    }
+    listDOM.appendChild(list);
 };
 
-var seqMan = new SequenceManager();
-var cursorGetter = db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
+g.seqMan.remove = function(key) {
+    var removed;
+    for (var i = 0; i < g.seqMan.sequences.length; i++) {
+        if (g.seqMan.sequences[i].key === key) {
+            removed = g.seqMan.sequences.splice(i, 1)[0];
+            break;
+        }
+    }
+    if (removed) {
+        var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
+        trans.addEventListener("complete", function() {
+            console.log("removed " + removed.name);
+        }, false);
+        trans.objectStore("sequences").delete(key);
+        trans.objectStore("sequencesMetadata").delete(key);
+        g.seqMan.updateDOM();
+    }
+};
+
+var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
 cursorGetter.addEventListener("success", function(e) {
     var cursor = e.target.result;
     if (cursor) {
-        seqMan.sequences.push(cursor.value);
+        g.seqMan.sequences.push(cursor.value);
         cursor.continue();
     } else {
-        seqMan.updateDOM();
-        loadScripts(["scripts/viewer.js"]);
+        if (g.DOMLoaded) {
+            g.seqMan.updateDOM();
+        }
+        g.loadScripts(["scripts/viewer.js"]);
     }
 }, false);

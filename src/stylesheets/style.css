@@ -56,8 +56,8 @@ option[data-type="protein"] {
 #container {
     overflow: auto;
     background: white;
-    flex-grow: 1;
     cursor: crosshair;
+    flex-grow: 1;
 }
 
 #hist {
@@ -79,6 +79,33 @@ canvas {
     transform-origin: 0 0;
 }
 
-#ghostAnchor {
+#ghost-anchor {
     display: none;
+}
+
+#sequence-list {
+    margin: 1em;
+    padding: 0;
+    width: 100;
+    list-style: none;
+}
+
+#sequence-list > li {
+    margin: 0.1em;
+    padding: 1em;
+}
+
+#sequence-list > li[data-type="dna"] {
+    background: lightgreen;
+}
+
+#sequence-list > li[data-type="protein"] {
+    background: lightblue;
+}
+
+#sequence-list > li > div {
+    position: absolute;
+    right: 2em;
+    display: inline;
+    background: lightgrey;
 }

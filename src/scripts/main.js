@@ -24,36 +24,32 @@
  * Mathieu Schaeffer
  */
 
-/*jshint -W020*/
-
 "use strict";
 
-(function(){
-    if (localStorage.getItem("alreadyVisited")) {
-        var request = window.indexedDB.open("dotplot", dbVersion);
-        request.addEventListener("error", function(e) {
-            console.log("Error opening the DB");
-            console.log(e);
-            alert("Error opening the DB");
-        }, false);
+if (localStorage.getItem("alreadyVisited")) {
+    var request = window.indexedDB.open("dotplot", g.dbVersion);
+    request.addEventListener("error", function(e) {
+        console.log("Error opening the DB");
+        console.log(e);
+        alert("Error opening the DB");
+    }, false);
 
-        request.addEventListener("success", function(e) {
-            console.log("Success opening the DB");
-            db = e.target.result;
-            loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
-        });
+    request.addEventListener("success", function(e) {
+        console.log("Success opening the DB");
+        g.db = e.target.result;
+        g.loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
+    });
 
-        request.addEventListener("upgradeneeded", function(e) {
-            console.log("Upgrading the DB...");
-            db = e.target.result;
-            if (!db.objectStoreNames.contains("sequencesMetadata")) {
-                db.createObjectStore("sequencesMetadata", {keyPath: "key", autoIncrement: true});
-            }
-            if (!db.objectStoreNames.contains("sequences")) {
-                db.createObjectStore("sequences", {keyPath: "key"});
-            }
-        });
-    } else {
-        loadScripts(["scripts/firstLoad.js"]);
-    }
-})();
+    request.addEventListener("upgradeneeded", function(e) {
+        console.log("Upgrading the DB...");
+        g.db = e.target.result;
+        if (!g.db.objectStoreNames.contains("sequencesMetadata")) {
+            g.db.createObjectStore("sequencesMetadata", {keyPath: "key", autoIncrement: true});
+        }
+        if (!g.db.objectStoreNames.contains("sequences")) {
+            g.db.createObjectStore("sequences", {keyPath: "key"});
+        }
+    });
+} else {
+    g.loadScripts(["scripts/firstLoad.js"]);
+}

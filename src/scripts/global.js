@@ -24,35 +24,42 @@
  * Mathieu Schaeffer
  */
 
-/*jshint -W079*/
+/*jshint -W079*///because defining globals
 
 //miscellaneous functions and variables to be used across the whole application
 "use strict";
 
-window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
-window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+//failing in strict mode
+//var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+//var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+//var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
-/*exported dbVersion*/
-var dbVersion = 1;
-/*exported db*/
-var db;
+var g = {};//custom "global" object
+g.dbVersion = 1;
+//internal database
+g.db = null;
 
-/*exported DOMLoaded*/
-var DOMLoaded = false;
+//sequence manager
+g.seqMan = {};
+//matrix manager
+g.matMan = {};
+//parameters of the currently viewed dot-plot
+g.currentView = {};
+//parameters of the next dot-plot analysis
+g.preparedView = {};
+
+g.DOMLoaded = false;
 document.addEventListener("DOMContentLoaded", function() {
-    DOMLoaded = true;
+    g.DOMLoaded = true;
 }, false);
 
-/*exported $*/
 //shortcut for getElementById
-var $ = function(id) {
+g.$ = function(id) {
     return document.getElementById(id);
 };
 
-/*exported loadScripts*/
 //loads scripts to be executed in order
-var loadScripts = function(scriptURLs) {
+g.loadScripts = function loadScripts(scriptURLs) {
     scriptURLs.forEach(function(url) {
         var script = document.createElement("script");
         script.async = false;
@@ -62,7 +69,7 @@ var loadScripts = function(scriptURLs) {
 };
 
 //makes async requests
-var xhr2 = function(url, callback) {
+g.xhr2 = function(url, callback) {
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.responseType = "text";
@@ -74,9 +81,8 @@ var xhr2 = function(url, callback) {
     req.send();
 };
 
-/*exported loadShaders*/
 //loads shaders from the server
-var loadShaders = function(shaders, callback) {
+g.loadShaders = function(shaders, callback) {
     var responses = [];
     var aggregateResponses = function(shaderText) {
         responses.push(shaderText);
@@ -84,7 +90,10 @@ var loadShaders = function(shaders, callback) {
             callback(responses);
         }
     };
-    for (var i = 0; i < shaders.length; i++) {
-        xhr2("shaders/" + shaders[i], aggregateResponses);
-    }
+    shaders.forEach(function(shader) {
+        g.xhr2("shaders/" + shader, aggregateResponses);
+    });
+    /*for (var i = 0; i < shaders.length; i++) {
+        g.xhr2("shaders/" + shaders[i], aggregateResponses);
+    }*/
 };

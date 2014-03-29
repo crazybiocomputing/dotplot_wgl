@@ -10,11 +10,13 @@ var sequenceParser = function(string, names, file) {
 };
 
 var fileToString = function(file, names, callback) {
+    names.push(file.name.replace(/\.[^\.]*$/, ""));
     //read file as text
     //callback(result, names);
 };
 
 self.addEventListener("message", function(message) {
+    //gets and cleans up names passed by user
     var names = message.proposedNames.split(/\s*,\s*/).filter(function(name) {
         return !(/^\s*$/.test(name));
     });

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+<!--<html manifest="manifest.appcache">-->
 <html>
 <head>
     <title>Test</title>
     <meta name='viewport' content='width=device-width'>
     <meta charset='utf-8'>
     <link rel='stylesheet' href='stylesheets/style.css'>
-    <script src='scripts/interface.js' async></script>
     <script src='scripts/global.js'></script>
+    <script src='scripts/interface.js'></script>
     <script src='scripts/main.js'></script>
 </head>
 <body>
@@ -50,6 +51,7 @@
             <a data-target="new-sequence" class="internal-nav">Add a new sequence</a>
         </nav>
         <h1>List of available sequences</h1>
+        <ul id='sequence-list'></ul>
     </section>
     <section id='new-sequence'>
         <nav>

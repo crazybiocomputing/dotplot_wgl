@@ -24,59 +24,62 @@
  * Mathieu Schaeffer
  */
 
-/*jshint -W020*/
-
 "use strict";
 
-(function() {
-    //TODO Provide demo sequences
-    var sequencesMetadata = [{key: 1, name: "demo sequence", protein: false}];
-    var sequences = [{key: 1, typedArray: new Uint8Array(8)}];
+//TODO Provide demo sequences
+var demos = [
+    {
+        sequence: {key: 1, typedArray: new Uint8Array(8)},
+        metadata: {key: 1, name: "demo nucleic sequence", protein: false, size: 8}
+    }, {
+        sequence: {key: 2, typedArray: new Uint8Array(10)},
+        metadata: {key: 2, name: "demo proteic sequence", protein: true, size: 10}
+    }
+];
 
-    window.indexedDB.deleteDatabase("dotplot");
-    var request = window.indexedDB.open("dotplot", dbVersion);
+window.indexedDB.deleteDatabase("dotplot");
+var request = window.indexedDB.open("dotplot", g.dbVersion);
 
-    request.addEventListener("error", function(e) {
-        console.log("Error opening the DB");
-        console.log(e);
-        alert("Error opening the DB");
+request.addEventListener("error", function(e) {
+    console.log("Error opening the DB");
+    console.log(e);
+    alert("Error opening the DB");
+}, false);
+
+request.addEventListener("success", function(e) {
+    console.log("Success opening the DB");
+    g.db = e.target.result;
+    var transaction = g.db.transaction(
+        ["sequencesMetadata", "sequences"],
+        "readwrite"
+    );
+
+    var sequencesMetadataOS = transaction.objectStore("sequencesMetadata");
+    var sequencesOS = transaction.objectStore("sequences");
+    demos.forEach(function(demo) {
+        sequencesMetadataOS.add(demo.metadata);
+        sequencesOS.add(demo.sequence);
+    });
+
+    transaction.addEventListener("complete", function() {
+        console.log("objects stored in DB");
+        localStorage.setItem("alreadyVisited", true);
+        g.loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
     }, false);
 
-    request.addEventListener("success", function(e) {
-        console.log("Success opening the DB");
-        db = e.target.result;
-        var transaction = db.transaction(
-            ["sequencesMetadata", "sequences"],
-            "readwrite"
-        );
+}, false);
 
-        var sequencesMetadataOS = transaction.objectStore("sequencesMetadata");
-        var sequencesOS = transaction.objectStore("sequences");
-        for (var i = 0; i < sequences.length; i++) {
-            sequencesMetadataOS.add(sequencesMetadata[i]);
-            sequencesOS.add(sequences[i]);
-        }
+request.addEventListener("upgradeneeded", function(e) {
+    console.log("Upgrading the DB...");
+    g.db = e.target.result;
 
-        transaction.addEventListener("complete", function() {
-            console.log("objects stored in DB");
-            localStorage.setItem("alreadyVisited", true);
-            loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
-        }, false);
+    if (g.db.objectStoreNames.contains("sequencesMetadata")) {
+        g.db.deleteObjectStore("sequencesMetadata");
+    }
+    g.db.createObjectStore("sequencesMetadata", {keyPath: "key", autoIncrement: true});
 
-    }, false);
-
-    request.addEventListener("upgradeneeded", function(e) {
-        console.log("Upgrading the DB...");
-        db = e.target.result;
-
-        if (db.objectStoreNames.contains("sequencesMetadata")) {
-            db.deleteObjectStore("sequencesMetadata");
-        }
-        db.createObjectStore("sequencesMetadata", {keyPath: "key", autoIncrement: true});
-
-        if (db.objectStoreNames.contains("sequences")) {
-            db.deleteObjectStore("sequences");
-        }
-        db.createObjectStore("sequences", {keyPath: "key"});
-    }, false);
-})();
+    if (g.db.objectStoreNames.contains("sequences")) {
+        g.db.deleteObjectStore("sequences");
+    }
+    g.db.createObjectStore("sequences", {keyPath: "key"});
+}, false);

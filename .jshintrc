@@ -12,11 +12,7 @@
     "esnext": true,
     "globalstrict": true,
     "globals": {
-        "$": false,
-        "loadShaders": false,
-        "loadScripts": false,
-        "db": false,
-        "dbVersion": false
+        "g": false
     },
     "lastsemic": true,
     "browser": true,
