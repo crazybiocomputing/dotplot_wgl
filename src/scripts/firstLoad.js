@@ -28,13 +28,8 @@
 
 //TODO Provide demo sequences
 var demos = [
-    {
-        sequence: {key: 1, typedArray: new Uint8Array(8)},
-        metadata: {key: 1, name: "demo nucleic sequence", protein: false, size: 8}
-    }, {
-        sequence: {key: 2, typedArray: new Uint8Array(10)},
-        metadata: {key: 2, name: "demo proteic sequence", protein: true, size: 10}
-    }
+    {typedArray: new Uint8Array(80), name: "demo nucleic sequence", protein: false},
+    {typedArray: new Uint8Array(100), name: "demo proteic sequence", protein: true}
 ];
 
 window.indexedDB.deleteDatabase("dotplot");
@@ -57,8 +52,15 @@ request.addEventListener("success", function(e) {
     var sequencesMetadataOS = transaction.objectStore("sequencesMetadata");
     var sequencesOS = transaction.objectStore("sequences");
     demos.forEach(function(demo) {
-        sequencesMetadataOS.add(demo.metadata);
-        sequencesOS.add(demo.sequence);
+        var req = sequencesOS.add(demo.typedArray);
+        req.addEventListener("success", function(e) {
+            sequencesMetadataOS.add({
+                name: demo.name,
+                size: demo.typedArray.length,
+                protein: demo.protein,
+                key: e.target.result
+            });
+        }, false);
     });
 
     transaction.addEventListener("complete", function() {
@@ -76,10 +78,10 @@ request.addEventListener("upgradeneeded", function(e) {
     if (g.db.objectStoreNames.contains("sequencesMetadata")) {
         g.db.deleteObjectStore("sequencesMetadata");
     }
-    g.db.createObjectStore("sequencesMetadata", {keyPath: "key", autoIncrement: true});
+    g.db.createObjectStore("sequencesMetadata", {keyPath: "key"});
 
     if (g.db.objectStoreNames.contains("sequences")) {
         g.db.deleteObjectStore("sequences");
     }
-    g.db.createObjectStore("sequences", {keyPath: "key"});
+    g.db.createObjectStore("sequences", {autoIncrement: true});
 }, false);

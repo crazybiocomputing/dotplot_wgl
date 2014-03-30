@@ -47,16 +47,33 @@ g.matMan = {};
 g.currentView = {};
 //parameters of the next dot-plot analysis
 g.preparedView = {};
+//DOM templates;
+g.DOM = {
+    liTempl: document.createElement("li"),
+    optTempl: document.createElement("option")
+};
+
+(function() {
+    var rm = document.createElement("div");
+    g.DOM.liTempl.appendChild(rm.cloneNode(true));
+    rm.classList.add("remove");
+    rm.textContent = "×";
+    g.DOM.liTempl.appendChild(rm.cloneNode(true));
+})();
 
 g.DOMLoaded = false;
-document.addEventListener("DOMContentLoaded", function() {
-    g.DOMLoaded = true;
-}, false);
 
 //shortcut for getElementById
 g.$ = function(id) {
     return document.getElementById(id);
 };
+
+document.addEventListener("DOMContentLoaded", function() {
+    g.DOMLoaded = true;
+    g.DOM.li = g.$("sequence-list");
+    g.DOM.opt1 = g.$("seq1");
+    g.DOM.opt2 = g.$("seq2");
+}, false);
 
 //loads scripts to be executed in order
 g.loadScripts = function loadScripts(scriptURLs) {

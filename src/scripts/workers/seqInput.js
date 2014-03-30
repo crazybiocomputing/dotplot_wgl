@@ -17,12 +17,12 @@ var fileToString = function(file, names, callback) {
 
 self.addEventListener("message", function(message) {
     //gets and cleans up names passed by user
-    var names = message.proposedNames.split(/\s*,\s*/).filter(function(name) {
+    var names = message.data.proposedNames.split(/\s*,\s*/).filter(function(name) {
         return !(/^\s*$/.test(name));
     });
-    if (typeof message.rawInput !== "string") {
-        fileToString(message.rawInput, names);
+    if (typeof message.data.rawInput !== "string") {
+        fileToString(message.data.rawInput, names);
     } else {
-        sequenceParser(message.rawInput, names);
+        sequenceParser(message.data.rawInput, names);
     }
 }, false);

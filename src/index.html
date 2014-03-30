@@ -17,12 +17,8 @@
             <a data-target="sequences"  class="internal-nav">Sequences</a>
         </nav>
         <h1>Dotplot_wgl</h1>
-        <select id='seq1'>
-            <option disabled>No sequence</option>
-        </select>
-        <select id='seq2'>
-            <option disabled>No sequence</option>
-        </select><br>
+        <select id='seq1'></select>
+        <select id='seq2'></select><br>
         <label for='window'>Window size: </label>
         <input type='number' name='window' id='window' min='1' step='1' value='1'><br>
         <input type='button' id='webgl' value='Render WebGL graph' disabled>
@@ -58,6 +54,7 @@
             <a data-target="new-sequence" class="internal-nav">Back</a>
         </nav>
         <h1>Add a new sequence</h1>
+        <textarea id='sequence-input' type='text' placeholder='input sequence here or drag and drop file'></textarea>
     </section>
 </body>
 </html>

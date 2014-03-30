@@ -54,7 +54,7 @@ window.addEventListener("DOMContentLoaded", function() {
     g.$("clean-up").addEventListener("click", function(e) {
         e.preventDefault();
         localStorage.removeItem("alreadyVisited");
-        location.reload();
+        location.reload(true);
     }, false);
 
     //nav buttons
@@ -73,6 +73,6 @@ window.addEventListener("DOMContentLoaded", function() {
     }, false);
 
     try {
-        g.seqMan.updateDOM();
+        g.seqMan.addDOM(g.seqMan.sequences);
     } catch(err) {}
 }, false);

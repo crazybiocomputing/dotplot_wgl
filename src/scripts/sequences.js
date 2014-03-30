@@ -32,28 +32,28 @@ g.seqMan.addClean = function(cleaned) {
     var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
     var seqOS = trans.objectStore("sequences");
     var request1 = seqOS.add(cleaned.typedArray);
-    request1.onsuccess = function(e) {
+    request1.addEventListener("success", function(e) {
         var seqMetaOS = trans.objectStore("sequencesMetadata");
         var seqTemp = {
             name: cleaned.name,
             protein: cleaned.protein,
-            size: cleaned.size,
+            size: cleaned.typedArray.length,
             key: e.target.result
         };
         var request2 = seqMetaOS.add(seqTemp);
-        request2.onsuccess(function(){
+        request2.addEventListener("success", function() {
             g.seqMan.sequences.push(seqTemp);
-            g.seqMan.updateDOM();
+            g.seqMan.addDOM([seqTemp]);
             console.log("added a sequence");
         });
-    };
+    }, false);
 };
 
 g.seqMan.add = function(rawInput, proposedNames) {
     var w = new Worker("scripts/workers/seqInput.js");
     w.addEventListener("message", function(message) {
-        console.log("Adding a sequences");
-        g.seqMan.addClean(message, false);
+        console.log("Adding a sequence");
+        g.seqMan.addClean(message.data);
     }, false);
     w.postMessage({
         rawInput: rawInput,
@@ -61,42 +61,21 @@ g.seqMan.add = function(rawInput, proposedNames) {
     });
 };
 
-g.seqMan.updateDOM = function() {
-    var options = document.createDocumentFragment();
-    var list = document.createDocumentFragment();
-    if (g.seqMan.sequences.length) {
-        g.seqMan.sequences.forEach(function(sequence) {
-            var option = document.createElement("option");
-            option.value = sequence.key;
-            option.textContent = sequence.name;
-            option.dataset.type = (sequence.protein ? "protein" : "dna");
-            options.appendChild(option);
-            var close = document.createElement("div");
-            close.textContent = "remove";
-            close.dataset.key = sequence.key;
-            var item = document.createElement("li");
-            item.textContent = sequence.name + ", size: " + sequence.size;
-            item.dataset.type = (sequence.protein ? "protein" : "dna");
-            item.appendChild(close);
-            list.appendChild(item);
-        });
-    } else {
-        var option = document.createElement("option");
-        option.textContent = "No sequence";
-        option.disabled = true;
-        options.appendChild(option);
-    }
-    [g.$("seq1"), g.$("seq2")].forEach(function(seqSelect) {
-        while (seqSelect.firstChild) {
-            seqSelect.removeChild(seqSelect.firstChild);
-        }
-        seqSelect.appendChild(options.cloneNode(true));
+g.seqMan.addDOM = function(sequences) {
+    sequences.forEach(function(sequence) {
+        sequence.opt1 = g.DOM.optTempl.cloneNode(true);
+        sequence.opt1.value = sequence.key;
+        sequence.opt1.textContent = sequence.name;
+        sequence.opt1.dataset.type = (sequence.protein ? "protein" : "dna");
+        sequence.opt2 = sequence.opt1.cloneNode(true);
+        g.DOM.opt1.appendChild(sequence.opt1);
+        g.DOM.opt2.appendChild(sequence.opt2);
+        sequence.li = g.DOM.liTempl.cloneNode(true);
+        sequence.li.children[1].dataset.key = sequence.key;
+        sequence.li.children[0].textContent = sequence.name + " (" + sequence.size + (sequence.protein ? " aa)" : " bp)");
+        sequence.li.dataset.type = (sequence.protein ? "protein" : "dna");
+        g.DOM.li.appendChild(sequence.li);
     });
-    var listDOM = g.$("sequence-list");
-    while (listDOM.firstChild) {
-        listDOM.removeChild(listDOM.firstChild);
-    }
-    listDOM.appendChild(list);
 };
 
 g.seqMan.remove = function(key) {
@@ -114,7 +93,9 @@ g.seqMan.remove = function(key) {
         }, false);
         trans.objectStore("sequences").delete(key);
         trans.objectStore("sequencesMetadata").delete(key);
-        g.seqMan.updateDOM();
+        g.DOM.li.removeChild(removed.li);
+        g.DOM.opt1.removeChild(removed.opt1);
+        g.DOM.opt2.removeChild(removed.opt2);
     }
 };
 
@@ -126,7 +107,7 @@ cursorGetter.addEventListener("success", function(e) {
         cursor.continue();
     } else {
         if (g.DOMLoaded) {
-            g.seqMan.updateDOM();
+            g.seqMan.addDOM(g.seqMan.sequences);
         }
         g.loadScripts(["scripts/viewer.js"]);
     }
