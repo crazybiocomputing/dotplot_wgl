@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", function() {
     g.DOM.li = g.$("sequence-list");
     g.DOM.opt1 = g.$("seq1");
     g.DOM.opt2 = g.$("seq2");
+    g.DOM.type = g.$("type");
+    g.DOM.names = g.$("names");
+    g.DOM.inputZone = g.$("input-zone");
 }, false);
 
 //loads scripts to be executed in order
@@ -86,10 +89,10 @@ g.loadScripts = function loadScripts(scriptURLs) {
 };
 
 //makes async requests
-g.xhr2 = function(url, callback) {
+g.xhr2 = function(url, type, callback) {
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
-    req.responseType = "text";
+    req.responseType = type;
     req.onload = function() {
         if (this.status === 200) {
             callback(this.response);
@@ -108,9 +111,6 @@ g.loadShaders = function(shaders, callback) {
         }
     };
     shaders.forEach(function(shader) {
-        g.xhr2("shaders/" + shader, aggregateResponses);
+        g.xhr2("shaders/" + shader, "text", aggregateResponses);
     });
-    /*for (var i = 0; i < shaders.length; i++) {
-        g.xhr2("shaders/" + shaders[i], aggregateResponses);
-    }*/
 };

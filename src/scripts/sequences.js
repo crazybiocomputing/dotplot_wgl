@@ -49,15 +49,17 @@ g.seqMan.addClean = function(cleaned) {
     }, false);
 };
 
-g.seqMan.add = function(rawInput, proposedNames) {
+g.seqMan.add = function(rawInput, proposedNames, type) {
     var w = new Worker("scripts/workers/seqInput.js");
     w.addEventListener("message", function(message) {
         console.log("Adding a sequence");
-        g.seqMan.addClean(message.data);
+        console.log(message.data);
+        //g.seqMan.addClean(message.data);
     }, false);
     w.postMessage({
         rawInput: rawInput,
-        proposedNames: proposedNames
+        proposedNames: proposedNames,
+        type: type
     });
 };
 
@@ -99,16 +101,22 @@ g.seqMan.remove = function(key) {
     }
 };
 
-var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
-cursorGetter.addEventListener("success", function(e) {
-    var cursor = e.target.result;
-    if (cursor) {
-        g.seqMan.sequences.push(cursor.value);
-        cursor.continue();
-    } else {
-        if (g.DOMLoaded) {
-            g.seqMan.addDOM(g.seqMan.sequences);
+(function() {
+    var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
+    cursorGetter.addEventListener("success", function(e) {
+        var cursor = e.target.result;
+        if (cursor) {
+            g.seqMan.sequences.push(cursor.value);
+            cursor.continue();
+        } else {
+            if (g.DOMLoaded) {
+                g.seqMan.addDOM(g.seqMan.sequences);
+            } else {
+                document.addEventListener("DOMContentLoaded", function() {
+                    g.seqMan.addDOM(g.seqMan.sequences);
+                }, false);
+            }
+            g.loadScripts(["scripts/viewer.js"]);
         }
-        g.loadScripts(["scripts/viewer.js"]);
-    }
-}, false);
+    }, false);
+}());

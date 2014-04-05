@@ -129,11 +129,11 @@ canvas {
     border: thin solid #ffffff;
 }
 
-#sequence-input {
+#input-zone {
     margin: 0.5em;
     padding: 0.5em;
     width: 97% !important;
-    height: 79% !important;
+    height: 60% !important;
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
 }

@@ -54,7 +54,16 @@
             <a data-target="new-sequence" class="internal-nav">Back</a>
         </nav>
         <h1>Add a new sequence</h1>
-        <textarea id='sequence-input' type='text' placeholder='input sequence here or drag and drop file'></textarea>
+        <label>Name(s) of sequence(s) (optionnal): </label>
+        <input id='names' type='text'><br>
+        <label>Type of sequence(s) (optionnal): </label>
+        <select id='type'>
+            <option value='unknown'>Unknown</option>
+            <option value='proteic'>Proteic</option>
+            <option value='nucleic'>Nucleic</option>
+        </select><br>
+        <textarea id='input-zone' placeholder='input sequence here or drag and drop file'></textarea><br>
+        <input id='input-submit' type='button' value='Submit'>
     </section>
 </body>
 </html>
