@@ -93,11 +93,11 @@ g.xhr2 = function(url, type, callback) {
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.responseType = type;
-    req.onload = function() {
+    req.addEventListener("load", function() {
         if (this.status === 200) {
             callback(this.response);
         }
-    };
+    }, false);
     req.send();
 };
 
