@@ -76,30 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
     g.DOM.type = g.$("type");
     g.DOM.names = g.$("names");
     g.DOM.inputZone = g.$("input-zone");
-
-    g.DOM.hist = document.getElementsByTagName("svg")[0];
-    var fragment = document.createDocumentFragment();
-    var barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    barCount.setAttribute("y1", 200.5);
-    barCount.setAttribute("y2", 100.5);
-    barCount.style.stroke = "#06F";
-    barCount.style.strokeWidth = 1;
-    var barLog = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    barLog.setAttribute("y1", 101.5);
-    barLog.setAttribute("y2", 100.5);
-    barLog.style.stroke = "#f0e";
-    barLog.style.strokeWidth = 1;
-    for (var i = 0; i < 256; i++) {//create 256 bars
-        var barC = barCount.cloneNode(); //copy the one defined
-        barC.setAttribute("x1", i + 0.5);
-        barC.setAttribute("x2", i + 0.5);
-        fragment.appendChild(barC);
-        var barL = barLog.cloneNode();
-        barL.setAttribute("x1", i + 0.5);
-        barL.setAttribute("x2", i + 0.5);
-        fragment.appendChild(barL);
-    }
-    g.DOM.hist.appendChild(fragment);
+    g.DOM.hist = null;
 }, false);
 
 //loads scripts to be executed in order

@@ -152,6 +152,15 @@ var webgl = function(canvas, shaders) {
     var w = new Worker("/scripts/workers/histogram.js");
     w.addEventListener("message", function(message) {
         console.log(message.data);
+        var bars = {
+            counts: g.DOM.hist.getElementsByClassName("count"),
+            logs: g.DOM.hist.getElementsByClassName("log")
+        };
+        console.log(bars);
+        for (var i = 0; i < 256; i++) {
+            bars.counts[i].style.transform = "translateY(-" + (message.data.histCountR[i] / message.data.maxCount.r * 250) + "px)";
+            bars.logs[i].style.transform = "translateY(-" + (message.data.histLogR[i] / message.data.maxLog.r * 250) + "px)";
+        }
     }, false);
     w.postMessage({pixels: hist});
     

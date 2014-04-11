@@ -72,6 +72,15 @@ option[data-type="protein"] {
     margin: auto;
 }
 
+#svg {
+    background: linear-gradient(to right, black 0%, white 100%);
+}
+
+line {
+    transition: transform 1s ease-in-out;
+    transform: translateX(0);
+}
+
 #container, #hist {
     min-width: 255px;
     height: 400px;

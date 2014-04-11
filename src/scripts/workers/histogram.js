@@ -1,7 +1,7 @@
 /* jshint worker: true */
-/* global FileReaderSync: false */
 
 "use strict";
+
 var maxCount = {rgb: null, rg: null, gb: null, rb: null, r: null, g: null, b: null};
 var maxLog   = {rgb: null, rg: null, gb: null, rb: null, r: null, g: null, b: null};
 var histCountR = new Uint32Array(256);
@@ -13,13 +13,12 @@ var histLogB   = new Uint8Array(256);
 
 self.addEventListener("message", function(message) {
     var pixels = message.data.pixels;
-    for (var i=0; i<pixels.length; i+=3){
+    for (var i = 0; i < pixels.length; i+=3){
         histCountR[pixels[i]]++;
         histCountG[pixels[i+1]]++;
         histCountB[pixels[i+2]]++;
     }
-    
-    for (i=0; i<256; i++){
+    for (var i = 0; i < 256; i++){
         histLogR[i] = Math.log(histCountR[i]);
         histLogG[i] = Math.log(histCountG[i]);
         histLogB[i] = Math.log(histCountB[i]);
@@ -38,15 +37,16 @@ self.addEventListener("message", function(message) {
         maxLog.g    = Math.max(maxLog.g, histLogG[i]);
         maxLog.b    = Math.max(maxLog.b, histLogB[i]);
     }
-      
+
     self.postMessage({
         maxCount:   maxCount,
-        histCountR: histCountR.buffer,
-        histCountG: histCountG.buffer,
-        histCountB: histCountB.buffer,
-        histLogR:   histLogR.buffer,
-        histLogG:   histLogG.buffer,
-        histLogB:   histLogB.buffer,
+        maxLog:     maxLog,
+        histCountR: histCountR,
+        histCountG: histCountG,
+        histCountB: histCountB,
+        histLogR:   histLogR,
+        histLogG:   histLogG,
+        histLogB:   histLogB,
     }, [
         histCountR.buffer,
         histCountG.buffer,
@@ -57,4 +57,3 @@ self.addEventListener("message", function(message) {
     ]);
     self.close();
 }, false);
- 

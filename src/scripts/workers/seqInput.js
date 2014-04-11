@@ -42,9 +42,9 @@ var sequenceLoader = function(id, website, names, type) {
             );
             break;
         case "UniProt":
-            //FIXME Failing with Firefox, but not with Chrome
+            //FIXME Fails with Firefox, but not with Chrome
             xhr2(
-                "//www.uniprot.org/uniprot/" + id.toUpperCase(),
+                "//www.uniprot.org/uniprot/" + id.toUpperCase() + ".fasta",
                 names, (type === "unknown") ? "protein" : type, sequenceParser
             );
             break;

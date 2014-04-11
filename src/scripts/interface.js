@@ -105,4 +105,30 @@ window.addEventListener("DOMContentLoaded", function() {
         g.seqMan.add(g.DOM.inputZone.value, g.DOM.names.value, g.DOM.type.value);
         cleanAfterInput();
     }, false);
+
+    g.DOM.hist = g.$("svg");
+    var fragment = document.createDocumentFragment();
+    var barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    barCount.classList.add("count");
+    barCount.setAttribute("y1", "200.5%");
+    barCount.setAttribute("y2", "100.5%");
+    barCount.style.stroke = "#06F";
+    barCount.style.strokeWidth = 1;
+    var barLog = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    barLog.classList.add("log");
+    barLog.setAttribute("y1", "101.5%");
+    barLog.setAttribute("y2", "100.5%");
+    barLog.style.stroke = "#f0e";
+    barLog.style.strokeWidth = 1;
+    for (var i = 0; i < 256; i++) {//create 256 bars
+        var barC = barCount.cloneNode();//copy the one defined
+        barC.setAttribute("x1", i + 0.5);
+        barC.setAttribute("x2", i + 0.5);
+        fragment.appendChild(barC);
+        var barL = barLog.cloneNode();
+        barL.setAttribute("x1", i + 0.5);
+        barL.setAttribute("x2", i + 0.5);
+        fragment.appendChild(barL);
+    }
+    g.DOM.hist.appendChild(fragment);
 }, false);
