@@ -55,6 +55,7 @@ matrix[96] = 255;
 console.timeEnd("load");
 
 var webgl = function(canvas, shaders) {
+    var w = STRING1.length;
     console.time("1");
 
     var WINDOW_SIZE = Math.floor(g.$("window").value);
@@ -147,10 +148,17 @@ var webgl = function(canvas, shaders) {
     //data for the histogram
     var hist = new Uint8Array((w + 1 - WINDOW_SIZE) * (h + 1 - WINDOW_SIZE) * 4);
     gl.readPixels(0, 0, (w + 1 - WINDOW_SIZE), (h + 1 - WINDOW_SIZE), gl.RGBA, gl.UNSIGNED_BYTE, hist);
+
+    var w = new Worker("/scripts/workers/histogram.js");
+    w.addEventListener("message", function(message) {
+        console.log(message.data);
+    }, false);
+    w.postMessage({pixels: hist});
     
     var webglInput = g.$("webgl");
     webglInput.value = "Render WebGL graph";
     webglInput.disabled = false;
+
     console.timeEnd("1");
 };
 
