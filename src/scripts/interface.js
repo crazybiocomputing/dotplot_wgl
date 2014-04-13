@@ -106,7 +106,6 @@ window.addEventListener("DOMContentLoaded", function() {
         cleanAfterInput();
     }, false);
 
-    g.DOM.hist = g.$("svg");
     var fragment = document.createDocumentFragment();
     var barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
     barCount.classList.add("count");
@@ -131,4 +130,20 @@ window.addEventListener("DOMContentLoaded", function() {
         fragment.appendChild(barL);
     }
     g.DOM.hist.appendChild(fragment);
+
+    var rangeHist = function() {
+        var v1 = g.DOM.range1.value / 2.55,
+            v2 = g.DOM.range2.value / 2.55,
+            color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
+        if (v1 >= v2) {
+            g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
+        } else {
+            g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
+        }
+    };
+    g.DOM.red.addEventListener("change", rangeHist, false);
+    g.DOM.green.addEventListener("change", rangeHist, false);
+    g.DOM.blue.addEventListener("change", rangeHist, false);
+    g.DOM.range1.addEventListener("input", rangeHist, false);
+    g.DOM.range2.addEventListener("input", rangeHist, false);
 }, false);

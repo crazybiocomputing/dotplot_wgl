@@ -47,7 +47,7 @@ g.matMan = {};
 g.currentView = {};
 //parameters of the next dot-plot analysis
 g.preparedView = {};
-//DOM templates;
+//DOM templates
 g.DOM = {
     liTempl: document.createElement("li"),
     optTempl: document.createElement("option")
@@ -76,7 +76,14 @@ document.addEventListener("DOMContentLoaded", function() {
     g.DOM.type = g.$("type");
     g.DOM.names = g.$("names");
     g.DOM.inputZone = g.$("input-zone");
-    g.DOM.hist = null;
+    g.DOM.hist = g.$("svg");
+    var ranges = document.getElementsByClassName("range");
+    g.DOM.range1 = ranges[0];
+    g.DOM.range2 = ranges[1];
+    var channels = document.getElementsByClassName("channel");
+    g.DOM.red = channels[0];
+    g.DOM.green = channels[1];
+    g.DOM.blue = channels[2];
 }, false);
 
 //loads scripts to be executed in order

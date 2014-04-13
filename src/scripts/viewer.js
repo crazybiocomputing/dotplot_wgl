@@ -145,24 +145,20 @@ var webgl = function(canvas, shaders) {
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    //data for the histogram
-    var hist = new Uint8Array((w + 1 - WINDOW_SIZE) * (h + 1 - WINDOW_SIZE) * 4);
-    gl.readPixels(0, 0, (w + 1 - WINDOW_SIZE), (h + 1 - WINDOW_SIZE), gl.RGBA, gl.UNSIGNED_BYTE, hist);
+    //Histogram
+    var pixels = new Uint8Array((w + 1 - WINDOW_SIZE) * (h + 1 - WINDOW_SIZE) * 4);
+    gl.readPixels(0, 0, (w + 1 - WINDOW_SIZE), (h + 1 - WINDOW_SIZE), gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
     var w = new Worker("/scripts/workers/histogram.js");
     w.addEventListener("message", function(message) {
-        console.log(message.data);
-        var bars = {
-            counts: g.DOM.hist.getElementsByClassName("count"),
-            logs: g.DOM.hist.getElementsByClassName("log")
-        };
-        console.log(bars);
         for (var i = 0; i < 256; i++) {
-            bars.counts[i].style.transform = "translateY(-" + (message.data.histCountR[i] / message.data.maxCount.r * 250) + "px)";
-            bars.logs[i].style.transform = "translateY(-" + (message.data.histLogR[i] / message.data.maxLog.r * 250) + "px)";
+            g.DOM.hist.children[i * 2].style["transform"] = "translate3d(0, -" + (message.data.histCountR[i] / message.data.maxCount.r * 200) + "px, 0)";
+            g.DOM.hist.children[i * 2 + 1].style["transform"] = "translate3d(0, -" + (message.data.histLogR[i] / message.data.maxLog.r * 200) + "px, 0)";
+            g.DOM.hist.children[i * 2].style["webkitTransform"] = "translate3d(0, -" + (message.data.histCountR[i] / message.data.maxCount.r * 200) + "px, 0)";
+            g.DOM.hist.children[i * 2 + 1].style["webkitTransform"] = "translate3d(0, -" + (message.data.histLogR[i] / message.data.maxLog.r * 200) + "px, 0)";
         }
     }, false);
-    w.postMessage({pixels: hist});
+    w.postMessage({pixels: pixels});
     
     var webglInput = g.$("webgl");
     webglInput.value = "Render WebGL graph";

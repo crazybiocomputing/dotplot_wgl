@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!--<html manifest="manifest.appcache">-->
+<!--<html manifest='manifest.appcache'>-->
 <html>
 <head>
     <title>Test</title>
@@ -13,21 +13,30 @@
 <body>
     <section id='main' class='active-section'>
         <nav>
-            <a data-target="settings" class="internal-nav">Settings</a>
-            <a data-target="sequences"  class="internal-nav">Sequences</a>
+            <a data-target='settings' class='internal-nav'>Settings</a>
+            <a data-target='sequences'  class='internal-nav'>Sequences</a>
         </nav>
         <h1>Dotplot_wgl</h1>
         <select id='seq1'></select>
         <select id='seq2'></select><br>
         <label for='window'>Window size: </label>
-        <input type='number' name='window' id='window' min='1' step='1' value='1'><br>
+        <input type='number' id='window' min='1' step='1' value='15'><br>
         <input type='button' id='webgl' value='Render WebGL graph' disabled>
         <div id='container-hist'>
             <div id='hist'>
-                <svg id='svg' viewBox='0 0 256 250'></svg>
+                <div>Channels:</div>
+                <input type='checkbox' id='red' class='channel' checked>
+                <label for='red'>red</label><br>
+                <input type='checkbox' id='green' class='channel' checked>
+                <label for='green'>green</label><br>
+                <input type='checkbox' id='blue' class='channel' checked>
+                <label for='blue'>blue</label><br>
+                <input type='range' min='0' max='255' value='255' class='range'><br>
+                <svg id='svg' viewBox='0 0 256 200'></svg><br>
+                <input type='range' min='0' max='255' value='0' class='range'><br>
             </div>
             <div id='container'>
-                <canvas id='canvas' width="0" height="0"></canvas>
+                <canvas id='canvas' width='0' height='0' ></canvas>
             </div>
         </div>
         <input type='button' id='download' value='Download as png file'>
@@ -35,7 +44,7 @@
     </section>
     <section id='settings'>
         <nav>
-            <a data-target="settings" class="internal-nav">Back</a>
+            <a data-target='settings' class='internal-nav'>Back</a>
         </nav>
         <h1>Settings</h1>
         <label for='clean-up'>Remove all cached data and reload: </label>
@@ -43,15 +52,15 @@
     </section>
     <section id='sequences'>
         <nav>
-            <a data-target="sequences" class="internal-nav">Back</a>
-            <a data-target="new-sequence" class="internal-nav">Add a new sequence</a>
+            <a data-target='sequences' class='internal-nav'>Back</a>
+            <a data-target='new-sequence' class='internal-nav'>Add a new sequence</a>
         </nav>
         <h1>List of available sequences</h1>
         <ul id='sequence-list'></ul>
     </section>
     <section id='new-sequence'>
         <nav>
-            <a data-target="new-sequence" class="internal-nav">Back</a>
+            <a data-target='new-sequence' class='internal-nav'>Back</a>
         </nav>
         <h1>Add a new sequence</h1>
         <label>Name(s) of sequence(s) (optionnal): </label>

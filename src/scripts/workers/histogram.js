@@ -13,7 +13,7 @@ var histLogB   = new Uint8Array(256);
 
 self.addEventListener("message", function(message) {
     var pixels = message.data.pixels;
-    for (var i = 0; i < pixels.length; i+=3){
+    for (var i = 0; i < pixels.length; i+=4){
         histCountR[pixels[i]]++;
         histCountG[pixels[i+1]]++;
         histCountB[pixels[i+2]]++;
