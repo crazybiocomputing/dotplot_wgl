@@ -51,10 +51,26 @@ g.seqMan.addClean = function(cleaned) {
 
 g.seqMan.add = function(rawInput, proposedNames, type) {
     var w = new Worker("scripts/workers/seqInput.js");
+    var count = 0;
     w.addEventListener("message", function(message) {
-        console.log("Adding a sequence");
-        console.log(message.data);
-        //g.seqMan.addClean(message.data);
+        switch (message.data.status) {
+            case "error":
+                if (Notification && Notification.permission === "granted") {
+                    new Notification("Error", {body: "Could not load a sequence"});
+                }
+                break;
+            case "sequence":
+                count++;
+                console.log(message.data);
+                //g.seqMan.addClean(message.data);
+                break;
+            case "done":
+                if (Notification && Notification.permission === "granted") {
+                    new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "type: " + message.data.type});
+                }
+                break;
+        }
+
     }, false);
     w.postMessage({
         rawInput: rawInput,

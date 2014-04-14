@@ -12,7 +12,8 @@
     "esnext": true,
     "globalstrict": true,
     "globals": {
-        "g": false
+        "g": false,
+        "Notification": false
     },
     "lastsemic": true,
     "browser": true,

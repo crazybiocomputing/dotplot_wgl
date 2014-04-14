@@ -31,7 +31,6 @@ window.addEventListener("DOMContentLoaded", function() {
 
     //declaring listeners
     canvas.addEventListener("click", function(e) {
-        e.preventDefault();
         console.log("pixel clicked at x: " + e.layerX + ", y: " + e.layerY);
     }, false);
 
@@ -51,10 +50,19 @@ window.addEventListener("DOMContentLoaded", function() {
         }
     }, false);
 
-    g.$("clean-up").addEventListener("click", function(e) {
-        e.preventDefault();
+    g.$("clean-up").addEventListener("click", function() {
         localStorage.removeItem("alreadyVisited");
         location.reload(true);
+    }, false);
+
+    g.$("notifications").addEventListener("click", function() {
+        if (Notification) {
+            Notification.requestPermission(function(e) {
+                if (e === "granted") {
+                    new Notification("Success", {body: "Notifications will now be used when importing sequences"});
+                }
+            });
+        }
     }, false);
 
     //nav buttons
@@ -119,19 +127,19 @@ window.addEventListener("DOMContentLoaded", function() {
     barLog.setAttribute("y2", "100.5%");
     barLog.style.stroke = "#f0e";
     barLog.style.strokeWidth = 1;
-    for (var i = 0; i < 256; i++) {//create 256 bars
+    for (var i = 0.5; i < 256; i++) {//create 256 bars
         var barC = barCount.cloneNode();//copy the one defined
-        barC.setAttribute("x1", i + 0.5);
-        barC.setAttribute("x2", i + 0.5);
+        barC.setAttribute("x1", i);
+        barC.setAttribute("x2", i);
         fragment.appendChild(barC);
         var barL = barLog.cloneNode();
-        barL.setAttribute("x1", i + 0.5);
-        barL.setAttribute("x2", i + 0.5);
+        barL.setAttribute("x1", i);
+        barL.setAttribute("x2", i);
         fragment.appendChild(barL);
     }
     g.DOM.hist.appendChild(fragment);
 
-    var rangeHist = function() {
+    var updateView = function() {
         var v1 = g.DOM.range1.value / 2.55,
             v2 = g.DOM.range2.value / 2.55,
             color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
@@ -140,10 +148,11 @@ window.addEventListener("DOMContentLoaded", function() {
         } else {
             g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
         }
+        //update WebGL view
     };
-    g.DOM.red.addEventListener("change", rangeHist, false);
-    g.DOM.green.addEventListener("change", rangeHist, false);
-    g.DOM.blue.addEventListener("change", rangeHist, false);
-    g.DOM.range1.addEventListener("input", rangeHist, false);
-    g.DOM.range2.addEventListener("input", rangeHist, false);
+    g.DOM.red.addEventListener("change", updateView, false);
+    g.DOM.green.addEventListener("change", updateView, false);
+    g.DOM.blue.addEventListener("change", updateView, false);
+    g.DOM.range1.addEventListener("input", updateView, false);
+    g.DOM.range2.addEventListener("input", updateView, false);
 }, false);

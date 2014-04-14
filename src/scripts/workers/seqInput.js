@@ -20,7 +20,15 @@ var xhr2 = function(url, names, type, callback) {
     req.responseType = "text";
     req.addEventListener("load", function() {
         if (this.status === 200) {
-            callback(this.response, names, type);
+            if (/^\nNothing has been found\n$/g.test(this.response)) {//genbank response when not found
+                self.postMessage({status: "error"});
+                self.close();
+            } else {
+                callback(this.response, names, type);
+            }
+        } else if (/^4/.test(this.status)) {//e.g. 404 not found
+            self.postMessage({status: "error"});
+            self.close();
         }
     }, false);
     req.send();
@@ -30,6 +38,7 @@ var sequenceParser = function(string, names, type) {
     //treatment
     self.postMessage({typedArray: string, name: names, type: type});//for each sequence found, to be changed
     //when finished
+    self.postMessage({status: "done"});
     self.close();
 };
 
