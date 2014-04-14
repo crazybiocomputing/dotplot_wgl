@@ -152,10 +152,8 @@ var webgl = function(canvas, shaders) {
     var w = new Worker("/scripts/workers/histogram.js");
     w.addEventListener("message", function(message) {
         for (var i = 0; i < 256; i++) {
-            g.DOM.hist.children[i * 2].style["transform"] = "translate3d(0, -" + (message.data.histCountR[i] / message.data.maxCount.r * 200) + "px, 0)";
-            g.DOM.hist.children[i * 2 + 1].style["transform"] = "translate3d(0, -" + (message.data.histLogR[i] / message.data.maxLog.r * 200) + "px, 0)";
-            g.DOM.hist.children[i * 2].style["webkitTransform"] = "translate3d(0, -" + (message.data.histCountR[i] / message.data.maxCount.r * 200) + "px, 0)";
-            g.DOM.hist.children[i * 2 + 1].style["webkitTransform"] = "translate3d(0, -" + (message.data.histLogR[i] / message.data.maxLog.r * 200) + "px, 0)";
+            g.DOM.hist.children[i * 2].style[g.DOM.transform] = "translate3d(0, -" + (message.data.histCountR[i] / message.data.maxCount.r * 200) + "px, 0)";
+            g.DOM.hist.children[i * 2 + 1].style[g.DOM.transform] = "translate3d(0, -" + (message.data.histLogR[i] / message.data.maxLog.r * 200) + "px, 0)";
         }
     }, false);
     w.postMessage({pixels: pixels});

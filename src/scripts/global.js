@@ -29,11 +29,6 @@
 //miscellaneous functions and variables to be used across the whole application
 "use strict";
 
-//failing in strict mode
-//var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-//var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
-//var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
-
 var g = {};//custom "global" object
 g.dbVersion = 1;
 //internal database
@@ -59,6 +54,15 @@ g.DOM = {
     rm.classList.add("remove");
     rm.textContent = "×";
     g.DOM.liTempl.appendChild(rm.cloneNode(true));
+
+    //Determine which vendor prefixes to use
+    var prefixes = ["transform", "MozTransform", "WebkitTransform", "OTransform", "msTransform"];
+    for (var i = 0; i < prefixes.length; i++) {
+        if (typeof rm.style[prefixes[i]] !== "undefined") {
+            g.DOM.transform = prefixes[i];
+            break;
+        }
+    }
 })();
 
 g.DOMLoaded = false;
@@ -84,6 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
     g.DOM.red = channels[0];
     g.DOM.green = channels[1];
     g.DOM.blue = channels[2];
+    g.DOM.zoom = g.$("zoom");
 }, false);
 
 //loads scripts to be executed in order

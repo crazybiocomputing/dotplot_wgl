@@ -103,12 +103,15 @@ input[type="range"] {
 
 canvas {
     margin-bottom: -5px;
-    transition: -webkit-transform 0.5s linear;
-    transition: -moz-transform 0.5s linear;
-    transition: transform 0.5s linear;
+    transition: -webkit-transform 0.5s ease-in-out;
+    transition: -moz-transform 0.5s ease-in-out;
+    transition: transform 0.5s ease-in-out;
     -webkit-transform-origin: 0 0;
     -moz-transform-origin: 0 0;
     transform-origin: 0 0;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: pixelated;
 }
 
 #ghost-anchor {

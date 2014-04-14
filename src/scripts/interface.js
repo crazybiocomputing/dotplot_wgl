@@ -28,10 +28,15 @@
 
 window.addEventListener("DOMContentLoaded", function() {
     var canvas = g.$("canvas");
+    canvas.style[g.DOM.transform] = "translateZ(0) scale(1)";
 
     //declaring listeners
     canvas.addEventListener("click", function(e) {
-        console.log("pixel clicked at x: " + e.layerX + ", y: " + e.layerY);
+        console.log(e);
+        var rect = this.getBoundingClientRect();
+        var x = Math.round((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value);
+        var y = Math.round((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value);
+        console.log("pixel clicked at x: " + x + ", y: " + y);
     }, false);
 
     g.$("download").addEventListener("click", function(e) {
@@ -48,6 +53,10 @@ window.addEventListener("DOMContentLoaded", function() {
             ghostAnchor.href = canvas.toDataURL();
             ghostAnchor.click();
         }
+    }, false);
+
+    g.DOM.zoom.addEventListener("input", function(e) {
+        canvas.style[g.DOM.transform] = canvas.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1/e.target.value) + ")");
     }, false);
 
     g.$("clean-up").addEventListener("click", function() {

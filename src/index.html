@@ -20,7 +20,9 @@
         <select id='seq1'></select>
         <select id='seq2'></select><br>
         <label for='window'>Window size: </label>
-        <input type='number' id='window' min='1' step='1' value='15'><br>
+        <input type='number' id='window' min='1' step='1' value='15'>
+        <label for='zoom'>Zoom 1:</label>
+        <input type='number' id='zoom' min='1' step='1' value='1'><br>
         <input type='button' id='webgl' value='Render WebGL graph' disabled>
         <div id='container-hist'>
             <div id='hist'>
@@ -65,9 +67,9 @@
             <a data-target='new-sequence' class='internal-nav'>Back</a>
         </nav>
         <h1>Add a new sequence</h1>
-        <label>Name(s) of sequence(s) (optionnal): </label>
+        <label>Name(s) of sequence(s) (optional): </label>
         <input id='names' type='text'><br>
-        <label>Type of sequence(s) (optionnal): </label>
+        <label>Type of sequence(s) (optional): </label>
         <select id='type'>
             <option value='unknown'>Unknown</option>
             <option value='proteic'>Proteic</option>
