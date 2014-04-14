@@ -8,8 +8,8 @@ var norm = function(e, i, arr) {
 };
 var normProt = {};
 var normDNA = {};
-["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X"].forEach(norm, normProt);
-["A", "C", "G", "T", "X"].forEach(norm, normDNA);
+["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X", "*"].forEach(norm, normProt);
+["A", "B", "C", "D", "G", "H", "K", "M", "N", "R", "S", "T", "U", "V", "W", "X", "Y"].forEach(norm, normDNA);
 normDNA.U = normDNA.T;
 //console.log(normProt);
 //console.log(normDNA);

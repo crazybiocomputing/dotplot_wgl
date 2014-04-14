@@ -66,7 +66,7 @@ request.addEventListener("success", function(e) {
     transaction.addEventListener("complete", function() {
         console.log("objects stored in DB");
         localStorage.setItem("alreadyVisited", true);
-        g.loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
+        g.loadScripts(["scripts/sequences.js", "scripts/matrices.js"]);
     }, false);
 
 }, false);

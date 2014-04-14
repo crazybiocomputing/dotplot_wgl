@@ -11,13 +11,9 @@ body {
     color: #2e2e4e;
 }
 
-nav {
-    display: flex;
-}
-
 nav > a {
     margin: 0.1em;
-    padding: 0.4em;
+    padding: 0.3em;
     border: thin outset rgb(168, 168, 168);
     background: lightblue;
     text-align: center;
@@ -32,6 +28,8 @@ nav > a:active {
 section {
     position: fixed;
     overflow: auto;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     background: #eeeeee;
@@ -57,20 +55,32 @@ option[data-type="protein"] {
     background: lightblue;
 }
 
-#container-hist {
+.grow {
+    flex-grow: 1;
+}
+
+nav, .flex {
     display: flex;
+    flex-wrap: wrap;
+}
+
+.col {
+    flex-direction: column;
+}
+
+.around {
+    justify-content: space-around;
+}
+
+#container-hist {
     flex-wrap: wrap-reverse;
+    flex-grow: 1;
 }
 
 #container {
     overflow: auto;
     background: white;
     cursor: crosshair;
-    flex-grow: 1;
-}
-
-#hist {
-    margin: auto;
 }
 
 #svg {
@@ -89,6 +99,15 @@ line:nth-child(even) {
     transition-delay: 0.5s;
 }
 
+input {
+    cursor: pointer;
+}
+
+input[type="number"] {
+    width: 4em;
+    padding: 0;
+}
+
 input[type="range"] {
     padding: 0;
     margin: 0;
@@ -98,7 +117,6 @@ input[type="range"] {
 
 #container, #hist {
     min-width: 255px;
-    height: 400px;
 }
 
 canvas {
@@ -157,10 +175,11 @@ canvas {
 }
 
 #input-zone {
-    margin: 0.5em;
+    /*margin: 0.5em;
     padding: 0.5em;
     width: 97% !important;
-    height: 60% !important;
+    height: 60% !important;*/
+    flex-grow: 1;
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
 }

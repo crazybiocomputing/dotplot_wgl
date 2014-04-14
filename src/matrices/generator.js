@@ -50,10 +50,10 @@ var callback = function(error) {
     }
 };
 if (dnaMatrices.length) {
-    var dnaBuffer = bufferize(dnaMatrices, 5 * 5);
+    var dnaBuffer = bufferize(dnaMatrices, 17 * 17);
     fs.writeFile("dnaMatrices.texture", dnaBuffer, callback);
 }
 if (proteinMatrices.length) {
-    var proteinBuffer = bufferize(proteinMatrices, 23 * 23);
+    var proteinBuffer = bufferize(proteinMatrices, 24 * 24);
     fs.writeFile("proteinMatrices.texture", proteinBuffer, callback);
 }

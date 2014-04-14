@@ -44,8 +44,7 @@ g.currentView = {};
 g.preparedView = {};
 //DOM templates
 g.DOM = {
-    liTempl: document.createElement("li"),
-    optTempl: document.createElement("option")
+    liTempl: document.createElement("li")
 };
 
 (function() {
@@ -77,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
     g.DOM.li = g.$("sequence-list");
     g.DOM.opt1 = g.$("seq1");
     g.DOM.opt2 = g.$("seq2");
+    g.DOM.mat = g.$("mat");
     g.DOM.type = g.$("type");
     g.DOM.names = g.$("names");
     g.DOM.inputZone = g.$("input-zone");

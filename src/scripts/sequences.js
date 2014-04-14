@@ -70,7 +70,6 @@ g.seqMan.add = function(rawInput, proposedNames, type) {
                 }
                 break;
         }
-
     }, false);
     w.postMessage({
         rawInput: rawInput,
@@ -81,7 +80,7 @@ g.seqMan.add = function(rawInput, proposedNames, type) {
 
 g.seqMan.addDOM = function(sequences) {
     sequences.forEach(function(sequence) {
-        sequence.opt1 = g.DOM.optTempl.cloneNode(true);
+        sequence.opt1 = document.createElement("option");
         sequence.opt1.value = sequence.key;
         sequence.opt1.textContent = sequence.name;
         sequence.opt1.dataset.type = (sequence.protein ? "protein" : "dna");
@@ -127,9 +126,11 @@ g.seqMan.remove = function(key) {
         } else {
             if (g.DOMLoaded) {
                 g.seqMan.addDOM(g.seqMan.sequences);
+                g.matMan.updateDOM();
             } else {
                 document.addEventListener("DOMContentLoaded", function() {
                     g.seqMan.addDOM(g.seqMan.sequences);
+                    g.matMan.updateDOM();
                 }, false);
             }
             g.loadScripts(["scripts/viewer.js"]);

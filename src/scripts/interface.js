@@ -55,6 +55,16 @@ window.addEventListener("DOMContentLoaded", function() {
         }
     }, false);
 
+    g.$("fullscreen").addEventListener("click", function() {
+        if (document.body.requestFullscreen) {
+            document.body.requestFullscreen();
+        } else if (document.body.mozRequestFullScreen) {
+            document.body.mozRequestFullScreen();
+        } else if (document.body.webkitRequestFullscreen) {
+            document.body.webkitRequestFullscreen();
+        }
+    }, false);
+
     g.DOM.zoom.addEventListener("input", function(e) {
         canvas.style[g.DOM.transform] = canvas.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1/e.target.value) + ")");
     }, false);

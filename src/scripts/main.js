@@ -37,7 +37,7 @@ if (localStorage.getItem("alreadyVisited")) {
     request.addEventListener("success", function(e) {
         console.log("Success opening the DB");
         g.db = e.target.result;
-        g.loadScripts(["scripts/matrices.js", "scripts/sequences.js"]);
+        g.loadScripts(["scripts/sequences.js", "scripts/matrices.js"]);
     });
 
     request.addEventListener("upgradeneeded", function(e) {
