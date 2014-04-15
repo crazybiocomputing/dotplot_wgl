@@ -33,6 +33,9 @@ var g = {};//custom "global" object
 g.dbVersion = 1;
 //internal database
 g.db = null;
+//reference to WebGL context and program
+g.context = null;
+g.program = null;
 
 //sequence manager
 g.seqMgr = {};
@@ -73,6 +76,7 @@ g.$ = function(id) {
 
 document.addEventListener("DOMContentLoaded", function() {
     g.DOMLoaded = true;
+    g.DOM.canvas = g.$("canvas");
     g.DOM.li = g.$("sequence-list");
     g.DOM.opt1 = g.$("seq1");
     g.DOM.opt2 = g.$("seq2");
@@ -89,6 +93,10 @@ document.addEventListener("DOMContentLoaded", function() {
     g.DOM.green = channels[1];
     g.DOM.blue = channels[2];
     g.DOM.zoom = g.$("zoom");
+    g.DOM.windowSize = g.$("window");
+    g.DOM.windowSize.getValue = function() {
+        return Math.max(Math.round(this.value), 1);
+    };
 }, false);
 
 //loads scripts to be executed in order
@@ -102,13 +110,13 @@ g.loadScripts = function loadScripts(scriptURLs) {
 };
 
 //makes async requests
-g.xhr2 = function(url, type, callback) {
+g.xhr2 = function(url, type, callback, i) {
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.responseType = type;
     req.addEventListener("load", function() {
         if (this.status === 200) {
-            callback(this.response);
+            callback(this.response, i);
         }
     }, false);
     req.send();
@@ -117,13 +125,16 @@ g.xhr2 = function(url, type, callback) {
 //loads shaders from the server
 g.loadShaders = function(shaders, callback) {
     var responses = [];
-    var aggregateResponses = function(shaderText) {
-        responses.push(shaderText);
-        if (responses.length === shaders.length) {
+    for (var i = 0; i < shaders.length; i++) {
+        responses.push(null);
+    }
+    var aggregateResponses = function(shaderText, i) {
+        responses[i] = shaderText;
+        if (responses.every(function(r){return r !== null})) {
             callback(responses);
         }
     };
-    shaders.forEach(function(shader) {
-        g.xhr2("shaders/" + shader, "text", aggregateResponses);
+    shaders.forEach(function(shader, i) {
+        g.xhr2("shaders/" + shader, "text", aggregateResponses, i);
     });
 };

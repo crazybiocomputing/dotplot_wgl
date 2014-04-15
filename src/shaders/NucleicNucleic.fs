@@ -4,6 +4,8 @@ uniform sampler2D uSamplerMat;
 uniform sampler2D uSampler1;
 uniform sampler2D uSampler2;
 uniform int uWindow;
+uniform float uMax;
+uniform float uMin;
 uniform vec2 uSizes;
 
 void main() {
@@ -29,5 +31,15 @@ void main() {
             )).rrr / float(uWindow), 1.0);
         }
     }
+    if (color.r > uMax) {
+        color = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+    if (color.r < uMin) {
+        color = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    if (color.r >= uMin && color.r <= uMax) {
+        color = color * (uMax - uMin) + uMin;
+    }
+    //FIXME when uMax < uMin
     gl_FragColor = color;
 }

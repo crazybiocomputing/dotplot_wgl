@@ -39,6 +39,20 @@ window.addEventListener("DOMContentLoaded", function() {
         console.log("pixel clicked at x: " + x + ", y: " + y);
     }, false);
 
+    g.$("window").addEventListener("input", function() {
+        g.DOM.range1.value = 255;
+        g.DOM.range2.value = 0;
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
+        g.context.uniform1f(g.program.windowUniform, 1.0);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
+        g.context.uniform1f(g.program.windowUniform, 0.0);
+        g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
+        g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
+        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
+        g.renderHist();
+    });
+
     g.$("download").addEventListener("click", function(e) {
         e.preventDefault();
         var ghostAnchor = g.$("ghost-anchor");
@@ -167,8 +181,14 @@ window.addEventListener("DOMContentLoaded", function() {
         } else {
             g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
         }
-        //update WebGL view
+
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
+        g.context.uniform1f(g.program.windowUniform, g.DOM.range1.value / 255);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
+        g.context.uniform1f(g.program.windowUniform, g.DOM.range2.value / 255);
+        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
     };
+
     g.DOM.red.addEventListener("change", updateView, false);
     g.DOM.green.addEventListener("change", updateView, false);
     g.DOM.blue.addEventListener("change", updateView, false);

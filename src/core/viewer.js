@@ -27,7 +27,7 @@
 "use strict";
 
 //var STRING1 = "MAAPSRTTLMPPPFRLQLRLLILPILLLLRHDAVHAEPYSGGFGSSAVSSGGLGSVGIHIPGGGVGVITEARCPRVCSCTGLNVDCSHRGLTSVPRKISADVERLELQGNNLTVIYETDFQRLTKLRMLQLTDNQIHTIERNSFQDLVSLERLDISNNVITTVGRRVFKGAQSLRSLQLDNNQITCLDEHAFKGLVELEILTLNNNNLTSLPHNIFGGLGRLRALRLSDNPFACDCHLSWLSRFLRSATRLAPYTRCQSPSQLKGQNVADLHDQEFKCSGLTEHAPMECGAENSCPHPCRCADGIVDCREKSLTSVPVTLPDDTTDVRLEQNFITELPPKSFSSFRRLRRIDLSNNNISRIAHDALSGLKQLTTLVLYGNKIKDLPSGVFKGLGSLRLLLLNANEISCIRKDAFRDLHSLSLLSLYDNNIQSLANGTFDAMKSMKTVHLAKNPFICDCNLRWLADYLHKNPIETSGARCESPKRMHRRRIESLREEKFKCSWGELRMKLSGECRMDSDCPAMCHCEGTTVDCTGRRLKEIPRDIPLHTTELLLNDNELGRISSDGLFGRLPHLVKLELKRNQLTGIEPNAFEGASHIQELQLGENKIKEISNKMFLGLHQLKTLNLYDNQISCVMPGSFEHLNSLTSLNLASNPFNCNCHLAWFAECVRKKSLNGGAARCGAPSKVRDVQIKDLPHSEFKCSSENSEGCLGDGYCPPSCTCTGTVVACSRNQLKEIPRGIPAETSELYLESNEIEQIHYERIRHLRSLTRLDLSNNQITILSNYTFANLTKLSTLIISYNKLQCLQRHALSGLNNLRVVSLHGNRISMLPEGSFEDLKSLTHIALGSNPLYCDCGLKWFSDWIKLDYVEPGIARCAEPEQMKDKLILSTPSSSFVCRGRVRNDILAKCNACFEQPCQNQAQCVALPQREYQCLCQPGYHGKHCEFMIDACYGNPCRNNATCTVLEEGRFSCQCAPGYTGARCETNIDDCLGEIKCQNNATCIDGVESYKCECQPGFSGEFCDTKIQFCSPEFNPCANGAKCMDHFTHYSCDCQAGFHGTNCTDNIDDCQNHMCQNGGTCVDGINDYQCRCPDDYTGKYCEGHNMISMMYPQTSPCQNHECKHGVCFQPNAQGSDYLCRCHPGYTGKWCEYLTSISFVHNNSFVELEPLRTRPEANVTIVFSSAEQNGILMYDGQDAHLAVELFNGRIRVSYDVGNHPVSTMYSFEMVADGKYHAVELLAIKKNFTLRVDRGLARSIINEGSNDYLKLTTPMFLGGLPVDPAQQAYKNWQIRNLTSFKGCMKEVWINHKLVDFGNAQRQQKITPGCALLEGEQQEEEDDEQDFMDETPHIKEEPVDPCLENKCRRGSRCVPNSNARDGYQCKCKHGQRGRYCDQGEGSTEPPTVTAASTCRKEQVREYYTENDCRSRQPLKYAKCVGGCGNQCCAAKIVRRRKVRMVCSNNRKYIKNLDIVRKCGCTKKCYY";
-var STRING1 = "ABCDCBDCCDBDBCAABCBCAABAABCDCADCADDABBACDABADDCADABBADAC";
+var STRING1 = "ABCDCBDCCDBDBCAABCBCAABAAAABAACBCBAACBDBDCCDBCDCBA";
 STRING1 += STRING1 + STRING1 + STRING1;
 var STRING2 = STRING1 + STRING1;
 
@@ -54,100 +54,120 @@ matrix[96] = 255;
 
 console.timeEnd("load");
 
-var webgl = function(canvas, shaders) {
+var webgl = function(shaders) {
     var w = STRING1.length;
     console.time("1");
 
-    var WINDOW_SIZE = Math.floor(g.$("window").value);
+    g.DOM.range1.value = 255;
+    g.DOM.range2.value = 0;
+    //FIXME update background color accordingly
+
     console.log("sequence 1: " + w);
     console.log("sequence 2: " + h);
-    canvas.width = w;
-    canvas.height = h;
-    canvas.style.width = w + "px";
-    canvas.style.height = h + "px";
-
-    var gl = canvas.getContext(
+    g.DOM.canvas.width = w;
+    g.DOM.canvas.height = h;
+    g.DOM.canvas.style.width = w + "px";
+    g.DOM.canvas.style.height = h + "px";
+    g.context = g.DOM.canvas.getContext(
         "webgl", {alpha: false, preserveDrawingBuffer: true}
-    ) || canvas.getContext(
+    ) || g.DOM.canvas.getContext(
         "experimental-webgl", {alpha: false, preserveDrawingBuffer: true}
     );
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    var program = gl.createProgram();
 
-    for (var i = 0; i < shaders.length; i++) {
-        var sh = gl.createShader(i % 2 === 0 ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER);
-        gl.shaderSource(sh, shaders[i]);
-        gl.compileShader(sh);
-        gl.attachShader(program, sh);
+    g.context.clearColor(1.0, 1.0, 1.0, 1.0);
+    g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
+    g.program = g.context.createProgram();
+
+    for (var i = 0; i < 2; i++) {
+        var sh = g.context.createShader(i === 0 ? g.context.VERTEX_SHADER : g.context.FRAGMENT_SHADER);
+        g.context.shaderSource(sh, shaders[i]);
+        g.context.compileShader(sh);
+        g.context.attachShader(g.program, sh);
     }
 
-    gl.linkProgram(program);
-    gl.useProgram(program);
+    g.context.linkProgram(g.program);
+    g.context.useProgram(g.program);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    g.context.bindBuffer(g.context.ARRAY_BUFFER, g.context.createBuffer());
+    g.context.bufferData(g.context.ARRAY_BUFFER, new Float32Array([
         -1,  1,  1,  1,  1, -1,
         -1,  1,  1, -1, -1, -1
-    ]), gl.STATIC_DRAW);
-    program.vertexPosAttrib = gl.getAttribLocation(program, "aVertexPosition");
-    gl.enableVertexAttribArray(program.vertexPosArray);
-    gl.vertexAttribPointer(program.vertexPosAttrib, 2, gl.FLOAT, false, 0, 0);
+    ]), g.context.STATIC_DRAW);
+    g.program.vertexPosAttrib = g.context.getAttribLocation(g.program, "aVertexPosition");
+    g.context.enableVertexAttribArray(g.program.vertexPosArray);
+    g.context.vertexAttribPointer(g.program.vertexPosAttrib, 2, g.context.FLOAT, false, 0, 0);
 
-    program.umat = gl.getUniformLocation(program, "uSamplerMat");
-    gl.uniform1i(program.umat, 0);
-    program.utex1 = gl.getUniformLocation(program, "uSampler1");
-    gl.uniform1i(program.utex1, 1);
-    program.utex2 = gl.getUniformLocation(program, "uSampler2");
-    gl.uniform1i(program.utex2, 2);
+    g.program.umat = g.context.getUniformLocation(g.program, "uSamplerMat");
+    g.context.uniform1i(g.program.umat, 0);
+    g.program.utex1 = g.context.getUniformLocation(g.program, "uSampler1");
+    g.context.uniform1i(g.program.utex1, 1);
+    g.program.utex2 = g.context.getUniformLocation(g.program, "uSampler2");
+    g.context.uniform1i(g.program.utex2, 2);
 
-    program.sizesUniform = gl.getUniformLocation(program, "uSizes");
-    gl.uniform2f(program.sizesUniform, w, h);
+    g.program.sizesUniform = g.context.getUniformLocation(g.program, "uSizes");
+    g.context.uniform2f(g.program.sizesUniform, w, h);
 
-    program.windowUniform = gl.getUniformLocation(program, "uWindow");
-    gl.uniform1i(program.windowUniform, WINDOW_SIZE);
+    g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
+    g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
 
-    var texCoordLocation = gl.getAttribLocation(program, "aTexCoord");
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
+    g.context.uniform1f(g.program.windowUniform, g.DOM.range1.value / 255);
+
+    g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
+    g.context.uniform1f(g.program.windowUniform, g.DOM.range2.value / 255);
+
+    var texCoordLocation = g.context.getAttribLocation(g.program, "aTexCoord");
+    g.context.bindBuffer(g.context.ARRAY_BUFFER, g.context.createBuffer());
+    g.context.bufferData(g.context.ARRAY_BUFFER, new Float32Array([
         0, 0, 1, 0, 1, 1,
         0, 0, 1, 1, 0, 1
-    ]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(texCoordLocation);
-    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+    ]), g.context.STATIC_DRAW);
+    g.context.enableVertexAttribArray(texCoordLocation);
+    g.context.vertexAttribPointer(texCoordLocation, 2, g.context.FLOAT, false, 0, 0);
 
-    var mat = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, mat);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 5, 5, 0, gl.RGBA, gl.UNSIGNED_BYTE, matrix);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    var mat = g.context.createTexture();
+    g.context.activeTexture(g.context.TEXTURE0);
+    g.context.bindTexture(g.context.TEXTURE_2D, mat);
+    g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.RGBA, 5, 5, 0, g.context.RGBA, g.context.UNSIGNED_BYTE, matrix);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
 
-    var tex1 = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, tex1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture1);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    var tex1 = g.context.createTexture();
+    g.context.activeTexture(g.context.TEXTURE1);
+    g.context.bindTexture(g.context.TEXTURE_2D, tex1);
+    g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.LUMINANCE, w, 1, 0, g.context.LUMINANCE, g.context.UNSIGNED_BYTE, texture1);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
 
-    var tex2 = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE2);
-    gl.bindTexture(gl.TEXTURE_2D, tex2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture2);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    var tex2 = g.context.createTexture();
+    g.context.activeTexture(g.context.TEXTURE2);
+    g.context.bindTexture(g.context.TEXTURE_2D, tex2);
+    g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.LUMINANCE, h, 1, 0, g.context.LUMINANCE, g.context.UNSIGNED_BYTE, texture2);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
+    g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
 
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    g.context.drawArrays(g.context.TRIANGLES, 0, 6);
 
-    //Histogram
-    var pixels = new Uint8Array((w + 1 - WINDOW_SIZE) * (h + 1 - WINDOW_SIZE) * 4);
-    gl.readPixels(0, 0, (w + 1 - WINDOW_SIZE), (h + 1 - WINDOW_SIZE), gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    g.renderHist();
+
+    var webglInput = g.$("webgl");
+    webglInput.value = "Render WebGL graph";
+    webglInput.disabled = false;
+
+    console.timeEnd("1");
+};
+
+g.renderHist = function() {
+    //FIXME problem with window size (white pixels)
+    var wS = g.DOM.windowSize.getValue();
+    var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
+    g.context.readPixels(0, 0, (g.DOM.canvas.width + 1 - wS), (g.DOM.canvas.height + 1 - wS), g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
 
     var w = new Worker("core/workers/histogram.js");
     w.addEventListener("message", function(message) {
@@ -157,31 +177,30 @@ var webgl = function(canvas, shaders) {
         }
     }, false);
     w.postMessage({pixels: pixels});
-
-    var webglInput = g.$("webgl");
-    webglInput.value = "Render WebGL graph";
-    webglInput.disabled = false;
-
-    console.timeEnd("1");
 };
 
-var doWhenDOMHasLoaded = function() {
-    var canvas = g.$("canvas");
-
-    g.loadShaders(["DotPlot.vs", "NucleicNucleic.fs"], function(shaders) {
+var initWebGL = function() {
+    g.loadShaders(["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicProteic.fs"], function(shaders) {
         var webglInput = g.$("webgl");
-        webglInput.addEventListener("click", function(e) {
-            e.preventDefault();
+        webglInput.addEventListener("click", function() {
             webglInput.disabled = true;
             webglInput.value = "Rendering…";
-            webgl(canvas, shaders);
+            if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type) {
+                if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic") {
+                    webgl([shaders[0], shaders[1]]);
+                } else {
+                    webgl([shaders[0], shaders[3]]);
+                }
+            } else {
+                webgl([shaders[0], shaders[2]]);
+            }
         }, false);
         webglInput.disabled = false;
     });
 };
 
 if (g.DOMLoaded) {
-    doWhenDOMHasLoaded();
+    initWebGL();
 } else {
-    window.addEventListener("DOMContentLoaded", doWhenDOMHasLoaded, false);
+    document.addEventListener("DOMContentLoaded", initWebGL, false);
 }
