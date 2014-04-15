@@ -1,0 +1,23 @@
+import os
+
+lignepourrie="   A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  Z  X  *"
+
+for fich in os.listdir('/net/cremi/querichepiotai/matrice_pdp/matrice/matrice_emboss/'):
+    passer=False
+    print fich
+    fileent=open('/net/cremi/querichepiotai/matrice_pdp/matrice/matrice_emboss/'+fich,"r")
+    filesor=open(fich+".protein.csv","w")
+    lignes=fileent.readlines()
+    for line in lignes:
+        line2=""
+        if line[0]=='A':
+            passer=True
+        if line==lignes[len(lignes)-1]:
+            passer=False
+        if passer==True:
+            for i in range(len(line)):
+                if (i>1 and i<len(line)-5):
+                    line2+=line[i]
+            filesor.write(line2)
+            filesor.write("\n")            
+            

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!--<html manifest='manifest.appcache'>-->
+<html>
+<head>
+    <title>Test</title>
+    <meta name='viewport' content='width=device-width'>
+    <meta charset='utf-8'>
+    <link rel='stylesheet' href='stylesheets/style.css'>
+    <script src='scripts/global.js'></script>
+    <script src='scripts/interface.js'></script>
+    <script src='scripts/main.js'></script>
+</head>
+<body>
+    <section id='main' class='active-section'>
+        <nav>
+            <a data-target='settings' class='internal-nav'>Settings</a>
+            <a data-target='sequences'  class='internal-nav'>Sequences</a>
+        </nav>
+        <h1>Dotplot_wgl</h1>
+        <div class='flex around'>
+            <select id='seq1'></select>
+            <select id='seq2'></select>
+            <select id='mat'></select>
+            <input type='button' id='webgl' value='Render WebGL graph' disabled>
+        </div>
+        <div class='flex around'>
+            <div>
+                <label for='window'>Window size: </label>
+                <input type='number' id='window' min='1' step='1' value='15'>
+            </div>
+            <div>
+                <label for='zoom'>Zoom 1:</label>
+                <input type='number' id='zoom' min='1' step='1' value='1'>
+            </div>
+            <input type='button' id='download' value='Download as png file'>
+            <input type='button' id='fullscreen' value='View fullscreen'>
+        </div>
+        <div id='container-hist' class='flex'>
+            <div id='hist' class='flex col'>
+                <div>Channels:</div>
+                <div>
+                    <input type='checkbox' id='red' class='channel' checked>
+                    <label for='red'>red</label>
+                </div>
+                <div>
+                    <input type='checkbox' id='green' class='channel' checked>
+                    <label for='green'>green</label>
+                </div>
+                <div>
+                    <input type='checkbox' id='blue' class='channel' checked>
+                    <label for='blue'>blue</label>
+                </div>
+                <input type='range' min='0' max='255' value='255' class='range'>
+                <svg id='svg' viewBox='0 0 256 200' preserveAspectRatio='none' class='grow'></svg>
+                <input type='range' min='0' max='255' value='0' class='range'>
+            </div>
+            <div id='container' class='grow'>
+                <canvas id='canvas' width='0' height='0' ></canvas>
+            </div>
+        </div>
+        <div id='picking'>
+            <input type='range' class='picking-slider' min='1' max='1' value='1'><br>
+            <div id='picking-sequences'></div>
+            <input type='range' class='picking-slider' min='1' max='1' value='1'><br>
+        </div>
+        <a id='ghost-anchor'></a>
+    </section>
+    <section id='settings'>
+        <nav>
+            <a data-target='settings' class='internal-nav'>Back</a>
+        </nav>
+        <h1>Settings</h1>
+        <div>
+            <label for='clean-up'>Remove all cached data and reload: </label>
+            <input type='button' id='clean-up' value='Remove all'>
+        </div>
+        <div>
+            <label for='clean-up'>Use notifications: </label>
+            <input type='button' id='notifications' value='Request permission'>
+        </div>
+    </section>
+    <section id='sequences'>
+        <nav>
+            <a data-target='sequences' class='internal-nav'>Back</a>
+            <a data-target='new-sequence' class='internal-nav'>Add a new sequence</a>
+        </nav>
+        <h1>List of available sequences</h1>
+        <ul id='sequence-list'></ul>
+    </section>
+    <section id='new-sequence'>
+        <nav>
+            <a data-target='new-sequence' class='internal-nav'>Back</a>
+        </nav>
+        <h1>Add a new sequence</h1>
+        <label>Name(s) of sequence(s) (optional): </label>
+        <input id='names' type='text'><br>
+        <label>Type of sequence(s) (optional): </label>
+        <select id='type'>
+            <option value='unknown'>Unknown</option>
+            <option value='proteic'>Proteic</option>
+            <option value='nucleic'>Nucleic</option>
+        </select><br>
+        <textarea id='input-zone' placeholder='Either input sequence, NCBI gi number or UniProt accession number here or drag and drop FASTA file'></textarea><br>
+        <input id='input-submit' type='button' value='Submit'>
+    </section>
+</body>
+</html>

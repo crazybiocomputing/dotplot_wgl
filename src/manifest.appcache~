@@ -1,0 +1,23 @@
+CACHE MANIFEST
+# v0.1
+
+NETWORK:
+*
+
+CACHE:
+#
+#stylesheets/style.css
+#
+#scripts/firstLoad.js
+#scripts/global.js
+#scripts/interface.js
+#scripts/main.js
+#scripts/matrices.js
+#scripts/sequences.js
+#scripts/viewer.js
+#
+#shaders/DNADNA.fragment.shader
+#shaders/dotplot.vertex.shader
+#
+#dnaMatrices.texture
+#proteinMatrices.texture
