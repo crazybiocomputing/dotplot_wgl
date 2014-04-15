@@ -50,7 +50,7 @@ var callback = function(error) {
     }
 };
 if (dnaMatrices.length) {
-    var dnaBuffer = bufferize(dnaMatrices, 17 * 17);
+    var dnaBuffer = bufferize(dnaMatrices, 16 * 16);
     fs.writeFile("dnaMatrices.texture", dnaBuffer, callback);
 }
 if (proteinMatrices.length) {
