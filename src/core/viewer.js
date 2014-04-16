@@ -27,9 +27,8 @@
 "use strict";
 
 //var STRING1 = "MAAPSRTTLMPPPFRLQLRLLILPILLLLRHDAVHAEPYSGGFGSSAVSSGGLGSVGIHIPGGGVGVITEARCPRVCSCTGLNVDCSHRGLTSVPRKISADVERLELQGNNLTVIYETDFQRLTKLRMLQLTDNQIHTIERNSFQDLVSLERLDISNNVITTVGRRVFKGAQSLRSLQLDNNQITCLDEHAFKGLVELEILTLNNNNLTSLPHNIFGGLGRLRALRLSDNPFACDCHLSWLSRFLRSATRLAPYTRCQSPSQLKGQNVADLHDQEFKCSGLTEHAPMECGAENSCPHPCRCADGIVDCREKSLTSVPVTLPDDTTDVRLEQNFITELPPKSFSSFRRLRRIDLSNNNISRIAHDALSGLKQLTTLVLYGNKIKDLPSGVFKGLGSLRLLLLNANEISCIRKDAFRDLHSLSLLSLYDNNIQSLANGTFDAMKSMKTVHLAKNPFICDCNLRWLADYLHKNPIETSGARCESPKRMHRRRIESLREEKFKCSWGELRMKLSGECRMDSDCPAMCHCEGTTVDCTGRRLKEIPRDIPLHTTELLLNDNELGRISSDGLFGRLPHLVKLELKRNQLTGIEPNAFEGASHIQELQLGENKIKEISNKMFLGLHQLKTLNLYDNQISCVMPGSFEHLNSLTSLNLASNPFNCNCHLAWFAECVRKKSLNGGAARCGAPSKVRDVQIKDLPHSEFKCSSENSEGCLGDGYCPPSCTCTGTVVACSRNQLKEIPRGIPAETSELYLESNEIEQIHYERIRHLRSLTRLDLSNNQITILSNYTFANLTKLSTLIISYNKLQCLQRHALSGLNNLRVVSLHGNRISMLPEGSFEDLKSLTHIALGSNPLYCDCGLKWFSDWIKLDYVEPGIARCAEPEQMKDKLILSTPSSSFVCRGRVRNDILAKCNACFEQPCQNQAQCVALPQREYQCLCQPGYHGKHCEFMIDACYGNPCRNNATCTVLEEGRFSCQCAPGYTGARCETNIDDCLGEIKCQNNATCIDGVESYKCECQPGFSGEFCDTKIQFCSPEFNPCANGAKCMDHFTHYSCDCQAGFHGTNCTDNIDDCQNHMCQNGGTCVDGINDYQCRCPDDYTGKYCEGHNMISMMYPQTSPCQNHECKHGVCFQPNAQGSDYLCRCHPGYTGKWCEYLTSISFVHNNSFVELEPLRTRPEANVTIVFSSAEQNGILMYDGQDAHLAVELFNGRIRVSYDVGNHPVSTMYSFEMVADGKYHAVELLAIKKNFTLRVDRGLARSIINEGSNDYLKLTTPMFLGGLPVDPAQQAYKNWQIRNLTSFKGCMKEVWINHKLVDFGNAQRQQKITPGCALLEGEQQEEEDDEQDFMDETPHIKEEPVDPCLENKCRRGSRCVPNSNARDGYQCKCKHGQRGRYCDQGEGSTEPPTVTAASTCRKEQVREYYTENDCRSRQPLKYAKCVGGCGNQCCAAKIVRRRKVRMVCSNNRKYIKNLDIVRKCGCTKKCYY";
-var STRING1 = "ABCD";
-STRING1 += STRING1;
-var STRING2 = STRING1;// + STRING1;
+var STRING1 = "ABCDABCDDCBADCBAAAAAAA";
+var STRING2 = STRING1 + STRING1;
 
 var w = STRING1.length,
     h = STRING2.length;
@@ -43,14 +42,6 @@ for (var i = 0; i < texture1.length; i++) {
 for (var i = 0; i < texture2.length; i++) {
     texture2[i] = (STRING2.charCodeAt(i) - 65) * (255 / 5);
 }
-
-//Identity matrix
-var matrix = new Uint8Array(5 * 5 * 4);
-matrix[0] = 255;
-matrix[24] = 255;
-matrix[48] = 255;
-matrix[72] = 255;
-matrix[96] = 255;
 
 console.timeEnd("load");
 
@@ -106,15 +97,28 @@ var webgl = function(params) {
 
     g.program.sizesUniform = g.context.getUniformLocation(g.program, "uSizes");
     g.context.uniform2f(g.program.sizesUniform, w, h);
+    
+    var tex = params.nucleicMatrix ? g.nucleicTex : g.proteicTex;
+    var texWidth = params.nucleicMatrix ? 16 : 24;
+    g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffset");
+    g.context.uniform1f(g.program.sizesUniform, params.offset / (tex.length / texWidth));
+    g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffsetNext");
+    g.context.uniform1f(g.program.sizesUniform, (params.offset + texWidth) / (tex.length / texWidth));
 
     g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
     g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
 
     g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
-    g.context.uniform1f(g.program.windowUniform, g.DOM.range1.value / 255);
-
+    g.context.uniform1f(g.program.windowUniform, 1.0);
     g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
-    g.context.uniform1f(g.program.windowUniform, g.DOM.range2.value / 255);
+    g.context.uniform1f(g.program.windowUniform, 0.0);
+
+    g.program.windowUniform = g.context.getUniformLocation(g.program, "uRed");
+    g.context.uniform1i(g.program.windowUniform, 1);
+    g.program.windowUniform = g.context.getUniformLocation(g.program, "uGreen");
+    g.context.uniform1i(g.program.windowUniform, 1);
+    g.program.windowUniform = g.context.getUniformLocation(g.program, "uBlue");
+    g.context.uniform1i(g.program.windowUniform, 1);
 
     var texCoordLocation = g.context.getAttribLocation(g.program, "aTexCoord");
     g.context.bindBuffer(g.context.ARRAY_BUFFER, g.context.createBuffer());
@@ -128,7 +132,7 @@ var webgl = function(params) {
     var mat = g.context.createTexture();
     g.context.activeTexture(g.context.TEXTURE0);
     g.context.bindTexture(g.context.TEXTURE_2D, mat);
-    g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.RGBA, 5, 5, 0, g.context.RGBA, g.context.UNSIGNED_BYTE, matrix);
+    g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.LUMINANCE, texWidth, tex.length / texWidth, 0, g.context.LUMINANCE, g.context.UNSIGNED_BYTE, tex);
     g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
     g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
     g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
@@ -177,6 +181,7 @@ g.renderHist = function() {
 
     var w = new Worker("core/workers/histogram.js");
     w.addEventListener("message", function(message) {
+        console.log(message.data);
         for (var i = 0; i < 256; i++) {
             g.DOM.hist.children[i * 2].style[g.DOM.transform] = "translate3d(0, -" + (message.data.histCountR[i] / message.data.maxCount.r * 200) + "px, 0)";
             g.DOM.hist.children[i * 2 + 1].style[g.DOM.transform] = "translate3d(0, -" + (message.data.histLogR[i] / message.data.maxLog.r * 200) + "px, 0)";
@@ -191,20 +196,21 @@ var initWebGL = function() {
         webglInput.addEventListener("click", function() {
             webglInput.disabled = true;
             webglInput.value = "Rendering…";
+            var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
+            g.DOM.red.disabled = false;
+            g.DOM.green.disabled = false;
+            g.DOM.blue.disabled = false;
             if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type) {
-                g.DOM.red.disabled = true;
-                g.DOM.green.disabled = true;
-                g.DOM.blue.disabled = true;
                 if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic") {
-                    webgl({vertex: shaders[0], fragment: shaders[1]});
+                    webgl({vertex: shaders[0], fragment: shaders[1], nucleicMatrix: true, offset: offset});
                 } else {
-                    webgl({vertex: shaders[0], fragment: shaders[3]});
+                    g.DOM.red.disabled = true;
+                    g.DOM.green.disabled = true;
+                    g.DOM.blue.disabled = true;
+                    webgl({vertex: shaders[0], fragment: shaders[3], nucleicMatrix: false, offset: offset});
                 }
             } else {
-                g.DOM.red.disabled = false;
-                g.DOM.green.disabled = false;
-                g.DOM.blue.disabled = false;
-                webgl({vertex: shaders[0], fragment: shaders[2]});
+                webgl({vertex: shaders[0], fragment: shaders[2], nucleicMatrix: false, offset: offset});
             }
         }, false);
         webglInput.disabled = false;

@@ -130,6 +130,13 @@ g.xhr2 = function(url, type, callback, i) {
     req.send();
 };
 
+g.xhr2("matrices/NucleicMatrices.texture","arraybuffer",function(r){
+    g.nucleicTex=new Uint8Array(r);
+});
+g.xhr2("matrices/ProteicMatrices.texture","arraybuffer",function(r){
+    g.proteicTex=new Uint8Array(r);
+});
+
 //loads shaders from the server
 g.loadShaders = function(shaders, callback) {
     var responses = [];

@@ -172,8 +172,8 @@ window.addEventListener("DOMContentLoaded", function() {
     g.DOM.hist.appendChild(fragment);
 
     var updateView = function() {
-        var v1 = g.DOM.range1.value / 2.55,
-            v2 = g.DOM.range2.value / 2.55,
+        var v1    = g.DOM.range1.value / 2.55,
+            v2    = g.DOM.range2.value / 2.55,
             color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
         if (v1 >= v2) {
             g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
@@ -181,6 +181,12 @@ window.addEventListener("DOMContentLoaded", function() {
             g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
         }
 
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uRed");
+        g.context.uniform1i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uGreen");
+        g.context.uniform1i(g.program.windowUniform, g.DOM.green.checked ? 1 : 0);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uBlue");
+        g.context.uniform1i(g.program.windowUniform, g.DOM.blue.checked ? 1 : 0);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
         g.context.uniform1f(g.program.windowUniform, g.DOM.range1.value / 255);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");

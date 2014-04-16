@@ -47,13 +47,14 @@ self.addEventListener("message", function(message) {
         histLogR:   histLogR,
         histLogG:   histLogG,
         histLogB:   histLogB,
-    }, [
+    }/*, [
         histCountR.buffer,
         histCountG.buffer,
         histCountB.buffer,
         histLogR.buffer,
         histLogG.buffer,
         histLogB.buffer
-    ]);
+    ]*/);
+    //NOTE: check support for transferable objects
     self.close();
 }, false);

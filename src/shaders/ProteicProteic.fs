@@ -4,6 +4,10 @@ uniform sampler2D uSamplerMat;
 uniform sampler2D uSampler1;
 uniform sampler2D uSampler2;
 uniform int uWindow;
+uniform float uMax;
+uniform float uMin;
+uniform float uOffset;
+uniform float uOffsetNext;
 uniform vec2 uSizes;
 
 void main() {
@@ -25,9 +29,10 @@ void main() {
                 ).r,
                 texture2D(
                     uSampler2, vTexCoord.yx - float(i + 1 - uWindow) * onePixel.yx
-                ).r
-            )).rrr / float(uWindow), 1.0);
+                ).r * (uOffsetNext - uOffset) + uOffset
+            )).rrr, 1.0);
         }
     }
-    gl_FragColor = color;
+    color /= float(uWindow);
+    gl_FragColor = color / (uMax - uMin) - uMin / (uMax - uMin);
 }
