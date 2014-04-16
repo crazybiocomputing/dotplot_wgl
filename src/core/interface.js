@@ -40,8 +40,7 @@ window.addEventListener("DOMContentLoaded", function() {
     }, false);
 
     g.$("window").addEventListener("input", function() {
-        g.DOM.range1.value = 255;
-        g.DOM.range2.value = 0;
+        g.DOM.reinitHist();
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
         g.context.uniform1f(g.program.windowUniform, 1.0);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");

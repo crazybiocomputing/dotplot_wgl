@@ -39,7 +39,7 @@ g.matMgr.updateDOM = function() {
     } catch (err) {
         return;
     }
-    if (g.matMgr.currentType !== type) {
+    if (this.currentType !== type) {
         g.matMgr.list.forEach(function(mat) {
             if (mat.dataset.type === type) {
                 g.DOM.mat.appendChild(mat);
@@ -49,7 +49,7 @@ g.matMgr.updateDOM = function() {
                 } catch (err) {}
             }
         });
-        g.matMgr.currentType = type;
+        this.currentType = type;
     }
 };
 

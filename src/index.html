@@ -26,7 +26,7 @@
         <div class='flex around'>
             <div>
                 <label for='window'>Window size: </label>
-                <input type='number' id='window' min='1' step='1' value='15'>
+                <input type='number' id='window' min='1' step='1' value='1'>
             </div>
             <div>
                 <label for='zoom'>Zoom 1:</label>
@@ -37,18 +37,18 @@
         </div>
         <div id='container-hist' class='flex'>
             <div id='hist' class='flex col'>
-                <div>Channels:</div>
+                <div>Reading frame offsets:</div>
                 <div>
-                    <input type='checkbox' id='red' class='channel' checked>
-                    <label for='red'>red</label>
+                    <input type='checkbox' id='red' class='channel' checked disabled>
+                    <label for='red'>0</label>
                 </div>
                 <div>
-                    <input type='checkbox' id='green' class='channel' checked>
-                    <label for='green'>green</label>
+                    <input type='checkbox' id='green' class='channel' checked disabled>
+                    <label for='green'>1</label>
                 </div>
                 <div>
-                    <input type='checkbox' id='blue' class='channel' checked>
-                    <label for='blue'>blue</label>
+                    <input type='checkbox' id='blue' class='channel' checked disabled>
+                    <label for='blue'>2</label>
                 </div>
                 <input type='range' min='0' max='255' value='255' class='range'>
                 <svg id='svg' viewBox='0 0 256 200' preserveAspectRatio='none' class='grow'></svg>

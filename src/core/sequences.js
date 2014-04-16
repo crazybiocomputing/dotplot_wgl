@@ -98,8 +98,8 @@ g.seqMgr.addDOM = function(sequences) {
 g.seqMgr.remove = function(key) {
     var removed;
     for (var i = 0; i < g.seqMgr.list.length; i++) {
-        if (g.seqMgr.list[i].key === key) {
-            removed = g.seqMgr.list.splice(i, 1)[0];
+        if (this.list[i].key === key) {
+            removed = this.list.splice(i, 1)[0];
             break;
         }
     }

@@ -27,9 +27,9 @@
 "use strict";
 
 //var STRING1 = "MAAPSRTTLMPPPFRLQLRLLILPILLLLRHDAVHAEPYSGGFGSSAVSSGGLGSVGIHIPGGGVGVITEARCPRVCSCTGLNVDCSHRGLTSVPRKISADVERLELQGNNLTVIYETDFQRLTKLRMLQLTDNQIHTIERNSFQDLVSLERLDISNNVITTVGRRVFKGAQSLRSLQLDNNQITCLDEHAFKGLVELEILTLNNNNLTSLPHNIFGGLGRLRALRLSDNPFACDCHLSWLSRFLRSATRLAPYTRCQSPSQLKGQNVADLHDQEFKCSGLTEHAPMECGAENSCPHPCRCADGIVDCREKSLTSVPVTLPDDTTDVRLEQNFITELPPKSFSSFRRLRRIDLSNNNISRIAHDALSGLKQLTTLVLYGNKIKDLPSGVFKGLGSLRLLLLNANEISCIRKDAFRDLHSLSLLSLYDNNIQSLANGTFDAMKSMKTVHLAKNPFICDCNLRWLADYLHKNPIETSGARCESPKRMHRRRIESLREEKFKCSWGELRMKLSGECRMDSDCPAMCHCEGTTVDCTGRRLKEIPRDIPLHTTELLLNDNELGRISSDGLFGRLPHLVKLELKRNQLTGIEPNAFEGASHIQELQLGENKIKEISNKMFLGLHQLKTLNLYDNQISCVMPGSFEHLNSLTSLNLASNPFNCNCHLAWFAECVRKKSLNGGAARCGAPSKVRDVQIKDLPHSEFKCSSENSEGCLGDGYCPPSCTCTGTVVACSRNQLKEIPRGIPAETSELYLESNEIEQIHYERIRHLRSLTRLDLSNNQITILSNYTFANLTKLSTLIISYNKLQCLQRHALSGLNNLRVVSLHGNRISMLPEGSFEDLKSLTHIALGSNPLYCDCGLKWFSDWIKLDYVEPGIARCAEPEQMKDKLILSTPSSSFVCRGRVRNDILAKCNACFEQPCQNQAQCVALPQREYQCLCQPGYHGKHCEFMIDACYGNPCRNNATCTVLEEGRFSCQCAPGYTGARCETNIDDCLGEIKCQNNATCIDGVESYKCECQPGFSGEFCDTKIQFCSPEFNPCANGAKCMDHFTHYSCDCQAGFHGTNCTDNIDDCQNHMCQNGGTCVDGINDYQCRCPDDYTGKYCEGHNMISMMYPQTSPCQNHECKHGVCFQPNAQGSDYLCRCHPGYTGKWCEYLTSISFVHNNSFVELEPLRTRPEANVTIVFSSAEQNGILMYDGQDAHLAVELFNGRIRVSYDVGNHPVSTMYSFEMVADGKYHAVELLAIKKNFTLRVDRGLARSIINEGSNDYLKLTTPMFLGGLPVDPAQQAYKNWQIRNLTSFKGCMKEVWINHKLVDFGNAQRQQKITPGCALLEGEQQEEEDDEQDFMDETPHIKEEPVDPCLENKCRRGSRCVPNSNARDGYQCKCKHGQRGRYCDQGEGSTEPPTVTAASTCRKEQVREYYTENDCRSRQPLKYAKCVGGCGNQCCAAKIVRRRKVRMVCSNNRKYIKNLDIVRKCGCTKKCYY";
-var STRING1 = "ABCDCBDCCDBDBCAABCBCAABAAAABAACBCBAACBDBDCCDBCDCBA";
-STRING1 += STRING1 + STRING1 + STRING1;
-var STRING2 = STRING1 + STRING1;
+var STRING1 = "ABCD";
+STRING1 += STRING1;
+var STRING2 = STRING1;// + STRING1;
 
 var w = STRING1.length,
     h = STRING2.length;
@@ -54,13 +54,11 @@ matrix[96] = 255;
 
 console.timeEnd("load");
 
-var webgl = function(shaders) {
+var webgl = function(params) {
     var w = STRING1.length;
     console.time("1");
 
-    g.DOM.range1.value = 255;
-    g.DOM.range2.value = 0;
-    //FIXME update background color accordingly
+    g.DOM.reinitHist();
 
     console.log("sequence 1: " + w);
     console.log("sequence 2: " + h);
@@ -78,12 +76,14 @@ var webgl = function(shaders) {
     g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
     g.program = g.context.createProgram();
 
-    for (var i = 0; i < 2; i++) {
-        var sh = g.context.createShader(i === 0 ? g.context.VERTEX_SHADER : g.context.FRAGMENT_SHADER);
-        g.context.shaderSource(sh, shaders[i]);
-        g.context.compileShader(sh);
-        g.context.attachShader(g.program, sh);
-    }
+    var vertex = g.context.createShader(g.context.VERTEX_SHADER);
+    g.context.shaderSource(vertex, params.vertex);
+    g.context.compileShader(vertex);
+    g.context.attachShader(g.program, vertex);
+    var fragment = g.context.createShader(g.context.FRAGMENT_SHADER);
+    g.context.shaderSource(fragment, params.fragment);
+    g.context.compileShader(fragment);
+    g.context.attachShader(g.program, fragment);
 
     g.context.linkProgram(g.program);
     g.context.useProgram(g.program);
@@ -167,7 +167,13 @@ g.renderHist = function() {
     //FIXME problem with window size (white pixels)
     var wS = g.DOM.windowSize.getValue();
     var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
-    g.context.readPixels(0, 0, (g.DOM.canvas.width + 1 - wS), (g.DOM.canvas.height + 1 - wS), g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
+    g.context.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
+    console.log(pixels);
+    console.log(pixels[0]);
+    console.log(pixels[1]);
+    console.log(pixels[2]);
+    console.log(pixels[3]);
+    console.log(pixels[4]);
 
     var w = new Worker("core/workers/histogram.js");
     w.addEventListener("message", function(message) {
@@ -186,13 +192,19 @@ var initWebGL = function() {
             webglInput.disabled = true;
             webglInput.value = "Rendering…";
             if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type) {
+                g.DOM.red.disabled = true;
+                g.DOM.green.disabled = true;
+                g.DOM.blue.disabled = true;
                 if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic") {
-                    webgl([shaders[0], shaders[1]]);
+                    webgl({vertex: shaders[0], fragment: shaders[1]});
                 } else {
-                    webgl([shaders[0], shaders[3]]);
+                    webgl({vertex: shaders[0], fragment: shaders[3]});
                 }
             } else {
-                webgl([shaders[0], shaders[2]]);
+                g.DOM.red.disabled = false;
+                g.DOM.green.disabled = false;
+                g.DOM.blue.disabled = false;
+                webgl({vertex: shaders[0], fragment: shaders[2]});
             }
         }, false);
         webglInput.disabled = false;

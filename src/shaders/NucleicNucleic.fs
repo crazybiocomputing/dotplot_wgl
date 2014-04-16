@@ -28,18 +28,9 @@ void main() {
                 texture2D(
                     uSampler2, vTexCoord.yx - float(i + 1 - uWindow) * onePixel.yx
                 ).r
-            )).rrr / float(uWindow), 1.0);
+            )).rrr, 1.0);
         }
     }
-    if (color.r > uMax) {
-        color = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-    if (color.r < uMin) {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
-    }
-    if (color.r >= uMin && color.r <= uMax) {
-        color = color * (uMax - uMin) + uMin;
-    }
-    //FIXME when uMax < uMin
-    gl_FragColor = color;
+    color /= float(uWindow);
+    gl_FragColor = color / (uMax - uMin) - uMin / (uMax - uMin);
 }

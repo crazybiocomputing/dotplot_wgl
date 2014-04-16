@@ -47,11 +47,11 @@ section {
     transform: translate3d(0, 0, 0);
 }
 
-option[data-type="dna"] {
+option[data-type="nucleic"] {
     background: lightgreen;
 }
 
-option[data-type="protein"] {
+option[data-type="proteic"] {
     background: lightblue;
 }
 
@@ -151,11 +151,11 @@ canvas {
     align-items: center;
 }
 
-#sequence-list > li[data-type="dna"] {
+#sequence-list > li[data-type="nucleic"] {
     background: lightgreen;
 }
 
-#sequence-list > li[data-type="protein"] {
+#sequence-list > li[data-type="proteic"] {
     background: lightblue;
 }
 
