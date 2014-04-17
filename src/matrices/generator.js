@@ -46,7 +46,7 @@ var callback = function(error) {
         console.log("error:");
         console.log(error);
     } else {
-        console.log("file saved!");
+        console.log("texture saved!");
     }
 };
 if (dnaMatrices.length) {
