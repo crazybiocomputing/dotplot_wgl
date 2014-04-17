@@ -39,8 +39,7 @@ window.addEventListener("DOMContentLoaded", function() {
         console.log("pixel clicked at x: " + x + ", y: " + y);
     }, false);
 
-    g.$("window").addEventListener("input", function() {
-        g.DOM.reinitHist();
+    g.DOM.windowSize.addEventListener("input", function() {
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
         g.context.uniform1f(g.program.windowUniform, 1.0);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");

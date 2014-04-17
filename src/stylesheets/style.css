@@ -47,6 +47,10 @@ section {
     transform: translate3d(0, 0, 0);
 }
 
+section > * {
+    flex-shrink: 0;
+}
+
 option[data-type="nucleic"] {
     background: lightgreen;
 }
@@ -74,13 +78,19 @@ nav, .flex {
 
 #container-hist {
     flex-wrap: wrap-reverse;
-    flex-grow: 1;
+    justify-content: center;
+    flex-shrink: 1;
 }
 
 #container {
     overflow: auto;
     background: white;
     cursor: crosshair;
+    flex: 1 1 255px;
+}
+
+#hist {
+    flex: 0 0 255px;
 }
 
 #svg {
@@ -113,10 +123,6 @@ input[type="range"] {
     margin: 0;
     border: 0;
     width: 100%;
-}
-
-#container, #hist {
-    min-width: 255px;
 }
 
 canvas {
