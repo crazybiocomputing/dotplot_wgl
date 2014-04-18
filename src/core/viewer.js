@@ -171,7 +171,6 @@ g.renderHist = function() {
     var wS = g.DOM.windowSize.getValue();
     var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
     g.context.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
-    console.log(pixels);
     console.log(pixels[0]);
     console.log(pixels[1]);
     console.log(pixels[2]);

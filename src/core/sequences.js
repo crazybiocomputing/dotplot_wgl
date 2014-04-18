@@ -36,8 +36,9 @@ g.seqMgr.addClean = function(cleaned) {
         var seqMetaOS = trans.objectStore("sequencesMetadata");
         var seqTemp = {
             name: cleaned.name,
-            protein: cleaned.protein,
+            protein: (cleaned.type === "proteic"),
             size: cleaned.typedArray.length,
+            comment: cleaned.comment,
             key: e.target.result
         };
         var request2 = seqMetaOS.add(seqTemp);
@@ -56,13 +57,13 @@ g.seqMgr.add = function(rawInput, proposedNames, type) {
         switch (message.data.status) {
             case "error":
                 if (Notification && Notification.permission === "granted") {
-                    new Notification("Error", {body: "Could not load a sequence"});
+                    new Notification("Error", {body: message.data.message});
                 }
                 break;
             case "sequence":
                 count++;
                 console.log(message.data);
-                //g.seqMgr.addClean(message.data);
+                g.seqMgr.addClean(message.data);
                 break;
             case "done":
                 if (Notification && Notification.permission === "granted") {

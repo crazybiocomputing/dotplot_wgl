@@ -107,7 +107,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
     g.$("sequence-list").addEventListener("click", function(e) {
         if (e.target.tagName === "DIV") {
-            g.seqMan.remove(parseInt(e.target.dataset.key));
+            g.seqMgr.remove(parseInt(e.target.dataset.key));
         }
     }, false);
 
@@ -133,7 +133,7 @@ window.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         g.DOM.inputZone.classList.remove("hovering");
         Array.prototype.forEach.call(e.dataTransfer.files, function(file) {
-            g.seqMan.add(file, g.DOM.names.value, g.DOM.type.value);
+            g.seqMgr.add(file, g.DOM.names.value, g.DOM.type.value);
         });
         cleanAfterInput();
     }, false);
@@ -141,7 +141,7 @@ window.addEventListener("DOMContentLoaded", function() {
     g.$("input-submit").addEventListener("click", function(e) {
         e.stopPropagation();
         e.preventDefault();
-        g.seqMan.add(g.DOM.inputZone.value, g.DOM.names.value, g.DOM.type.value);
+        g.seqMgr.add(g.DOM.inputZone.value, g.DOM.names.value, g.DOM.type.value);
         cleanAfterInput();
     }, false);
 
