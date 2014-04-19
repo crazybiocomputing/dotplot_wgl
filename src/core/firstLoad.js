@@ -24,8 +24,6 @@
  * Mathieu Schaeffer
  */
 
-"use strict";
-
 //TODO Provide demo sequences
 var demos = [
     {typedArray: new Uint8Array(80), name: "demo nucleic sequence", protein: false},
@@ -42,13 +40,8 @@ request.addEventListener("error", function(e) {
 }, false);
 
 request.addEventListener("success", function(e) {
-    console.log("Success opening the DB");
     g.db = e.target.result;
-    var transaction = g.db.transaction(
-        ["sequencesMetadata", "sequences"],
-        "readwrite"
-    );
-
+    var transaction = g.db.transaction(["sequencesMetadata", "sequences"], "readwrite");
     var sequencesMetadataOS = transaction.objectStore("sequencesMetadata");
     var sequencesOS = transaction.objectStore("sequences");
     demos.forEach(function(demo) {
@@ -62,24 +55,20 @@ request.addEventListener("success", function(e) {
             });
         }, false);
     });
-
     transaction.addEventListener("complete", function() {
-        console.log("objects stored in DB");
+        console.log("demo objects stored in DB");
         localStorage.setItem("alreadyVisited", true);
-        g.loadScripts(["core/sequences.js", "core/matrices.js"]);
+        sequences();
+        matrices();
     }, false);
-
 }, false);
 
 request.addEventListener("upgradeneeded", function(e) {
-    console.log("Upgrading the DB...");
     g.db = e.target.result;
-
     if (g.db.objectStoreNames.contains("sequencesMetadata")) {
         g.db.deleteObjectStore("sequencesMetadata");
     }
     g.db.createObjectStore("sequencesMetadata", {keyPath: "key"});
-
     if (g.db.objectStoreNames.contains("sequences")) {
         g.db.deleteObjectStore("sequences");
     }

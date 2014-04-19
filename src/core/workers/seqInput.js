@@ -1,6 +1,6 @@
-/* jshint worker: true */
-/* global FileReaderSync: false */
-
+/*jshint worker: true*/
+/*global FileReaderSync: false*/
+/*jshint globalstrict: true*/
 "use strict";
 
 var norm = function(e, i, arr) {
@@ -15,14 +15,14 @@ normDNA.U = normDNA.T;
 var xhr2 = function(url, names, type, callback) {
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
-    req.responseType = "text";
+    req.responseType = "blob";
     req.addEventListener("load", function() {
         if (this.status === 200) {
             if (/^\nNothing has been found\n$/g.test(this.response)) {//genbank response when not found
                 self.postMessage({status: "error"});
                 self.close();
             } else {
-                callback(this.response, names, type);
+                callback(new Blob([this.response]), names, type);
             }
         } else if (/^4/.test(this.status)) {//e.g. 404 not found
             self.postMessage({status: "error", message: "could not load file"});
@@ -45,7 +45,6 @@ var sequenceParser = function(wholeSequence, i) {
         self.close();
     }
     //determine name with "names" array, otherwise, comment-based
-    console.log(this.names[i]);
     self.postMessage({
         typedArray:
             (type === "proteic") ?
@@ -76,8 +75,8 @@ var sequenceLoader = function(id, website, names, type) {
     switch (website) {
         case "NCBI":
             xhr2(
-                "//www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?dopt=fasta&retmode=text&val=" + id,
-                names, type, sequenceSeparator
+                "//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&rettype=fasta&retmode=text&id=" + id,
+                names, type, fileToString
             );
             break;
         case "UniProt":
@@ -91,14 +90,6 @@ var sequenceLoader = function(id, website, names, type) {
 };
 
 var fileToString = function(file, names, type) {
-    if (type === "unknown") {
-        if (file.name.match(/\.(fna|ffn|frn)$/i)) {
-            type = "nucleic";
-        } else if (file.name.match(/\.faa$/i)) {
-            type = "proteic";
-        }
-    }
-    names.push(file.name.replace(/\.[^\.]*$/, ""));
     var reader = new FileReaderSync();
     sequenceSeparator(reader.readAsText(file), names, type);
 };
@@ -109,6 +100,15 @@ self.addEventListener("message", function(message) {
         return Boolean(name);
     });
     if (typeof message.data.rawInput !== "string") {//A File was passed
+        var type = message.data.type;
+        if (type === "unknown") {
+            if (message.data.rawInput.name.match(/\.(fna|ffn|frn)$/i)) {
+                type = "nucleic";
+            } else if (message.data.rawInput.name.match(/\.faa$/i)) {
+                type = "proteic";
+            }
+        }
+        names.push(message.data.rawInput.name.replace(/\.[^\.]*$/, ""));
         fileToString(message.data.rawInput, names, message.data.type);
     } else {
         if (message.data.rawInput.match(/^\d*$/)) {//NCBI gi number

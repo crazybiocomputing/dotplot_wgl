@@ -1,5 +1,5 @@
-/* jshint worker: true */
-
+/*jshint worker: true*/
+/*jshint globalstrict: true*/
 "use strict";
 
 var maxCount = {rgb: null, rg: null, gb: null, rb: null, r: null, g: null, b: null};

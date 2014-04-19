@@ -24,15 +24,12 @@
  * Mathieu Schaeffer
  */
 
-"use strict";
-
-window.addEventListener("DOMContentLoaded", function() {
+g.executeAfterDOM(function() {
     var canvas = g.$("canvas");
     canvas.style[g.DOM.transform] = "translateZ(0) scale(1)";
 
     //declaring listeners
     canvas.addEventListener("click", function(e) {
-        console.log(e);
         var rect = this.getBoundingClientRect();
         var x = Math.round((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value);
         var y = Math.round((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value);
@@ -61,7 +58,6 @@ window.addEventListener("DOMContentLoaded", function() {
                 ghostAnchor.click();
             });
         } catch(error) {
-            console.log("canvas.toBlob not supported");
             ghostAnchor.href = canvas.toDataURL();
             ghostAnchor.click();
         }
@@ -198,4 +194,4 @@ window.addEventListener("DOMContentLoaded", function() {
     g.DOM.blue.addEventListener("change", updateView, false);
     g.DOM.range1.addEventListener("input", updateView, false);
     g.DOM.range2.addEventListener("input", updateView, false);
-}, false);
+});

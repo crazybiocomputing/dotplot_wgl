@@ -6,13 +6,14 @@
     "quotmark": "double",
     "undef": true,
     "unused": true,
-    "strict": true,
     "trailing": true,
     "debug": true,
     "esnext": true,
-    "globalstrict": true,
     "globals": {
         "g": false,
+        "sequences": false,
+        "matrices": false,
+        "viewer": false,
         "Notification": false
     },
     "lastsemic": true,
