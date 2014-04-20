@@ -1,0 +1,21 @@
+{
+    "name": "{{name}}",
+    "version": "{{version}}",
+    "description": "{{description}}",
+    "icons": {
+        "128": "icons/icon-128.png"
+    },
+    "appcache_path": "cache.manifest",
+    "fullscreen": "true",
+    "permissions": {
+        "storage": {
+            "description": "Required to store sequences between sessions"
+        },
+        "systemXHR": {
+            "description": "Required to load sequences from Internet databases"
+        },
+        "desktop-notification": {
+            "description": "Required to display sequence import statuses"
+        }
+    }
+}

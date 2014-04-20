@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html manifest='manifest.appcache'>
 <head>
-    <title>Test</title>
-    <meta name='viewport' content='width=device-width'>
     <meta charset='utf-8'>
+    <title>{{name}} | {{description}}</title>
+    <meta name='viewport' content='width=device-width'>
     <link rel='stylesheet' href='stylesheets/style.css'>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <script src='core/1-global.js'></script>
     <script src='core/2-interface.js'></script>
     <script src='core/3-viewer.js'></script>
@@ -15,10 +17,10 @@
 <body>
     <section id='main' class='active-section'>
         <nav>
-            <a data-target='settings' class='internal-nav'>Settings</a>
+            <a data-target='settings' class='internal-nav'>Settings and Documentation</a>
             <a data-target='sequences'  class='internal-nav'>Sequences</a>
         </nav>
-        <h1>Dotplot_wgl</h1>
+        <h1>{{name}}</h1>
         <div class='flex around'>
             <select id='seq1'></select>
             <select id='seq2'></select>
@@ -56,8 +58,10 @@
                 <svg id='svg' viewBox='0 0 256 200' preserveAspectRatio='none' class='grow'></svg>
                 <input type='range' min='0' max='255' value='0' class='range'>
             </div>
-            <div id='container' class='grow'>
-                <canvas id='canvas' width='0' height='0' ></canvas>
+            <div id='container'>
+                <div id='inner-container'>
+                    <canvas id='canvas' width='0' height='0' ></canvas>
+                </div>
             </div>
         </div>
         <div id='picking'>
@@ -80,30 +84,34 @@
             <label for='clean-up'>Use notifications: </label>
             <input type='button' id='notifications' value='Request permission'>
         </div>
+        <div>
+            <label for='install'>Install as a WebApp</label>
+            <input type='button' id='install' value='Install'>
+        </div>
     </section>
     <section id='sequences'>
         <nav>
             <a data-target='sequences' class='internal-nav'>Back</a>
-            <a data-target='new-sequence' class='internal-nav'>Add a new sequence</a>
         </nav>
-        <h1>List of available sequences</h1>
-        <ul id='sequence-list'></ul>
-    </section>
-    <section id='new-sequence'>
-        <nav>
-            <a data-target='new-sequence' class='internal-nav'>Back</a>
-        </nav>
-        <h1>Add a new sequence</h1>
-        <label>Name(s) of sequence(s) (optional): </label>
-        <input id='names' type='text'><br>
-        <label>Type of sequence(s) (optional): </label>
-        <select id='type'>
-            <option value='unknown'>Unknown</option>
-            <option value='proteic'>Proteic</option>
-            <option value='nucleic'>Nucleic</option>
-        </select><br>
-        <textarea id='input-zone' placeholder='Either input sequence, NCBI gi number or UniProt accession number here or drag and drop FASTA file'></textarea><br>
-        <input id='input-submit' type='button' value='Submit'>
+        <div class='flex grow'>
+            <div class='flex col grow'>
+                <h1>Add a new sequence</h1>
+                <label>Name(s) of sequence(s) (optional): </label>
+                <input id='names' type='text'><br>
+                <label>Type of sequence(s) (optional): </label>
+                <select id='type'>
+                    <option value='unknown'>Unknown</option>
+                    <option value='proteic'>Proteic</option>
+                    <option value='nucleic'>Nucleic</option>
+                </select><br>
+                <textarea id='input-zone' placeholder='Either input sequence, NCBI gi number or UniProt accession number here or drag and drop FASTA file'></textarea><br>
+                <input id='input-submit' type='button' value='Submit'>
+            </div>
+            <div class='flex col grow'>
+                <h1>List of available sequences</h1>
+                <ul id='sequence-list'></ul>
+            </div>
+        </div>
     </section>
 </body>
 </html>

@@ -23,6 +23,7 @@
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
  */
+
 /*jshint -W079 */
 
 /*exported matrices*/

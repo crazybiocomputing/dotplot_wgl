@@ -7,7 +7,12 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON("package.json"),
         clean: {
             begin: ["dist/<%= pkg.version %>/"],
-            end: ["dist/<%= pkg.version %>/**/*.css", "!**/*.min.css"]
+            end: [
+                "dist/<%= pkg.version %>/**/*.css",
+                "!**/*.min.css",
+                //"dist/<%= pkg.version %>/**/*.js",
+                "!**/*.min.js"
+            ]
         },
         copy: {
             build: {
@@ -15,7 +20,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "src",
-                        src: ["**/*.html", "**/*.js", "**/*.texture", "**/*.vs", "**/*.fs"],
+                        src: ["**/*.html", "**/*.js", "**/*.texture", "**/*.vs", "**/*.fs", "**/*.webapp"],
                         dest: "dist/<%= pkg.version %>/"
                     }
                 ]
@@ -23,8 +28,8 @@ module.exports = function(grunt) {
         },
         uglify: {
             options: {
-                banner: "/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today('yyyy-mm-dd') %> */\n<%= pkg.license %>",
-                sourceMap: true,
+                banner: "/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today('yyyy-mm-dd') %> */\n<%= pkg.license %>\n",
+                //sourceMap: true,
                 report: "gzip"
             },
             core: {
@@ -69,13 +74,26 @@ module.exports = function(grunt) {
                 replacements: [
                     {from: /href='(.*).css'/g, to: "href='$1.min.css'"},
                     {from: /\n    <script.*><\/script>/g, to: ""},
-                    {from: /(<\/head>)/g, to: "    <script src='core/<%= pkg.name %>.min.js' async></script>\n$1"}
+                    {from: /(<\/head>)/g, to: "    <script src='core/<%= pkg.name %>.min.js' async></script>\n$1"},
+                    {from: /\{\{name\}\}/g, to: "<%= pkg.name %>"},
+                    {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"}
                 ]
             },
             js: {
                 src: ["dist/<%= pkg.version %>/core/*.js"],
                 overwrite: true,
-                replacements: [{from: /(".*).js/g, to: "$1.min.js"}]
+                replacements: [
+                    {from: /(".*).js/g, to: "$1.min.js"}
+                ]
+            },
+            webapp: {
+                src: ["dist/<%= pkg.version %>/manifest.webapp"],
+                overwrite: true,
+                replacements: [
+                    {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"},
+                    {from: /\{\{name\}\}/g, to: "<%= pkg.name %>"},
+                    {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"}
+                ]
             },
             appcache : {
                 src: ["dist/<%= pkg.version %>/manifest.appcache"],
@@ -100,5 +118,5 @@ module.exports = function(grunt) {
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache"]);
+    grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache", "replace:webapp"]);
 };

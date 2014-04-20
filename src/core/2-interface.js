@@ -64,12 +64,12 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.$("fullscreen").addEventListener("click", function() {
-        if (document.body.requestFullscreen) {
-            document.body.requestFullscreen();
-        } else if (document.body.mozRequestFullScreen) {
-            document.body.mozRequestFullScreen();
-        } else if (document.body.webkitRequestFullscreen) {
-            document.body.webkitRequestFullscreen();
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
         }
     }, false);
 
@@ -92,6 +92,16 @@ g.executeAfterDOM(function() {
         }
     }, false);
 
+    g.$("install").addEventListener("click", function() {
+        var req = navigator.mozApps.install(location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp");
+        req.addEventListener("success", function() {
+            alert("Installed successfully. Tou can now close this tab and open your application like any other application");
+        }, false);
+        req.addEventListener("error", function(err) {
+            alert("Error: " + err.name);
+        }, false);
+    }, false);
+
     //nav buttons
     var nav = function(e) {
         e.preventDefault();
@@ -111,7 +121,6 @@ g.executeAfterDOM(function() {
         g.DOM.names.value = "";
         g.DOM.type.value = "unknown";
         g.DOM.inputZone.value = "";
-        g.$("new-sequence").classList.remove("active-section");
     };
     g.DOM.inputZone.addEventListener("dragover", function(e) {
         e.stopPropagation();

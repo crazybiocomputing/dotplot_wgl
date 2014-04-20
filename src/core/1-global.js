@@ -70,7 +70,6 @@ var g = {
         }, false);
         req.send();
     },
-
 };
 
 (function() {
@@ -88,15 +87,16 @@ var g = {
             break;
         }
     }
-})();
+}());
 
 g.executeAfterDOM(function() {
     g.DOM.canvas     = g.$("canvas");
     g.DOM.li         = g.$("sequence-list");
-    g.DOM.opt1       = g.$("seq1");
-    g.DOM.opt2       = g.$("seq2");
-    g.DOM.mat        = g.$("mat");
-    g.DOM.type       = g.$("type");
+    var selects  = document.getElementsByTagName("select");
+    g.DOM.opt1       = selects[0];
+    g.DOM.opt2       = selects[1];
+    g.DOM.mat        = selects[2];
+    g.DOM.type       = selects[3];
     g.DOM.names      = g.$("names");
     g.DOM.inputZone  = g.$("input-zone");
     g.DOM.hist       = g.$("svg");

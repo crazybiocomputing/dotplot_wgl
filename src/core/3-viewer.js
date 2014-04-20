@@ -211,9 +211,9 @@ var viewer = function() {
                     if (g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic") {
                         webgl({vertex: shaders[0], fragment: shaders[1], nucleicMatrix: true, offset: offset});
                     } else {
-                        g.DOM.red.disabled = true;
+                        g.DOM.red.disabled   = true;
                         g.DOM.green.disabled = true;
-                        g.DOM.blue.disabled = true;
+                        g.DOM.blue.disabled  = true;
                         webgl({vertex: shaders[0], fragment: shaders[3], nucleicMatrix: false, offset: offset});
                     }
                 } else {

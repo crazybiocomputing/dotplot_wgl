@@ -85,12 +85,22 @@ nav, .flex {
     overflow: auto;
     background: white;
     cursor: crosshair;
-    flex: 1 1 255px;
-    max-height: 400px;
+    flex: 1 1 15em;
+}
+
+#inner-container {
+    height: 20em;
 }
 
 #hist {
-    flex: 0 0 255px;
+    flex: 0 0 15em;
+    align-self: center;
+}
+
+@media (max-width: 31em) {
+    #container-hist {
+        margin-left: 1.5em;
+    }
 }
 
 #svg {
@@ -142,9 +152,17 @@ canvas {
     display: none;
 }
 
+#sequences > div {
+    flex-shrink: 1;
+}
+
 #sequence-list {
     padding: 0;
+    margin : 0;
     list-style: none;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 #sequence-list > li {
@@ -155,6 +173,7 @@ canvas {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    overflow: auto;
 }
 
 #sequence-list > li[data-type="nucleic"] {
@@ -181,10 +200,6 @@ canvas {
 }
 
 #input-zone {
-    /*margin: 0.5em;
-    padding: 0.5em;
-    width: 97% !important;
-    height: 60% !important;*/
     flex-grow: 1;
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
