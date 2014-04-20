@@ -78,6 +78,7 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.$("clean-up").addEventListener("click", function() {
+        window.indexedDB.deleteDatabase("dotplot");
         localStorage.removeItem("alreadyVisited");
         location.reload(true);
     }, false);

@@ -59,11 +59,12 @@ var xhr2 = function(url, names, type, callback) {
 };
 
 var sequenceParser = function(wholeSequence, i) {
-    var type = this.type;
-    var parts = wholeSequence.split(/\n(?![>;])/m);
-    parts[1] = parts[1].replace(/\s/g, "");
+    var type     = this.type;
+    var comment  = wholeSequence.match(/^[>;][\s\S]*?\n(?![>;])/);
+    comment = (comment) ? comment[0] : "";
+    var sequence = wholeSequence.match(/^[^>;][\s\S]*/m)[0].replace(/\s/g, "");
     if (type === "unknown") {
-        type = /[EFILOPQZ\*]/i.test(parts[1]) ? "proteic" : "unknown";
+        type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
     }
     //Possible to add new tests (stats, comment-based, etc)
     if (type === "unknown") {
@@ -74,11 +75,11 @@ var sequenceParser = function(wholeSequence, i) {
     self.postMessage({
         typedArray:
             (type === "proteic") ?
-            stringToTypedArray(parts[1].toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X"), normProt) :
-            stringToTypedArray(parts[1].toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N"), normDNA),
+            stringToTypedArray(sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X"), normProt) :
+            stringToTypedArray(sequence.toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N"), normDNA),
         name: this.names[i],
         type: type,
-        comment: parts[0],
+        comment: comment,
         status: "sequence"
     });
 };
@@ -92,7 +93,7 @@ var stringToTypedArray = function(sequence, dict) {
 };
 
 var sequenceSeparator = function(string, names, type) {
-    string.match(/^[>;][\s\S]*?^[^>;]*$/m).forEach(sequenceParser, {names: names, type: type});
+    string.match(/([>;][^\n]*\n)*[^>;]*/g).forEach(sequenceParser, {names: names, type: type});
     self.postMessage({status: "done"});
     self.close();
 };

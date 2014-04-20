@@ -23,8 +23,14 @@
         </nav>
         <h1>{{name}}</h1>
         <div class='flex around'>
-            <select id='seq1'></select>
-            <select id='seq2'></select>
+            <div>
+                <select id='seq1'></select>
+                <input type='button' data-target='sequences'  class='internal-nav' value='+'>
+            </div>
+            <div>
+                <select id='seq2'></select>
+                <input type='button' data-target='sequences'  class='internal-nav' value='+'>
+            </div>
             <select id='mat'></select>
             <input type='button' id='webgl' value='Render WebGL graph' disabled>
         </div>
@@ -78,16 +84,16 @@
         </nav>
         <h1>Settings</h1>
         <div>
-            <label for='clean-up'>Remove all cached data and reload: </label>
-            <input type='button' id='clean-up' value='Remove all'>
+            <input type='button' id='clean-up' value='Clean data'>
+            <label for='clean-up'>Remove all cached data and reload</label>
         </div>
         <div>
-            <label for='clean-up'>Use notifications: </label>
             <input type='button' id='notifications' value='Request permission'>
+            <label for='clean-up'>Use notifications</label>
         </div>
         <div>
-            <label for='install'>Install as a WebApp</label>
             <input type='button' id='install' value='Install'>
+            <label for='install'>Install as an Open Web App</label>
         </div>
     </section>
     <section id='sequences'>

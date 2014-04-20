@@ -25,32 +25,38 @@
  */
 
 (function() {
-    if (localStorage.getItem("alreadyVisited")) {
-        var request = window.indexedDB.open("dotplot", g.dbVersion);
-        request.addEventListener("error", function(e) {
-            console.log("Error opening the DB");
-            console.log(e);
-            alert("Error opening the DB");
-        }, false);
-
-        request.addEventListener("success", function(e) {
-            g.db = e.target.result;
-            sequences();
-            matrices();
-        });
-
-        request.addEventListener("upgradeneeded", function(e) {
-            g.db = e.target.result;
-            if (!g.db.objectStoreNames.contains("sequencesMetadata")) {
-                g.db.createObjectStore("sequencesMetadata", {keyPath: "key", autoIncrement: true});
-            }
-            if (!g.db.objectStoreNames.contains("sequences")) {
-                g.db.createObjectStore("sequences", {keyPath: "key"});
-            }
-        });
-    } else {
+    var firstLoad = function() {
         var script = document.createElement("script");
         script.src = "core/firstLoad.js";
         document.head.appendChild(script);
-    }
+    };
+    var request = window.indexedDB.open("dotplot", g.dbVersion);
+    request.addEventListener("error", function(e) {
+        console.log("Error opening the DB");
+        console.log(e);
+        alert("Error opening the DB");
+        //FUTURE implement sequence management without IndexedDB
+        /*sequences();
+        matrices();
+        firstLoad();*/
+    }, false);
+
+    request.addEventListener("success", function(e) {
+        g.db = e.target.result;
+        sequences();
+        matrices();
+        if (!localStorage.getItem("alreadyVisited")) {
+            firstLoad();
+        }
+    });
+
+    request.addEventListener("upgradeneeded", function(e) {
+        g.db = e.target.result;
+        if (!g.db.objectStoreNames.contains("sequencesMetadata")) {
+            g.db.createObjectStore("sequencesMetadata", {keyPath: "key"});
+        }
+        if (!g.db.objectStoreNames.contains("sequences")) {
+            g.db.createObjectStore("sequences", {autoIncrement: true});
+        }
+    });
 })();

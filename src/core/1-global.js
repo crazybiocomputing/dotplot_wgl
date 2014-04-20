@@ -73,16 +73,17 @@ var g = {
 };
 
 (function() {
-    var rm = document.createElement("div");
-    g.DOM.liTempl.appendChild(rm.cloneNode(true));
-    rm.classList.add("remove");
-    rm.textContent = "×";
-    g.DOM.liTempl.appendChild(rm.cloneNode(true));
+    var div = document.createElement("div");
+    g.DOM.liTempl.appendChild(div.cloneNode(true));
+    g.DOM.liTempl.appendChild(div.cloneNode(true));
+    div.classList.add("remove");
+    div.textContent = "×";
+    g.DOM.liTempl.appendChild(div.cloneNode(true));
 
     //Determine which vendor prefixes to use
     var prefixes = ["transform", "MozTransform", "WebkitTransform", "OTransform", "msTransform"];
     for (var i = 0; i < prefixes.length; i++) {
-        if (typeof rm.style[prefixes[i]] !== "undefined") {
+        if (typeof div.style[prefixes[i]] !== "undefined") {
             g.DOM.transform = prefixes[i];
             break;
         }

@@ -74,11 +74,17 @@ nav, .flex {
 
 .around {
     justify-content: space-around;
+    padding: 0.2em;
 }
 
 #container-hist {
     flex-wrap: wrap-reverse;
     justify-content: center;
+}
+@media (max-width: 31em) {
+    #container-hist {
+        margin-left: 1.5em;
+    }
 }
 
 #container {
@@ -95,12 +101,6 @@ nav, .flex {
 #hist {
     flex: 0 0 15em;
     align-self: center;
-}
-
-@media (max-width: 31em) {
-    #container-hist {
-        margin-left: 1.5em;
-    }
 }
 
 #svg {
@@ -152,6 +152,19 @@ canvas {
     display: none;
 }
 
+#settings > div {
+    padding: 0.2em;
+    background: #dddddd;
+    margin: 0.2em;
+    border: thin solid #bbbbbb;
+    border-radius: 0.3em;
+}
+
+#settings input {
+    width: 12em;
+    height: 2.5em;
+}
+
 #sequences > div {
     flex-shrink: 1;
 }
@@ -171,7 +184,6 @@ canvas {
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     overflow: auto;
 }
@@ -184,9 +196,14 @@ canvas {
     background: lightblue;
 }
 
+#sequence-list div:first-child {
+    flex: 1 1;
+}
+
 .remove {
     height: 1em;
     width: 1em;
+    margin: 0.2em 0 0 1em;
     line-height: 0.8em;
     border: thin solid #bbbbbb;
     border-radius: 50%;

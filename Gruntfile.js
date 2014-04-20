@@ -10,7 +10,7 @@ module.exports = function(grunt) {
             end: [
                 "dist/<%= pkg.version %>/**/*.css",
                 "!**/*.min.css",
-                //"dist/<%= pkg.version %>/**/*.js",
+                "dist/<%= pkg.version %>/**/*.js",
                 "!**/*.min.js"
             ]
         },
@@ -20,7 +20,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "src",
-                        src: ["**/*.html", "**/*.js", "**/*.texture", "**/*.vs", "**/*.fs", "**/*.webapp"],
+                        src: ["**/*", "!**/*.cs?"],
                         dest: "dist/<%= pkg.version %>/"
                     }
                 ]

@@ -90,8 +90,9 @@ var sequences = function() {
             g.DOM.opt1.appendChild(sequence.opt1);
             g.DOM.opt2.appendChild(sequence.opt2);
             sequence.li = g.DOM.liTempl.cloneNode(true);
-            sequence.li.children[1].dataset.key = sequence.key;
-            sequence.li.children[0].textContent = sequence.name + " (" + sequence.size + (sequence.protein ? " aa)" : " bp)");
+            sequence.li.children[2].dataset.key = sequence.key;
+            sequence.li.children[1].textContent = "(" + sequence.size + (sequence.protein ? " aa)" : " bp)");
+            sequence.li.children[0].textContent = sequence.name;
             sequence.li.dataset.type = (sequence.protein ? "proteic" : "nucleic");
             g.DOM.li.appendChild(sequence.li);
         });
