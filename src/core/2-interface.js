@@ -44,8 +44,7 @@ g.executeAfterDOM(function() {
         g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
         g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
-        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
-        g.renderHist();
+        g.viewMgr.draw(true);
     });
 
     g.$("download").addEventListener("click", function(e) {
@@ -83,25 +82,33 @@ g.executeAfterDOM(function() {
         location.reload(true);
     }, false);
 
-    g.$("notifications").addEventListener("click", function() {
-        if (Notification) {
-            Notification.requestPermission(function(e) {
-                if (e === "granted") {
-                    new Notification("Success", {body: "Notifications will now be used when importing sequences"});
-                }
-            });
-        }
-    }, false);
+    if (Notification) {
+        g.$("notifications").addEventListener("click", function() {
+            if (Notification) {
+                Notification.requestPermission(function(e) {
+                    if (e === "granted") {
+                        new Notification("Success", {body: "Notifications will now be used when importing sequences"});
+                    }
+                });
+            }
+        }, false);
+    } else {
+        g.$("notifications").classList.add("hidden");
+    }
 
-    g.$("install").addEventListener("click", function() {
-        var req = navigator.mozApps.install(location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp");
-        req.addEventListener("success", function() {
-            alert("Installed successfully. Tou can now close this tab and open your application like any other application");
+    if (navigator.mozApps) {
+        g.$("install").addEventListener("click", function() {
+            var req = navigator.mozApps.install(location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp");
+            req.addEventListener("success", function() {
+                alert("Installed successfully. Tou can now close this tab and open your application like any other application");
+            }, false);
+            req.addEventListener("error", function(err) {
+                alert("Error: " + err.name);
+            }, false);
         }, false);
-        req.addEventListener("error", function(err) {
-            alert("Error: " + err.name);
-        }, false);
-    }, false);
+    } else {
+        g.$("install").classList.add("hidden");
+    }
 
     //nav buttons
     var nav = function(e) {
@@ -185,6 +192,7 @@ g.executeAfterDOM(function() {
         } else {
             g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
         }
+        g.DOM.countHist((g.DOM.red.checked ? "R" : "") + (g.DOM.green.checked ? "G" : "") + (g.DOM.blue.checked ? "B" : ""));
 
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uRed");
         g.context.uniform1i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0);
@@ -196,7 +204,7 @@ g.executeAfterDOM(function() {
         g.context.uniform1f(g.program.windowUniform, g.DOM.range1.value / 255);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
         g.context.uniform1f(g.program.windowUniform, g.DOM.range2.value / 255);
-        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
+        g.viewMgr.draw(false);
     };
 
     g.DOM.red.addEventListener("change", updateView, false);

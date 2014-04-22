@@ -76,24 +76,24 @@
             <div id='picking-sequences'></div>
             <input type='range' class='picking-slider' min='1' max='1' value='1'><br>
         </div>
-        <a id='ghost-anchor'></a>
+        <a id='ghost-anchor' class='hidden'></a>
     </section>
     <section id='settings'>
         <nav>
             <a data-target='settings' class='internal-nav'>Back</a>
         </nav>
         <h1>Settings</h1>
-        <div>
-            <input type='button' id='clean-up' value='Clean data'>
-            <label for='clean-up'>Remove all cached data and reload</label>
+        <div id='clean-up'>
+            <input type='button' value='Clean data'>
+            <label>Remove all cached data and reload</label>
         </div>
-        <div>
-            <input type='button' id='notifications' value='Request permission'>
-            <label for='clean-up'>Use notifications</label>
+        <div id='notifications'>
+            <input type='button' value='Request permission'>
+            <label>Use notifications</label>
         </div>
-        <div>
-            <input type='button' id='install' value='Install'>
-            <label for='install'>Install as an Open Web App</label>
+        <div id='install'>
+            <input type='button' value='Install'>
+            <label>Install as an Open Web App</label>
         </div>
     </section>
     <section id='sequences'>

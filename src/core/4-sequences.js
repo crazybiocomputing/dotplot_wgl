@@ -32,15 +32,23 @@ var sequences = function() {
     g.seqMgr.addClean = function(cleaned) {
         var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
         var seqOS = trans.objectStore("sequences");
-        var request1 = seqOS.add(cleaned.typedArray);
+        var request1;
+        if (cleaned.type === "proteic") {
+            request1 = seqOS.add({proteic: cleaned.typedArray});
+        } else {
+            request1 = seqOS.add({
+                nucleic: cleaned.typedArray,
+                proteic: cleaned.translated
+            });
+        }
         request1.addEventListener("success", function(e) {
             var seqMetaOS = trans.objectStore("sequencesMetadata");
             var seqTemp = {
-                name: cleaned.name,
-                protein: (cleaned.type === "proteic"),
-                size: cleaned.typedArray.length,
+                name:    cleaned.name,
+                type:    cleaned.type,
+                size:    cleaned.typedArray.length,
                 comment: cleaned.comment,
-                key: e.target.result
+                key:     e.target.result
             };
             var request2 = seqMetaOS.add(seqTemp);
             request2.addEventListener("success", function() {
@@ -83,17 +91,19 @@ var sequences = function() {
     g.seqMgr.addDOM = function(sequences) {
         sequences.forEach(function(sequence) {
             sequence.opt1 = document.createElement("option");
-            sequence.opt1.value = sequence.key;
-            sequence.opt1.textContent = sequence.name;
-            sequence.opt1.dataset.type = (sequence.protein ? "proteic" : "nucleic");
+            sequence.opt1.value        = sequence.key;
+            sequence.opt1.textContent  = sequence.name;
+            sequence.opt1.dataset.type = sequence.type;
+            sequence.opt1.dataset.size = sequence.size;
+            sequence.opt1.dataset.key  = sequence.key;
             sequence.opt2 = sequence.opt1.cloneNode(true);
             g.DOM.opt1.appendChild(sequence.opt1);
             g.DOM.opt2.appendChild(sequence.opt2);
             sequence.li = g.DOM.liTempl.cloneNode(true);
             sequence.li.children[2].dataset.key = sequence.key;
-            sequence.li.children[1].textContent = "(" + sequence.size + (sequence.protein ? " aa)" : " bp)");
+            sequence.li.children[1].textContent = "(" + sequence.size + ((sequence.type === "proteic") ? " aa)" : " bp)");
             sequence.li.children[0].textContent = sequence.name;
-            sequence.li.dataset.type = (sequence.protein ? "proteic" : "nucleic");
+            sequence.li.dataset.type = sequence.type;
             g.DOM.li.appendChild(sequence.li);
         });
     };
@@ -117,6 +127,12 @@ var sequences = function() {
             g.DOM.opt1.removeChild(removed.opt1);
             g.DOM.opt2.removeChild(removed.opt2);
         }
+    };
+
+    g.seqMgr.getTex = function(key, type, callback) {
+        g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(parseInt(key)).addEventListener("success", function(e) {
+            callback(e.target.result[type]);
+        }, false);
     };
 
     var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();

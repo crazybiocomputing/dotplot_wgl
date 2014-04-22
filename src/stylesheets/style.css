@@ -137,9 +137,9 @@ input[type="range"] {
 
 canvas {
     margin-bottom: -5px;
-    transition: -webkit-transform 0.5s ease-in-out;
-    transition: -moz-transform 0.5s ease-in-out;
-    transition: transform 0.5s ease-in-out;
+    transition: -webkit-transform 0.1s ease-in-out;
+    transition: -moz-transform 0.1s ease-in-out;
+    transition: transform 0.1s ease-in-out;
     -webkit-transform-origin: 0 0;
     -moz-transform-origin: 0 0;
     transform-origin: 0 0;
@@ -148,7 +148,7 @@ canvas {
     image-rendering: pixelated;
 }
 
-#ghost-anchor {
+.hidden {
     display: none;
 }
 

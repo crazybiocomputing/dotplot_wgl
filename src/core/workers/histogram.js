@@ -28,59 +28,93 @@
 /*jshint globalstrict: true*/
 "use strict";
 
-var maxCount = {rgb: null, rg: null, gb: null, rb: null, r: null, g: null, b: null};
-var maxLog   = {rgb: null, rg: null, gb: null, rb: null, r: null, g: null, b: null};
-var histCountR = new Uint32Array(256);
-var histCountG = new Uint32Array(256);
-var histCountB = new Uint32Array(256);
-var histLogR   = new Uint8Array(256);
-var histLogG   = new Uint8Array(256);
-var histLogB   = new Uint8Array(256);
+var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
+    maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
+    histCount = {
+    RGB: new Uint32Array(256),
+    RG: new Uint32Array(256),
+    GB: new Uint32Array(256),
+    RB: new Uint32Array(256),
+    R: new Uint32Array(256),
+    G: new Uint32Array(256),
+    B: new Uint32Array(256)
+},
+    histLog = {
+    RGB: new Uint32Array(256),
+    RG: new Uint32Array(256),
+    GB: new Uint32Array(256),
+    RB: new Uint32Array(256),
+    R: new Uint32Array(256),
+    G: new Uint32Array(256),
+    B: new Uint32Array(256)
+};
 
 self.addEventListener("message", function(message) {
     var pixels = message.data.pixels;
     for (var i = 0; i < pixels.length; i+=4){
-        histCountR[pixels[i]]++;
-        histCountG[pixels[i+1]]++;
-        histCountB[pixels[i+2]]++;
+        histCount.R[pixels[i]]++;
+        histCount.G[pixels[i+1]]++;
+        histCount.B[pixels[i+2]]++;
     }
     for (var i = 0; i < 256; i++){
-        histLogR[i] = Math.log(histCountR[i]);
-        histLogG[i] = Math.log(histCountG[i]);
-        histLogB[i] = Math.log(histCountB[i]);
-        maxCount.rgb= Math.max(maxCount.rgb, histCountR[i] + histCountG[i] + histCountB[i]);
-        maxCount.rg = Math.max(maxCount.rg, histCountR[i] + histCountG[i]);
-        maxCount.gb = Math.max(maxCount.gb, histCountG[i] + histCountB[i]);
-        maxCount.rb = Math.max(maxCount.rb, histCountR[i] + histCountB[i]);
-        maxCount.r  = Math.max(maxCount.r, histCountR[i]);
-        maxCount.g  = Math.max(maxCount.g, histCountG[i]);
-        maxCount.b  = Math.max(maxCount.b, histCountB[i]);
-        maxLog.rgb  = Math.max(maxLog.rgb, histLogR[i] + histLogG[i] + histLogB[i]);
-        maxLog.rg   = Math.max(maxLog.rg, histLogR[i] + histLogG[i]);
-        maxLog.gb   = Math.max(maxLog.gb, histLogG[i] + histLogB[i]);
-        maxLog.rb   = Math.max(maxLog.rb, histLogR[i] + histLogB[i]);
-        maxLog.r    = Math.max(maxLog.r, histLogR[i]);
-        maxLog.g    = Math.max(maxLog.g, histLogG[i]);
-        maxLog.b    = Math.max(maxLog.b, histLogB[i]);
+        histCount.RG[i]  = histCount.R[i] + histCount.G[i];
+        histCount.GB[i]  = histCount.G[i] + histCount.B[i];
+        histCount.RB[i]  = histCount.R[i] + histCount.B[i];
+        histCount.RGB[i] = histCount.RG[i] + histCount.B[i];
+        histLog.R[i]     = Math.log(histCount.R[i]);
+        histLog.G[i]     = Math.log(histCount.G[i]);
+        histLog.B[i]     = Math.log(histCount.B[i]);
+        histLog.RG[i]    = Math.log(histCount.RG[i]);
+        histLog.GB[i]    = Math.log(histCount.GB[i]);
+        histLog.RB[i]    = Math.log(histCount.RB[i]);
+        histLog.RGB[i]   = Math.log(histCount.RGB[i]);
+        maxCount.RGB     = Math.max(maxCount.RGB, histCount.RGB[i]);
+        maxCount.RG      = Math.max(maxCount.RG, histCount.RG[i]);
+        maxCount.GB      = Math.max(maxCount.GB, histCount.GB[i]);
+        maxCount.RB      = Math.max(maxCount.RB, histCount.RB[i]);
+        maxCount.R       = Math.max(maxCount.R, histCount.R[i]);
+        maxCount.G       = Math.max(maxCount.G, histCount.G[i]);
+        maxCount.B       = Math.max(maxCount.B, histCount.B[i]);
+        maxLog.RGB       = Math.max(maxLog.RGB, histLog.RGB[i]);
+        maxLog.RG        = Math.max(maxLog.RG, histLog.RG[i]);
+        maxLog.GB        = Math.max(maxLog.GB, histLog.GB[i]);
+        maxLog.RB        = Math.max(maxLog.RB, histLog.RB[i]);
+        maxLog.R         = Math.max(maxLog.R, histLog.R[i]);
+        maxLog.G         = Math.max(maxLog.G, histLog.G[i]);
+        maxLog.B         = Math.max(maxLog.B, histLog.B[i]);
     }
 
-    self.postMessage({
-        maxCount:   maxCount,
-        maxLog:     maxLog,
-        histCountR: histCountR,
-        histCountG: histCountG,
-        histCountB: histCountB,
-        histLogR:   histLogR,
-        histLogG:   histLogG,
-        histLogB:   histLogB,
-    }/*, [
-        histCountR.buffer,
-        histCountG.buffer,
-        histCountB.buffer,
-        histLogR.buffer,
-        histLogG.buffer,
-        histLogB.buffer
-    ]*/);
-    //NOTE: check support for transferable objects
+    var test = new ArrayBuffer(1);
+    self.postMessage(test, [test]);
+    if (test) {
+        self.postMessage({
+            maxCount:   maxCount,
+            maxLog:     maxLog,
+            histCount:  histCount,
+            histLog:    histLog,
+        });
+    } else {
+        self.postMessage({
+            maxCount:   maxCount,
+            maxLog:     maxLog,
+            histCount:  histCount,
+            histLog:    histLog,
+        }, [
+            histCount.RGB.buffer,
+            histCount.RG.buffer,
+            histCount.GB.buffer,
+            histCount.RB.buffer,
+            histCount.R.buffer,
+            histCount.G.buffer,
+            histCount.B.buffer,
+            histLog.RGB.buffer,
+            histLog.RG.buffer,
+            histLog.GB.buffer,
+            histLog.RB.buffer,
+            histLog.R.buffer,
+            histLog.G.buffer,
+            histLog.B.buffer
+        ]);
+    }
     self.close();
 }, false);

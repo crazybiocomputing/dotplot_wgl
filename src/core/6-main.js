@@ -36,14 +36,13 @@
         console.log(e);
         alert("Error opening the DB");
         //FUTURE implement sequence management without IndexedDB
-        /*sequences();
-        matrices();
+        /*matrices();
+        sequences();
         firstLoad();*/
     }, false);
 
     request.addEventListener("success", function(e) {
         g.db = e.target.result;
-        sequences();
         matrices();
         if (!localStorage.getItem("alreadyVisited")) {
             firstLoad();

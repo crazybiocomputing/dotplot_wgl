@@ -41,6 +41,7 @@ var g = {
     //Managers
     seqMgr:    {},
     matMgr:    {},
+    viewMgr:   {},
     //Document Object Model handles
     DOM:     {
         liTempl: document.createElement("li")

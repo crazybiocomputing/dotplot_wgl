@@ -69,3 +69,5 @@ g.seqMgr.add(
     "SERA_PLAFG (P13823)",
     "proteic"
 );
+localStorage.setItem("alreadyVisited", true);
+setTimeout(g.matMgr.updateDOM, 250);
