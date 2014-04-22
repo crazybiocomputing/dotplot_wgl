@@ -62,6 +62,8 @@ var sequences = function() {
     g.seqMgr.add = function(rawInput, proposedNames, type) {
         var w = new Worker("core/workers/seqInput.js");
         var count = 0;
+        var proteics = 0;
+        var nucleics = 0;
         w.addEventListener("message", function(message) {
             switch (message.data.status) {
                 case "error":
@@ -72,11 +74,16 @@ var sequences = function() {
                 case "sequence":
                     count++;
                     console.log(message.data);
+                    if (message.data.type === "proteic") {
+                        proteics++;
+                    } else {
+                        nucleics++;
+                    }
                     g.seqMgr.addClean(message.data);
                     break;
                 case "done":
                     if (Notification && Notification.permission === "granted") {
-                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "type: " + message.data.type});
+                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteics: " + proteics, tag: "sequence", icon: "favicon.ico"});
                     }
                     break;
             }
