@@ -148,6 +148,18 @@ canvas {
     image-rendering: pixelated;
 }
 
+#picking-sequences {
+    font-family: Courier, "Lucida Console", monospace;
+    overflow: hidden;
+}
+
+#picking-sequences > div {
+    transform: translateZ(0);
+    /*transform-origin: center;*/
+    width: 100%;
+    /*transition: transform 0.1s ;*/
+}
+
 .hidden {
     display: none;
 }

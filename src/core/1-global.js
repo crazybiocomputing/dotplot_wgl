@@ -122,6 +122,10 @@ g.executeAfterDOM(function() {
     g.DOM.windowSize.getValue = function() {
         return Math.max(Math.round(this.value), 1);
     };
+    var sliders = document.getElementsByClassName("picking-slider");
+    g.DOM.slider1    = sliders[0];
+    g.DOM.slider2    = sliders[1];
+    g.DOM.pick       = g.$("picking-sequences");
 });
 
 g.xhr2("matrices/NucleicMatrices.texture","arraybuffer",function(r){

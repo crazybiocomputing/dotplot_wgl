@@ -41,6 +41,7 @@ var viewer = function() {
         if (updateHist) {
             g.DOM.renderHist();
         }
+        g.viewMgr.pick(0, 0);
         var webglInput = g.$("webgl");
         webglInput.value = "Render WebGL graph";
         webglInput.disabled = false;
@@ -49,7 +50,6 @@ var viewer = function() {
 
     g.viewMgr.render = function(params) {
         console.time("1");
-        console.log(params);
         g.DOM.reinitHist();
         var w = params.seq1.size,
             h = params.seq2.size;
@@ -117,8 +117,9 @@ var viewer = function() {
         g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffsetNext");
         g.context.uniform1f(g.program.sizesUniform, (params.offset + texWidth) / (tex.length / texWidth));
 
+        var wS = g.DOM.windowSize.getValue();
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
-        g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
+        g.context.uniform1i(g.program.windowUniform, wS);
 
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
         g.context.uniform1f(g.program.windowUniform, 1.0);
@@ -151,7 +152,11 @@ var viewer = function() {
         g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
 
         var texLoaded = false;
-        g.seqMgr.getTex(params.seq1.key, this.tex.type, function(texture) {
+        g.seqMgr.getTex(params.seq1.key, this.tex.type, function(texture, string) {
+            g.DOM.slider1.max = texture.length - wS;
+            g.DOM.pickDiv1 = document.createElement("div");
+            g.DOM.pickDiv1.textContent = string;
+            g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             var tex = g.context.createTexture();
             g.context.activeTexture(g.context.TEXTURE1);
             g.context.bindTexture(g.context.TEXTURE_2D, tex);
@@ -167,7 +172,11 @@ var viewer = function() {
             }
         });
 
-        g.seqMgr.getTex(params.seq2.key, this.tex.type, function(texture) {
+        g.seqMgr.getTex(params.seq2.key, this.tex.type, function(texture, string) {
+            g.DOM.slider2.max = texture.length - wS;
+            g.DOM.pickDiv2 = document.createElement("div");
+            g.DOM.pickDiv2.textContent = string;
+            g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             var tex = g.context.createTexture();
             g.context.activeTexture(g.context.TEXTURE2);
             g.context.bindTexture(g.context.TEXTURE_2D, tex);
@@ -210,6 +219,9 @@ var viewer = function() {
         var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
         g.context.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
         w.postMessage({pixels: pixels});
+    };
+
+    g.viewMgr.pick = function(x, y) {
     };
 
     var loadShaders = function(shaders, callback) {

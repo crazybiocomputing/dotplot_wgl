@@ -33,7 +33,7 @@ g.executeAfterDOM(function() {
         var rect = this.getBoundingClientRect();
         var x = Math.round((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value);
         var y = Math.round((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value);
-        console.log("pixel clicked at x: " + x + ", y: " + y);
+        g.viewMgr.pick(x, y);
     }, false);
 
     g.DOM.windowSize.addEventListener("input", function() {
@@ -212,4 +212,11 @@ g.executeAfterDOM(function() {
     g.DOM.blue.addEventListener("change", updateView, false);
     g.DOM.range1.addEventListener("input", updateView, false);
     g.DOM.range2.addEventListener("input", updateView, false);
+
+    g.DOM.slider1.addEventListener("input", function(e) {
+        g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + (e.target.value / e.target.max) * (100 + g.DOM.pick.offsetWidth) + "%)";
+    }, false);
+    g.DOM.slider2.addEventListener("input", function(e) {
+        g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + (e.target.value / e.target.max) * (100 + g.DOM.pick.offsetWidth) + "%)";
+    }, false);
 });
