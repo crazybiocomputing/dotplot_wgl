@@ -34,11 +34,16 @@ var sequences = function() {
         var seqOS = trans.objectStore("sequences");
         var request1;
         if (cleaned.type === "proteic") {
-            request1 = seqOS.add({proteic: cleaned.typedArray});
+            request1 = seqOS.add({
+                proteic: cleaned.proteic,
+                proteicS: cleaned.proteicS
+            });
         } else {
             request1 = seqOS.add({
-                nucleic: cleaned.typedArray,
-                proteic: cleaned.translated
+                nucleic: cleaned.nucleic,
+                nucleicS: cleaned.nucleicS,
+                proteic: cleaned.proteic,
+                proteicS: cleaned.proteicS
             });
         }
         request1.addEventListener("success", function(e) {
@@ -46,7 +51,7 @@ var sequences = function() {
             var seqTemp = {
                 name:    cleaned.name,
                 type:    cleaned.type,
-                size:    cleaned.typedArray.length,
+                size:    (cleaned.nucleic) ? cleaned.nucleic.length : cleaned.proteic.length,
                 comment: cleaned.comment,
                 key:     e.target.result
             };
@@ -83,7 +88,7 @@ var sequences = function() {
                     break;
                 case "done":
                     if (Notification && Notification.permission === "granted") {
-                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteics: " + proteics, tag: "sequence", icon: "favicon.ico"});
+                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteics: " + proteics, tag: parseInt(Date.now() / 2000), icon: "favicon.ico"});
                     }
                     break;
             }
@@ -138,7 +143,7 @@ var sequences = function() {
 
     g.seqMgr.getTex = function(key, type, callback) {
         g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(parseInt(key)).addEventListener("success", function(e) {
-            callback(e.target.result[type]);
+            callback(e.target.result[type], e.target.result[type+"S"]);
         }, false);
     };
 
