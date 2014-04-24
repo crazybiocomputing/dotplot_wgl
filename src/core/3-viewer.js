@@ -42,21 +42,24 @@ var viewer = function() {
             g.DOM.renderHist();
         }
         g.viewMgr.pick(0, 0);
-        var webglInput = g.$("webgl");
-        webglInput.value = "Render WebGL graph";
+        var webglInput      = g.$("webgl");
+        webglInput.value    = "Render WebGL graph";
         webglInput.disabled = false;
         console.timeEnd("1");
     };
 
     g.viewMgr.render = function(params) {
         console.time("1");
-        g.DOM.reinitHist();
+        g.DOM.reinitCont();
         var w = params.seq1.size,
-            h = params.seq2.size;
-        g.DOM.canvas.width        = w;
-        g.DOM.canvas.height       = h;
-        g.DOM.canvas.style.width  = w + "px";
-        g.DOM.canvas.style.height = h + "px";
+            h = params.seq2.size,
+            wS = g.DOM.windowSize.getValue();
+        g.DOM.canvas.width         = w;
+        g.DOM.canvas.height        = h;
+        g.DOM.canvas.style.width   = w + "px";
+        g.DOM.canvas.style.height  = h + "px";
+        g.DOM.picker1.style.height = (h + 1 - wS) + "px";
+        g.DOM.picker2.style.width  = (w + 1 - wS) + "px";
         g.context = g.DOM.canvas.getContext(
             "webgl", {alpha: false, preserveDrawingBuffer: true}
         ) || g.DOM.canvas.getContext(
@@ -117,7 +120,6 @@ var viewer = function() {
         g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffsetNext");
         g.context.uniform1f(g.program.sizesUniform, (params.offset + texWidth) / (tex.length / texWidth));
 
-        var wS = g.DOM.windowSize.getValue();
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
         g.context.uniform1i(g.program.windowUniform, wS);
 
@@ -155,7 +157,11 @@ var viewer = function() {
         g.seqMgr.getTex(params.seq1.key, this.tex.type, function(texture, string) {
             g.DOM.slider1.max = texture.length - wS;
             g.DOM.pickDiv1 = document.createElement("div");
-            g.DOM.pickDiv1.textContent = string;
+            for (var i = 0; i < string.length; i++) {
+                var temp = document.createElement("span");
+                temp.textContent = string.charAt(i);
+                g.DOM.pickDiv1.appendChild(temp);
+            }
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             var tex = g.context.createTexture();
             g.context.activeTexture(g.context.TEXTURE1);
@@ -175,7 +181,11 @@ var viewer = function() {
         g.seqMgr.getTex(params.seq2.key, this.tex.type, function(texture, string) {
             g.DOM.slider2.max = texture.length - wS;
             g.DOM.pickDiv2 = document.createElement("div");
-            g.DOM.pickDiv2.textContent = string;
+            for (var i = 0; i < string.length; i++) {
+                var temp = document.createElement("span");
+                temp.textContent = string.charAt(i);
+                g.DOM.pickDiv2.appendChild(temp);
+            }
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             var tex = g.context.createTexture();
             g.context.activeTexture(g.context.TEXTURE2);
@@ -222,6 +232,7 @@ var viewer = function() {
     };
 
     g.viewMgr.pick = function(x, y) {
+        console.log(x + " " + y);
     };
 
     var loadShaders = function(shaders, callback) {
@@ -242,10 +253,10 @@ var viewer = function() {
         g.viewMgr.frag2  = shaders[2];
         g.viewMgr.frag3  = shaders[3];
         g.executeAfterDOM(function() {
-            var webglInput   = g.$("webgl");
+            var webglInput = g.$("webgl");
             webglInput.addEventListener("click", function() {
                 webglInput.disabled = true;
-                webglInput.value = "Rendering…";
+                webglInput.value    = "Rendering…";
                 var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
                 g.DOM.red.disabled   = false;
                 g.DOM.green.disabled = false;
@@ -263,8 +274,16 @@ var viewer = function() {
                     }
                 }
                 g.viewMgr.render({
-                    seq1: {type: seq1.dataset.type, key: seq1.dataset.key, size: seq1.dataset.size},
-                    seq2: {type: seq2.dataset.type, key: seq2.dataset.key, size: seq2.dataset.size},
+                    seq1: {
+                        type: seq1.dataset.type,
+                        key:  seq1.dataset.key,
+                        size: parseInt(seq1.dataset.size)
+                    },
+                    seq2: {
+                        type: seq2.dataset.type,
+                        key:  seq2.dataset.key,
+                        size: parseInt(seq2.dataset.size)
+                    },
                     nucleicMatrix: nucleicMatrix,
                     offset: offset
                 });

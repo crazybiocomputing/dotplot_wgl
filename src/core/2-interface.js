@@ -26,7 +26,7 @@
 
 g.executeAfterDOM(function() {
     var canvas = g.$("canvas");
-    canvas.style[g.DOM.transform] = "translateZ(0) scale(1)";
+    g.$("inner-container").style[g.DOM.transform] = "translateZ(0) scale(1)";
 
     //declaring listeners
     canvas.addEventListener("click", function(e) {
@@ -73,7 +73,7 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.DOM.zoom.addEventListener("input", function(e) {
-        canvas.style[g.DOM.transform] = canvas.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1/e.target.value) + ")");
+        g.$("inner-container").style[g.DOM.transform] = g.$("inner-container").style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1/e.target.value) + ")");
     }, false);
 
     g.$("clean-up").addEventListener("click", function() {
@@ -82,29 +82,35 @@ g.executeAfterDOM(function() {
         location.reload(true);
     }, false);
 
-    if (Notification) {
+    if (Notification && Notification.permission !== "granted") {
         g.$("notifications").addEventListener("click", function() {
-            if (Notification) {
-                Notification.requestPermission(function(e) {
-                    if (e === "granted") {
-                        new Notification("Success", {body: "Notifications will now be used when importing sequences"});
-                    }
-                });
-            }
+            Notification.requestPermission(function(e) {
+                if (e === "granted") {
+                    new Notification("Success", {body: "Notifications will now be used when importing sequences"});
+                }
+            });
         }, false);
     } else {
         g.$("notifications").classList.add("hidden");
     }
 
-    if (navigator.mozApps) {
-        g.$("install").addEventListener("click", function() {
-            var req = navigator.mozApps.install(location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp");
-            req.addEventListener("success", function() {
-                alert("Installed successfully. Tou can now close this tab and open your application like any other application");
-            }, false);
-            req.addEventListener("error", function(err) {
-                alert("Error: " + err.name);
-            }, false);
+    if (navigator.mozApps) {//supports Open Web Apps
+        var manifest = location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp";
+        var req = navigator.mozApps.checkInstalled(manifest);
+        req.addEventListener("success", function(e) {
+            if (e.result) {//already installed
+                g.$("install").classList.add("hidden");
+            } else {//propose to install on click
+                g.$("install").addEventListener("click", function() {
+                    var req = navigator.mozApps.install(manifest);
+                    req.addEventListener("success", function() {
+                        alert("Installed successfully. Tou can now close this tab and open your application like any other application");
+                    }, false);
+                    req.addEventListener("error", function(err) {
+                        alert("Error: " + err.name);
+                    }, false);
+                }, false);
+            }
         }, false);
     } else {
         g.$("install").classList.add("hidden");
@@ -213,10 +219,10 @@ g.executeAfterDOM(function() {
     g.DOM.range1.addEventListener("input", updateView, false);
     g.DOM.range2.addEventListener("input", updateView, false);
 
-    g.DOM.slider1.addEventListener("input", function(e) {
-        g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + (e.target.value / e.target.max) * (100 + g.DOM.pick.offsetWidth) + "%)";
-    }, false);
-    g.DOM.slider2.addEventListener("input", function(e) {
-        g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + (e.target.value / e.target.max) * (100 + g.DOM.pick.offsetWidth) + "%)";
-    }, false);
+    var picker = function(e) {
+        g.DOM["pickDiv" + e.target.dataset.num].style[g.DOM.transform] = "translateZ(0) translateX(-" + e.target.value + "ch)";
+        g.DOM["picker" + e.target.dataset.num].style[g.DOM.transform] = "translateZ(0) translate" + (e.target.dataset.num === "1" ? "X" : "Y") + "(" + e.target.value + "px)";
+    };
+    g.DOM.slider1.addEventListener("input", picker, false);
+    g.DOM.slider2.addEventListener("input", picker, false);
 });

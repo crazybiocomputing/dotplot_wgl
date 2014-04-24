@@ -35,14 +35,14 @@ var sequences = function() {
         var request1;
         if (cleaned.type === "proteic") {
             request1 = seqOS.add({
-                proteic: cleaned.proteic,
+                proteic:  cleaned.proteic,
                 proteicS: cleaned.proteicS
             });
         } else {
             request1 = seqOS.add({
-                nucleic: cleaned.nucleic,
+                nucleic:  cleaned.nucleic,
                 nucleicS: cleaned.nucleicS,
-                proteic: cleaned.proteic,
+                proteic:  cleaned.proteic,
                 proteicS: cleaned.proteicS
             });
         }
@@ -59,16 +59,15 @@ var sequences = function() {
             request2.addEventListener("success", function() {
                 g.seqMgr.list.push(seqTemp);
                 g.seqMgr.addDOM([seqTemp]);
-                console.log("added a sequence");
             });
         }, false);
     };
 
     g.seqMgr.add = function(rawInput, proposedNames, type) {
-        var w = new Worker("core/workers/seqInput.js");
-        var count = 0;
-        var proteics = 0;
-        var nucleics = 0;
+        var w = new Worker("core/workers/seqInput.js"),
+            count    = 0,
+            proteics = 0,
+            nucleics = 0;
         w.addEventListener("message", function(message) {
             switch (message.data.status) {
                 case "error":
@@ -78,7 +77,6 @@ var sequences = function() {
                     break;
                 case "sequence":
                     count++;
-                    console.log(message.data);
                     if (message.data.type === "proteic") {
                         proteics++;
                     } else {
@@ -94,9 +92,9 @@ var sequences = function() {
             }
         }, false);
         w.postMessage({
-            rawInput: rawInput,
+            rawInput:      rawInput,
             proposedNames: proposedNames,
-            type: type
+            type:          type
         });
     };
 

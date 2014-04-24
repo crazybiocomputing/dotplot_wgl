@@ -37,7 +37,6 @@
         alert("Error opening the DB");
         //FUTURE implement sequence management without IndexedDB
         /*matrices();
-        sequences();
         firstLoad();*/
     }, false);
 

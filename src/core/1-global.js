@@ -109,13 +109,15 @@ g.executeAfterDOM(function() {
     g.DOM.red        = channels[0];
     g.DOM.green      = channels[1];
     g.DOM.blue       = channels[2];
-    g.DOM.reinitHist = function() {
+    g.DOM.reinitCont = function() {
         this.range1.value  = 255;
         this.range2.value  = 0;
         this.red.checked   = true;
         this.green.checked = true;
         this.blue.checked  = true;
         this.hist.style.background = "linear-gradient(to right, #000 0, #000 0%, #fff 100%, #fff 100%)";
+        this.slider1.value = 0;
+        this.slider2.value = 0;
     };
     g.DOM.zoom       = g.$("zoom");
     g.DOM.windowSize = g.$("window");
@@ -126,6 +128,9 @@ g.executeAfterDOM(function() {
     g.DOM.slider1    = sliders[0];
     g.DOM.slider2    = sliders[1];
     g.DOM.pick       = g.$("picking-sequences");
+    var pickers = document.getElementsByClassName("pickers");
+    g.DOM.picker1    = pickers[0];
+    g.DOM.picker2    = pickers[1];
 });
 
 g.xhr2("matrices/NucleicMatrices.texture","arraybuffer",function(r){
