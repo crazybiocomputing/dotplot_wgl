@@ -219,10 +219,10 @@ g.executeAfterDOM(function() {
     g.DOM.range1.addEventListener("input", updateView, false);
     g.DOM.range2.addEventListener("input", updateView, false);
 
-    var picker = function(e) {
-        g.DOM["pickDiv" + e.target.dataset.num].style[g.DOM.transform] = "translateZ(0) translateX(-" + e.target.value + "ch)";
-        g.DOM["picker" + e.target.dataset.num].style[g.DOM.transform] = "translateZ(0) translate" + (e.target.dataset.num === "1" ? "X" : "Y") + "(" + e.target.value + "px)";
-    };
-    g.DOM.slider1.addEventListener("input", picker, false);
-    g.DOM.slider2.addEventListener("input", picker, false);
+    g.DOM.slider1.addEventListener("input", function(e) {
+        g.viewMgr.pick(e.target.value, null);
+    }, false);
+    g.DOM.slider2.addEventListener("input", function(e) {
+        g.viewMgr.pick(null, e.target.value);
+    }, false);
 });

@@ -169,14 +169,23 @@ canvas {
     height: 1px;
 }
 
-#picking-sequences {
+#picking-sequences-cont {
+    position: relative;
     font-family: Courier, "Lucida Console", monospace;
     overflow: hidden;
 }
 
-#picking-sequences > div {
+.picking-sequences {
     transform: translateZ(0);
     padding: 0 50%;
+}
+
+#window-viewer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    border: thin solid red;
 }
 
 .hidden {

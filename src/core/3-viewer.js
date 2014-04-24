@@ -40,8 +40,9 @@ var viewer = function() {
         g.context.drawArrays(g.context.TRIANGLES, 0, 6);
         if (updateHist) {
             g.DOM.renderHist();
+            g.viewMgr.pick(0, 0);
         }
-        g.viewMgr.pick(0, 0);
+        g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
         var webglInput      = g.$("webgl");
         webglInput.value    = "Render WebGL graph";
         webglInput.disabled = false;
@@ -54,6 +55,7 @@ var viewer = function() {
         var w = params.seq1.size,
             h = params.seq2.size,
             wS = g.DOM.windowSize.getValue();
+        g.$("window-viewer").style.width = wS + "ch";
         g.DOM.canvas.width         = w;
         g.DOM.canvas.height        = h;
         g.DOM.canvas.style.width   = w + "px";
@@ -157,6 +159,7 @@ var viewer = function() {
         g.seqMgr.getTex(params.seq1.key, this.tex.type, function(texture, string) {
             g.DOM.slider1.max = texture.length - wS;
             g.DOM.pickDiv1 = document.createElement("div");
+            g.DOM.pickDiv1.classList.add("picking-sequences");
             for (var i = 0; i < string.length; i++) {
                 var temp = document.createElement("span");
                 temp.textContent = string.charAt(i);
@@ -181,6 +184,7 @@ var viewer = function() {
         g.seqMgr.getTex(params.seq2.key, this.tex.type, function(texture, string) {
             g.DOM.slider2.max = texture.length - wS;
             g.DOM.pickDiv2 = document.createElement("div");
+            g.DOM.pickDiv2.classList.add("picking-sequences");
             for (var i = 0; i < string.length; i++) {
                 var temp = document.createElement("span");
                 temp.textContent = string.charAt(i);
@@ -232,7 +236,16 @@ var viewer = function() {
     };
 
     g.viewMgr.pick = function(x, y) {
-        console.log(x + " " + y);
+        if (x !== undefined) {
+            g.DOM.slider1.value = Math.min(x, g.DOM.slider1.max);
+            g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + x + "ch)";
+            g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + x + "px)";
+        }
+        if (y !== undefined) {
+            g.DOM.slider2.value = Math.min(y, g.DOM.slider2.max);
+            g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + y + "ch)";
+            g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + y + "px)";
+        }
     };
 
     var loadShaders = function(shaders, callback) {

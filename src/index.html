@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html manifest='manifest.appcache'>
 <head>
-    <link rel="icon" href="favicon-16.png"sizes="16x16" >
-    <link rel="icon" href="favicon-32.png" sizes="32x32">
-    <link rel="icon" href="favicon-64.png" sizes="64x64">
-    <link rel="icon" href="favicon-128.png" sizes="128x128">
     <meta charset='utf-8'>
-    <title>{{name}} | {{description}}</title>
     <meta name='viewport' content='width=device-width'>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <meta name='mobile-web-app-capable' content='yes'>
+    <link rel='icon' href='favicon-16.png' sizes='16x16' >
+    <link rel='icon' href='favicon-32.png' sizes='32x32'>
+    <link rel='icon' href='favicon-64.png' sizes='64x64'>
+    <link rel='icon' href='favicon-128.png' sizes='128x128'>
     <link rel='stylesheet' href='stylesheets/style.css'>
+    <title>{{name}} | {{description}}</title>
     <script src='core/1-global.js'></script>
     <script src='core/2-interface.js'></script>
     <script src='core/3-viewer.js'></script>
@@ -78,9 +78,10 @@
         </div>
         <div id='picking'>
             <input type='range' class='picking-slider' min='0' max='0' value='0' data-num='1'><br>
-            <div id='picking-sequences'>
-                <div></div>
-                <div></div>
+            <div id='picking-sequences-cont'>
+                <div class='picking-sequences'></div>
+                <div class='picking-sequences'></div>
+                <div id='window-viewer'></div>
             </div>
             <input type='range' class='picking-slider' min='0' max='0' value='0' data-num='2'><br>
         </div>

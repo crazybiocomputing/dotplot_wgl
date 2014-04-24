@@ -127,7 +127,7 @@ g.executeAfterDOM(function() {
     var sliders = document.getElementsByClassName("picking-slider");
     g.DOM.slider1    = sliders[0];
     g.DOM.slider2    = sliders[1];
-    g.DOM.pick       = g.$("picking-sequences");
+    g.DOM.pick       = g.$("picking-sequences-cont");
     var pickers = document.getElementsByClassName("pickers");
     g.DOM.picker1    = pickers[0];
     g.DOM.picker2    = pickers[1];
