@@ -25,15 +25,16 @@
  */
 
 g.executeAfterDOM(function() {
-    var canvas = g.$("canvas");
-    g.$("inner-container").style[g.DOM.transform] = "translateZ(0) scale(1)";
+    var innerContainer = g.$("inner-container");
+    innerContainer.style[g.DOM.transform] = "translateZ(0) scale(1)";
 
     //declaring listeners
-    canvas.addEventListener("click", function(e) {
+    innerContainer.addEventListener("click", function(e) {
         var rect = this.getBoundingClientRect();
-        var x = Math.round((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value);
-        var y = Math.round((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value);
-        g.viewMgr.pick(x, y);
+        g.viewMgr.pick(
+            Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
+            Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
+        );
     }, false);
 
     g.DOM.windowSize.addEventListener("input", function() {
@@ -47,17 +48,16 @@ g.executeAfterDOM(function() {
         g.viewMgr.draw(true);
     });
 
-    g.$("download").addEventListener("click", function(e) {
-        e.preventDefault();
+    g.$("download").addEventListener("click", function() {
         var ghostAnchor = g.$("ghost-anchor");
         ghostAnchor.download = "image.png";
         try {
-            canvas.toBlob(function(blob) {
+            g.DOM.canvas.toBlob(function(blob) {
                 ghostAnchor.href = window.URL.createObjectURL(blob);
                 ghostAnchor.click();
             });
         } catch(error) {
-            ghostAnchor.href = canvas.toDataURL();
+            ghostAnchor.href = g.DOM.canvas.toDataURL();
             ghostAnchor.click();
         }
     }, false);
@@ -86,7 +86,7 @@ g.executeAfterDOM(function() {
         g.$("notifications").addEventListener("click", function() {
             Notification.requestPermission(function(e) {
                 if (e === "granted") {
-                    new Notification("Success", {body: "Notifications will now be used when importing sequences"});
+                    new Notification("Success", {body: "Notifications will now be used when importing sequences", icon: "/images/favicon-128.png"});
                 }
             });
         }, false);
@@ -118,7 +118,6 @@ g.executeAfterDOM(function() {
 
     //nav buttons
     var nav = function(e) {
-        e.preventDefault();
         g.$(e.target.dataset.target).classList.toggle("active-section");
     };
     Array.prototype.forEach.call(document.getElementsByClassName("internal-nav"), function(anchor) {
@@ -157,9 +156,7 @@ g.executeAfterDOM(function() {
         cleanAfterInput();
     }, false);
 
-    g.$("input-submit").addEventListener("click", function(e) {
-        e.stopPropagation();
-        e.preventDefault();
+    g.$("input-submit").addEventListener("click", function() {
         g.seqMgr.add(g.DOM.inputZone.value, g.DOM.names.value, g.DOM.type.value);
         cleanAfterInput();
     }, false);
@@ -220,7 +217,7 @@ g.executeAfterDOM(function() {
     g.DOM.range2.addEventListener("input", updateView, false);
 
     g.DOM.slider1.addEventListener("input", function(e) {
-        g.viewMgr.pick(e.target.value, null);
+        g.viewMgr.pick(e.target.value);
     }, false);
     g.DOM.slider2.addEventListener("input", function(e) {
         g.viewMgr.pick(null, e.target.value);

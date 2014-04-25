@@ -160,10 +160,37 @@ var viewer = function() {
             g.DOM.slider1.max = texture.length - wS;
             g.DOM.pickDiv1 = document.createElement("div");
             g.DOM.pickDiv1.classList.add("picking-sequences");
-            for (var i = 0; i < string.length; i++) {
-                var temp = document.createElement("span");
-                temp.textContent = string.charAt(i);
-                g.DOM.pickDiv1.appendChild(temp);
+            if (typeof string === "string") {
+                if (params.seq1.type === "proteic") {
+                    for (var i = 0; i < string.length; i++) {
+                        var temp = document.createElement("span");
+                        temp.textContent = string.charAt(i);
+                        g.DOM.pickDiv1.appendChild(temp);
+                    }
+                } else {
+                    var forward = document.createElement("div"),
+                        reverse = document.createElement("div");
+                    for (var i = 0; i < string.length; i++) {
+                        var temp1 = document.createElement("span"),
+                            temp2 = document.createElement("span");
+                        temp1.textContent = string.charAt(i);
+                        temp2.textContent = string.charAt(string.length - 1 - i);
+                        forward.appendChild(temp1);
+                        reverse.appendChild(temp2);
+                    }
+                    g.DOM.pickDiv1.appendChild(forward);
+                    g.DOM.pickDiv1.appendChild(reverse);
+                }
+            } else {
+                string.forEach(function(string) {
+                    var tempDiv = document.createElement("div");
+                    for (var i = 0; i < string.length; i++) {
+                        var temp = document.createElement("span");
+                        temp.textContent = string.charAt(i);
+                        tempDiv.appendChild(temp);
+                    }
+                    g.DOM.pickDiv1.appendChild(tempDiv);
+                });
             }
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             var tex = g.context.createTexture();
@@ -185,10 +212,22 @@ var viewer = function() {
             g.DOM.slider2.max = texture.length - wS;
             g.DOM.pickDiv2 = document.createElement("div");
             g.DOM.pickDiv2.classList.add("picking-sequences");
-            for (var i = 0; i < string.length; i++) {
-                var temp = document.createElement("span");
-                temp.textContent = string.charAt(i);
-                g.DOM.pickDiv2.appendChild(temp);
+            if (typeof string === "string") {
+                for (var i = 0; i < string.length; i++) {
+                    var temp = document.createElement("span");
+                    temp.textContent = string.charAt(i);
+                    g.DOM.pickDiv2.appendChild(temp);
+                }
+            } else {
+                string.forEach(function(string) {
+                    var tempDiv = document.createElement("div");
+                    for (var i = 0; i < string.length; i++) {
+                        var temp = document.createElement("span");
+                        temp.textContent = string.charAt(i);
+                        tempDiv.appendChild(temp);
+                    }
+                    g.DOM.pickDiv2.appendChild(tempDiv);
+                });
             }
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             var tex = g.context.createTexture();
@@ -231,7 +270,13 @@ var viewer = function() {
         var wS = g.DOM.windowSize.getValue();
         //FIXME problem with window size (white pixels)
         var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
+        //console.log(pixels.length);
         g.context.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
+        /*console.log(pixels[0]);
+        console.log(pixels[1]);
+        console.log(pixels[2]);
+        console.log(pixels[3]);
+        console.log(pixels[4]);*/
         w.postMessage({pixels: pixels});
     };
 

@@ -7,8 +7,8 @@
 
 body {
     margin: 0;
-    font-family: Verdana, Geneva, sans-serif;
     color: #2e2e4e;
+    font-family: Verdana, Geneva, sans-serif;
 }
 
 nav > a {
@@ -27,9 +27,10 @@ nav > a:active {
 
 section {
     position: fixed;
-    overflow: auto;
     display: flex;
     flex-direction: column;
+    overflow: auto;
+    padding: 0 1%;
     width: 100%;
     height: 100%;
     background: #eeeeee;
@@ -73,8 +74,8 @@ nav, .flex {
 }
 
 .around {
-    justify-content: space-around;
     padding: 0.2em;
+    justify-content: space-around;
 }
 
 #container-hist {
@@ -100,13 +101,14 @@ nav, .flex {
 }
 
 #hist {
+    margin: 0 1%;
     flex: 0 0 15em;
     align-self: center;
 }
 
 #svg {
-    background: linear-gradient(to right, #000 0, #000 0, #fff 100%, #fff 100%);
     height: 200px;
+    background: linear-gradient(to right, #000 0, #000 0, #fff 100%, #fff 100%);
 }
 
 line {
@@ -125,27 +127,27 @@ input {
 }
 
 input[type="number"] {
-    width: 4em;
     padding: 0;
+    width: 4em;
 }
 
 input[type="range"] {
-    padding: 0;
     margin: 0;
-    border: 0;
+    padding: 0;
     width: 100%;
+    border: 0;
 }
 
 #inner-container {
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: pixelated;
     transition: -webkit-transform 0.1s ease-in-out;
     transition: -moz-transform 0.1s ease-in-out;
     transition: transform 0.1s ease-in-out;
     -webkit-transform-origin: 0 0;
     -moz-transform-origin: 0 0;
     transform-origin: 0 0;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: pixelated;
 }
 
 canvas {
@@ -153,10 +155,12 @@ canvas {
 }
 
 .pickers {
-    background: blue;
     position: absolute;
     top: 0;
+    background: blue;
+    opacity: 0.5;
     transform: translateZ(0);
+    transition: transform 0.3s;
 }
 
 #picker1 {
@@ -171,13 +175,14 @@ canvas {
 
 #picking-sequences-cont {
     position: relative;
-    font-family: Courier, "Lucida Console", monospace;
     overflow: hidden;
+    font-family: Courier, "Lucida Console", monospace;
 }
 
 .picking-sequences {
-    transform: translateZ(0);
     padding: 0 50%;
+    transform: translateZ(0);
+    transition: transform 0.4s ease-in-out;
 }
 
 #window-viewer {
@@ -186,18 +191,19 @@ canvas {
     left: 50%;
     height: 100%;
     border: thin solid red;
+    transition: width 0.2s linear;
 }
 
 .hidden {
     display: none;
 }
 
-#settings > div {
-    padding: 0.2em;
-    background: #dddddd;
+#settings > div, #settings > a {
     margin: 0.2em;
+    padding: 0.2em;
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
+    background: #dddddd;
 }
 
 #settings input {
@@ -210,22 +216,22 @@ canvas {
 }
 
 #sequence-list {
-    padding: 0;
+    overflow-y: auto;
     margin : 0;
+    padding: 0;
+    min-height: 0;
     list-style: none;
     flex: 1;
-    min-height: 0;
-    overflow-y: auto;
 }
 
 #sequence-list > li {
+    display: flex;
+    overflow: auto;
     margin: 0.5em;
     padding: 1em;
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
-    display: flex;
     align-items: center;
-    overflow: auto;
 }
 
 #sequence-list > li[data-type="nucleic"] {
@@ -241,14 +247,14 @@ canvas {
 }
 
 .remove {
-    height: 1em;
-    width: 1em;
     margin: 0.2em 0 0 1em;
-    line-height: 0.8em;
+    width: 1em;
+    height: 1em;
     border: thin solid #bbbbbb;
     border-radius: 50%;
-    text-align: center;
     background: #eeeeee;
+    text-align: center;
+    line-height: 0.8em;
     cursor: pointer;
 }
 
@@ -257,7 +263,7 @@ canvas {
 }
 
 #input-zone {
-    flex-grow: 1;
     border: thin solid #bbbbbb;
     border-radius: 0.3em;
+    flex-grow: 1;
 }

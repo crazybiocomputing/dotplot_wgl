@@ -72,7 +72,7 @@ var sequences = function() {
             switch (message.data.status) {
                 case "error":
                     if (Notification && Notification.permission === "granted") {
-                        new Notification("Error", {body: message.data.message});
+                        new Notification("Error", {body: message.data.message, icon: "/images/favicon-128.png"});
                     }
                     break;
                 case "sequence":
@@ -86,7 +86,7 @@ var sequences = function() {
                     break;
                 case "done":
                     if (Notification && Notification.permission === "granted") {
-                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteics: " + proteics, tag: parseInt(Date.now() / 2000), icon: "favicon.ico"});
+                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteic: " + proteics, tag: parseInt(Date.now() / 2000), icon: "/images/favicon-128.png"});
                     }
                     break;
             }

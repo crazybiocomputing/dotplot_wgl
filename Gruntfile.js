@@ -100,7 +100,8 @@ module.exports = function(grunt) {
                 overwrite: true,
                 replacements: [
                     {from: /\n.*\.map/g, to: ""},
-                    {from: /\n[^\.\n]*\.js/g, to:""}
+                    {from: /\n[^\.\n]*\.js/g, to:""},
+                    {from: /\nmanifest.webapp/g, to:""}
                 ]
             }
         },
