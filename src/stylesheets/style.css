@@ -185,6 +185,10 @@ canvas {
     transition: transform 0.4s ease-in-out;
 }
 
+.picking-sequences:first-child {
+    margin-bottom: 0.2em;
+}
+
 #window-viewer {
     position: absolute;
     top: 0;

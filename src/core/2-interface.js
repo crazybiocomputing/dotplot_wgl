@@ -38,6 +38,9 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.DOM.windowSize.addEventListener("input", function() {
+        g.DOM.range1.value = 255;
+        g.DOM.range2.value = 0;
+        g.DOM.hist.style.background = "";
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
         g.context.uniform1f(g.program.windowUniform, 1.0);
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
@@ -56,7 +59,7 @@ g.executeAfterDOM(function() {
                 ghostAnchor.href = window.URL.createObjectURL(blob);
                 ghostAnchor.click();
             });
-        } catch(error) {
+        } catch(err) {
             ghostAnchor.href = g.DOM.canvas.toDataURL();
             ghostAnchor.click();
         }
@@ -77,8 +80,10 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.$("clean-up").addEventListener("click", function() {
-        window.indexedDB.deleteDatabase("dotplot");
-        localStorage.removeItem("alreadyVisited");
+        indexedDB.deleteDatabase("dotplot");
+        try {
+            localStorage.removeItem("alreadyVisited");
+        } catch(err) {}
         location.reload(true);
     }, false);
 
@@ -86,7 +91,7 @@ g.executeAfterDOM(function() {
         g.$("notifications").addEventListener("click", function() {
             Notification.requestPermission(function(e) {
                 if (e === "granted") {
-                    new Notification("Success", {body: "Notifications will now be used when importing sequences", icon: "/images/favicon-128.png"});
+                    new Notification("Success", {body: "Notifications will now be used when importing sequences", icon: "images/favicon-128.png"});
                 }
             });
         }, false);
@@ -186,7 +191,7 @@ g.executeAfterDOM(function() {
     }
     g.DOM.hist.appendChild(fragment);
 
-    var updateView = function() {
+    var updateColor = function() {
         var v1    = g.DOM.range1.value / 2.55,
             v2    = g.DOM.range2.value / 2.55,
             color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
@@ -197,24 +202,41 @@ g.executeAfterDOM(function() {
         }
         g.DOM.countHist((g.DOM.red.checked ? "R" : "") + (g.DOM.green.checked ? "G" : "") + (g.DOM.blue.checked ? "B" : ""));
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uRed");
-        g.context.uniform1i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uGreen");
-        g.context.uniform1i(g.program.windowUniform, g.DOM.green.checked ? 1 : 0);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uBlue");
-        g.context.uniform1i(g.program.windowUniform, g.DOM.blue.checked ? 1 : 0);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
-        g.context.uniform1f(g.program.windowUniform, g.DOM.range1.value / 255);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
-        g.context.uniform1f(g.program.windowUniform, g.DOM.range2.value / 255);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uColors");
+        g.context.uniform3i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0, g.DOM.green.checked ? 1 : 0, g.DOM.blue.checked ? 1 : 0);
         g.viewMgr.draw(false);
     };
 
-    g.DOM.red.addEventListener("change", updateView, false);
-    g.DOM.green.addEventListener("change", updateView, false);
-    g.DOM.blue.addEventListener("change", updateView, false);
-    g.DOM.range1.addEventListener("input", updateView, false);
-    g.DOM.range2.addEventListener("input", updateView, false);
+    g.DOM.red.addEventListener("change", updateColor, false);
+    g.DOM.green.addEventListener("change", updateColor, false);
+    g.DOM.blue.addEventListener("change", updateColor, false);
+
+    var linearEq = function(y1, y2) {
+        var a = 100 / (y2 - y1);
+        return {
+            a: a,
+            b: -a * y1 / 100
+        };
+    };
+
+    var updateTransfer = function() {
+        var v1    = g.DOM.range1.value / 2.55,
+            v2    = g.DOM.range2.value / 2.55,
+            color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
+        if (v1 >= v2) {
+            g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
+        } else {
+            g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
+        }
+
+        var params = linearEq(v2, v1);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
+        g.context.uniform2f(g.program.windowUniform, params.a, params.b);
+        g.viewMgr.draw(false);
+    };
+
+    g.DOM.range1.addEventListener("input", updateTransfer, false);
+    g.DOM.range2.addEventListener("input", updateTransfer, false);
 
     g.DOM.slider1.addEventListener("input", function(e) {
         g.viewMgr.pick(e.target.value);

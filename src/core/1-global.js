@@ -43,16 +43,16 @@ var g = {
     matMgr:    {},
     viewMgr:   {},
     //Document Object Model handles
-    DOM:     {
+    DOM:       {
         liTempl: document.createElement("li")
     },
     //useful functions
     //executes a function after DOM has loaded
-    executeAfterDOM: function(fun) {
+    executeAfterDOM: function(callback) {
         if (document.readyState !== "loading") {
-            fun();
+            callback();
         } else {
-            document.addEventListener("DOMContentLoaded", fun, false);
+            document.addEventListener("DOMContentLoaded", callback, false);
         }
     },
     //shortcut for getElementById
@@ -60,17 +60,17 @@ var g = {
         return document.getElementById(id);
     },
     //makes custom XmlHttpRequests (version 2)
-    xhr2: function(url, type, callback, i) {
+    xhr2: function(url, callback, type) {
         var req = new XMLHttpRequest();
         req.open("GET", url, true);
-        req.responseType = type;
+        req.responseType = type || "text";
         req.addEventListener("load", function() {
             if (this.status === 200) {
-                callback(this.response, i);
+                callback(this.response);
             }
         }, false);
         req.send();
-    },
+    }
 };
 
 (function() {
@@ -109,16 +109,6 @@ g.executeAfterDOM(function() {
     g.DOM.red        = channels[0];
     g.DOM.green      = channels[1];
     g.DOM.blue       = channels[2];
-    g.DOM.reinitCont = function() {
-        this.range1.value  = 255;
-        this.range2.value  = 0;
-        this.red.checked   = true;
-        this.green.checked = true;
-        this.blue.checked  = true;
-        this.hist.style.background = "linear-gradient(to right, #000 0, #000 0%, #fff 100%, #fff 100%)";
-        this.slider1.value = 0;
-        this.slider2.value = 0;
-    };
     g.DOM.zoom       = g.$("zoom");
     g.DOM.windowSize = g.$("window");
     g.DOM.windowSize.getValue = function() {
@@ -133,9 +123,9 @@ g.executeAfterDOM(function() {
     g.DOM.picker2    = pickers[1];
 });
 
-g.xhr2("matrices/NucleicMatrices.texture","arraybuffer",function(r){
+g.xhr2("matrices/NucleicMatrices.texture", function(r) {
     g.nucleicTex = new Uint8Array(r);
-});
-g.xhr2("matrices/ProteicMatrices.texture","arraybuffer",function(r){
+}, "arraybuffer");
+g.xhr2("matrices/ProteicMatrices.texture", function(r) {
     g.proteicTex = new Uint8Array(r);
-});
+}, "arraybuffer");

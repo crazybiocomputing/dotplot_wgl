@@ -262,7 +262,7 @@ var sequenceParser = function(wholeSequence, i) {
         try {
             this.names[i] = comment.match(/^./g)[0];
         }
-        catch (err) {
+        catch(err) {
             this.names[i] = "sequence " + (i + 1);
         }
     }

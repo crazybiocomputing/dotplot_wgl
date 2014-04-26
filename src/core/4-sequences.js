@@ -27,78 +27,9 @@
 
 /*exported sequences*/
 var sequences = function() {
-    g.seqMgr.list = [];
+    var list = [];
 
-    g.seqMgr.addClean = function(cleaned) {
-        var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
-        var seqOS = trans.objectStore("sequences");
-        var request1;
-        if (cleaned.type === "proteic") {
-            request1 = seqOS.add({
-                proteic:  cleaned.proteic,
-                proteicS: cleaned.proteicS
-            });
-        } else {
-            request1 = seqOS.add({
-                nucleic:  cleaned.nucleic,
-                nucleicS: cleaned.nucleicS,
-                proteic:  cleaned.proteic,
-                proteicS: cleaned.proteicS
-            });
-        }
-        request1.addEventListener("success", function(e) {
-            var seqMetaOS = trans.objectStore("sequencesMetadata");
-            var seqTemp = {
-                name:    cleaned.name,
-                type:    cleaned.type,
-                size:    (cleaned.nucleic) ? cleaned.nucleic.length : cleaned.proteic.length,
-                comment: cleaned.comment,
-                key:     e.target.result
-            };
-            var request2 = seqMetaOS.add(seqTemp);
-            request2.addEventListener("success", function() {
-                g.seqMgr.list.push(seqTemp);
-                g.seqMgr.addDOM([seqTemp]);
-            });
-        }, false);
-    };
-
-    g.seqMgr.add = function(rawInput, proposedNames, type) {
-        var w = new Worker("core/workers/seqInput.js"),
-            count    = 0,
-            proteics = 0,
-            nucleics = 0;
-        w.addEventListener("message", function(message) {
-            switch (message.data.status) {
-                case "error":
-                    if (Notification && Notification.permission === "granted") {
-                        new Notification("Error", {body: message.data.message, icon: "/images/favicon-128.png"});
-                    }
-                    break;
-                case "sequence":
-                    count++;
-                    if (message.data.type === "proteic") {
-                        proteics++;
-                    } else {
-                        nucleics++;
-                    }
-                    g.seqMgr.addClean(message.data);
-                    break;
-                case "done":
-                    if (Notification && Notification.permission === "granted") {
-                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteic: " + proteics, tag: parseInt(Date.now() / 2000), icon: "/images/favicon-128.png"});
-                    }
-                    break;
-            }
-        }, false);
-        w.postMessage({
-            rawInput:      rawInput,
-            proposedNames: proposedNames,
-            type:          type
-        });
-    };
-
-    g.seqMgr.addDOM = function(sequences) {
+    var addDOM = function(sequences) {
         sequences.forEach(function(sequence) {
             sequence.opt1 = document.createElement("option");
             sequence.opt1.value        = sequence.key;
@@ -118,45 +49,152 @@ var sequences = function() {
         });
     };
 
+    g.seqMgr.add = function(rawInput, proposedNames, type) {
+        var w = new Worker("core/workers/seqInput.js"),
+            count    = 0,
+            proteics = 0,
+            nucleics = 0;
+        w.addEventListener("message", function(message) {
+            switch (message.data.status) {
+                case "error":
+                    if (Notification && Notification.permission === "granted") {
+                        new Notification("Error", {body: message.data.message, icon: "images/favicon-128.png"});
+                    }
+                    break;
+                case "sequence":
+                    count++;
+                    if (message.data.type === "proteic") {
+                        proteics++;
+                    } else {
+                        nucleics++;
+                    }
+                    addClean(message.data);
+                    break;
+                case "done":
+                    if (Notification && Notification.permission === "granted") {
+                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteic: " + proteics, tag: parseInt(Date.now() / 2000), icon: "images/favicon-128.png"});
+                    }
+                    break;
+            }
+        }, false);
+        w.postMessage({
+            rawInput:      rawInput,
+            proposedNames: proposedNames,
+            type:          type
+        });
+    };
+
     g.seqMgr.remove = function(key) {
         var removed;
-        for (var i = 0; i < g.seqMgr.list.length; i++) {
-            if (this.list[i].key === key) {
-                removed = this.list.splice(i, 1)[0];
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].key === key) {
+                removed = list.splice(i, 1)[0];
                 break;
             }
         }
         if (removed) {
-            var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
-            trans.addEventListener("complete", function() {
-                console.log("removed " + removed.name);
-            }, false);
-            trans.objectStore("sequences").delete(key);
-            trans.objectStore("sequencesMetadata").delete(key);
+            if (g.db) {
+                var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
+                trans.addEventListener("complete", function() {
+                    console.log("removed " + removed.name);
+                }, false);
+                trans.objectStore("sequences").delete(key);
+                trans.objectStore("sequencesMetadata").delete(key);
+            }
             g.DOM.li.removeChild(removed.li);
             g.DOM.opt1.removeChild(removed.opt1);
             g.DOM.opt2.removeChild(removed.opt2);
         }
     };
 
-    g.seqMgr.getTex = function(key, type, callback) {
-        g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(parseInt(key)).addEventListener("success", function(e) {
-            callback(e.target.result[type], e.target.result[type+"S"]);
-        }, false);
-    };
+    var addClean;
+    if (g.db) {
+        addClean = function(cleaned) {
+            var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
+            var seqOS = trans.objectStore("sequences");
+            var request1;
+            if (cleaned.type === "proteic") {
+                request1 = seqOS.add({
+                    proteic:  cleaned.proteic,
+                    proteicS: cleaned.proteicS
+                });
+            } else {
+                request1 = seqOS.add({
+                    nucleic:  cleaned.nucleic,
+                    nucleicS: cleaned.nucleicS,
+                    proteic:  cleaned.proteic,
+                    proteicS: cleaned.proteicS
+                });
+            }
+            request1.addEventListener("success", function(e) {
+                var seqMetaOS = trans.objectStore("sequencesMetadata");
+                var seqTemp = {
+                    name:    cleaned.name,
+                    type:    cleaned.type,
+                    size:    cleaned.proteic.length,
+                    comment: cleaned.comment,
+                    key:     e.target.result
+                };
+                var request2 = seqMetaOS.add(seqTemp);
+                request2.addEventListener("success", function() {
+                    list.push(seqTemp);
+                    addDOM([seqTemp]);
+                });
+            }, false);
+        };
 
-    var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
-    cursorGetter.addEventListener("success", function(e) {
-        var cursor = e.target.result;
-        if (cursor) {
-            g.seqMgr.list.push(cursor.value);
-            cursor.continue();
-        } else {
-            g.executeAfterDOM(function() {
-                g.seqMgr.addDOM(g.seqMgr.list);
-                g.matMgr.updateDOM();
-            });
-            viewer();
-        }
-    }, false);
+        g.seqMgr.get = function(key, type, callback) {
+            g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(key).addEventListener("success", function(e) {
+                callback(e.target.result[type], e.target.result[type + "S"]);
+            }, false);
+        };
+
+        var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
+        cursorGetter.addEventListener("success", function(e) {
+            var cursor = e.target.result;
+            if (cursor) {
+                list.push(cursor.value);
+                cursor.continue();
+            } else {
+                g.executeAfterDOM(function() {
+                    addDOM(list);
+                    g.matMgr.updateDOM();
+                });
+                viewer();
+            }
+        }, false);
+    } else {
+        addClean = function(cleaned) {
+            var item = {
+                name:     cleaned.name,
+                type:     cleaned.type,
+                size:     cleaned.proteic.length,
+                comment:  cleaned.comment,
+                key:      Date.now(),
+                proteic:  cleaned.proteic,
+                proteicS: cleaned.proteicS
+            };
+            if (cleaned.type === "nucleic") {
+                item.nucleic  = cleaned.nucleic;
+                item.nucleicS = cleaned.nucleicS;
+            }
+            list.push(item);
+            addDOM([item]);
+        };
+
+        g.seqMgr.get = function(key, type, callback) {
+            var item;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].key === key) {
+                    item = list[i];
+                    break;
+                }
+            }
+            if (item) {
+                callback(item[type], item[type + "S"]);
+            }
+        };
+
+        viewer();
+    }
 };

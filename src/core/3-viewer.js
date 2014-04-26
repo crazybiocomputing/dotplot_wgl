@@ -27,31 +27,32 @@
 
 /*exported viewer*/
 var viewer = function() {
-    g.viewMgr.window   = 1;
-    g.viewMgr.red      = true;
-    g.viewMgr.green    = true;
-    g.viewMgr.blue     = true;
-    g.viewMgr.histData = {};
-    g.viewMgr.tex      = {
+    var histData = {};
+    var texMat   = {
         type:   null
     };
 
-    g.viewMgr.draw = function(updateHist) {
-        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
-        if (updateHist) {
-            g.DOM.renderHist();
-            g.viewMgr.pick(0, 0);
-        }
-        g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
-        var webglInput      = g.$("webgl");
-        webglInput.value    = "Render WebGL graph";
-        webglInput.disabled = false;
-        console.timeEnd("1");
+    var prepareShaders = function(fragment) {
+        var vert = g.context.createShader(g.context.VERTEX_SHADER);
+        g.context.shaderSource(vert, g.viewMgr.DotPlot);
+        g.context.compileShader(vert);
+        g.context.attachShader(g.program, vert);
+        var frag = g.context.createShader(g.context.FRAGMENT_SHADER);
+        g.context.shaderSource(frag, g.viewMgr[fragment]);
+        g.context.compileShader(frag);
+        g.context.attachShader(g.program, frag);
     };
 
-    g.viewMgr.render = function(params) {
+    var render = function(params) {
         console.time("1");
-        g.DOM.reinitCont();
+        g.DOM.range1.value  = 255;
+        g.DOM.range2.value  = 0;
+        g.DOM.red.checked   = true;
+        g.DOM.green.checked = true;
+        g.DOM.blue.checked  = true;
+        g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 0%, #fff 100%, #fff 100%)";
+        g.DOM.slider1.value = 0;
+        g.DOM.slider2.value = 0;
         var w = params.seq1.size,
             h = params.seq2.size,
             wS = g.DOM.windowSize.getValue();
@@ -73,23 +74,19 @@ var viewer = function() {
 
         g.program = g.context.createProgram();
 
-        var vert = g.context.createShader(g.context.VERTEX_SHADER);
-        g.context.shaderSource(vert, this.vertex);
-        g.context.compileShader(vert);
-        g.context.attachShader(g.program, vert);
-
-        var frag = g.context.createShader(g.context.FRAGMENT_SHADER);
         if (params.nucleicMatrix) {
-            g.context.shaderSource(frag, this.frag1);
+            prepareShaders("NucleicNucleic");
         } else {
             if (params.seq1.type === params.seq2.type) {
-                g.context.shaderSource(frag, this.frag3);
+                prepareShaders("ProteicProteic");
             } else {
-                g.context.shaderSource(frag, this.frag2);
+                if (params.seq1.type === "proteic") {
+                    prepareShaders("ProteicNucleic");
+                } else {
+                    prepareShaders("NucleicProteic");
+                }
             }
         }
-        g.context.compileShader(frag);
-        g.context.attachShader(g.program, frag);
 
         g.context.linkProgram(g.program);
         g.context.useProgram(g.program);
@@ -113,29 +110,21 @@ var viewer = function() {
         g.program.sizesUniform = g.context.getUniformLocation(g.program, "uSizes");
         g.context.uniform2f(g.program.sizesUniform, w, h);
 
-        this.tex.type = (params.seq1.type === "proteic" || params.seq2.type === "proteic" ) ? "proteic" : "nucleic";
+        texMat.type = (params.seq1.type === "proteic" || params.seq2.type === "proteic" ) ? "proteic" : "nucleic";
 
         var tex = params.nucleicMatrix ? g.nucleicTex : g.proteicTex;
         var texWidth = params.nucleicMatrix ? 16 : 24;
         g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffset");
-        g.context.uniform1f(g.program.sizesUniform, params.offset / (tex.length / texWidth));
-        g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffsetNext");
-        g.context.uniform1f(g.program.sizesUniform, (params.offset + texWidth) / (tex.length / texWidth));
+        g.context.uniform2f(g.program.sizesUniform, params.offset * texWidth / tex.length, texWidth * texWidth / tex.length);
 
         g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
         g.context.uniform1i(g.program.windowUniform, wS);
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
-        g.context.uniform1f(g.program.windowUniform, 1.0);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
-        g.context.uniform1f(g.program.windowUniform, 0.0);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uColors");
+        g.context.uniform3i(g.program.windowUniform, 1, 1, 1);
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uRed");
-        g.context.uniform1i(g.program.windowUniform, 1);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uGreen");
-        g.context.uniform1i(g.program.windowUniform, 1);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uBlue");
-        g.context.uniform1i(g.program.windowUniform, 1);
+        g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
+        g.context.uniform2f(g.program.windowUniform, 1.0, 0.0);
 
         var texCoordLocation = g.context.getAttribLocation(g.program, "aTexCoord");
         g.context.bindBuffer(g.context.ARRAY_BUFFER, g.context.createBuffer());
@@ -156,9 +145,10 @@ var viewer = function() {
         g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
 
         var texLoaded = false;
-        g.seqMgr.getTex(params.seq1.key, this.tex.type, function(texture, string) {
-            g.DOM.slider1.max = texture.length - wS;
-            g.DOM.pickDiv1 = document.createElement("div");
+        g.seqMgr.get(params.seq1.key, texMat.type, function(texture, string) {
+            g.DOM.slider1.max    = texture.length - wS;
+            g.DOM.pickDiv1       = document.createElement("div");
+            g.DOM.pickDiv1.title = params.seq1.name;
             g.DOM.pickDiv1.classList.add("picking-sequences");
             if (typeof string === "string") {
                 if (params.seq1.type === "proteic") {
@@ -208,9 +198,10 @@ var viewer = function() {
             }
         });
 
-        g.seqMgr.getTex(params.seq2.key, this.tex.type, function(texture, string) {
-            g.DOM.slider2.max = texture.length - wS;
-            g.DOM.pickDiv2 = document.createElement("div");
+        g.seqMgr.get(params.seq2.key, texMat.type, function(texture, string) {
+            g.DOM.slider2.max    = texture.length - wS;
+            g.DOM.pickDiv2       = document.createElement("div");
+            g.DOM.pickDiv2.title = params.seq2.name;
             g.DOM.pickDiv2.classList.add("picking-sequences");
             if (typeof string === "string") {
                 for (var i = 0; i < string.length; i++) {
@@ -246,23 +237,12 @@ var viewer = function() {
         });
     };
 
-    g.DOM.countHist = function(channels) {
-        for (var i = 0; i < 256; i++) {
-            g.DOM.hist.children[i * 2].style[g.DOM.transform] = "translate3d(0, -" + ((channels ? (g.viewMgr.histData.histCount[channels][i] / g.viewMgr.histData.maxCount[channels]) : 0) * 200) + "px, 0)";
-            g.DOM.hist.children[i * 2 + 1].style[g.DOM.transform] = "translate3d(0, -" + ((channels ? (g.viewMgr.histData.histLog[channels][i] / g.viewMgr.histData.maxLog[channels]) : 0) * 200) + "px, 0)";
-        }
-        if (!channels) {//all black
-            g.DOM.hist.children[0].style[g.DOM.transform] = "translate3d(0, -200px, 0)";
-            g.DOM.hist.children[1].style[g.DOM.transform] = "translate3d(0, -200px, 0)";
-        }
-    };
-
-    g.DOM.renderHist = function() {
+    var renderHist = function() {
         var w = new Worker("core/workers/histogram.js");
         w.addEventListener("message", function(message) {
             if (typeof message.data.byteLength === "undefined") {
                 Object.keys(message.data).forEach(function(key) {
-                    g.viewMgr.histData[key] = message.data[key];
+                    histData[key] = message.data[key];
                 });
                 g.DOM.countHist("RGB");
             }
@@ -280,6 +260,30 @@ var viewer = function() {
         w.postMessage({pixels: pixels});
     };
 
+    g.viewMgr.draw = function(updateHist) {
+        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
+        if (updateHist) {
+            renderHist();
+            g.viewMgr.pick(0, 0);
+        }
+        g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
+        var webglInput      = g.$("webgl");
+        webglInput.value    = "Render WebGL graph";
+        webglInput.disabled = false;
+        console.timeEnd("1");
+    };
+
+    g.DOM.countHist = function(channels) {
+        for (var i = 0; i < 256; i++) {
+            g.DOM.hist.children[i * 2].style[g.DOM.transform] = "translate3d(0, -" + ((channels ? (histData.histCount[channels][i] / histData.maxCount[channels]) : 0) * 200) + "px, 0)";
+            g.DOM.hist.children[i * 2 + 1].style[g.DOM.transform] = "translate3d(0, -" + ((channels ? (histData.histLog[channels][i] / histData.maxLog[channels]) : 0) * 200) + "px, 0)";
+        }
+        if (!channels) {//all black
+            g.DOM.hist.children[0].style[g.DOM.transform] = "translate3d(0, -200px, 0)";
+            g.DOM.hist.children[1].style[g.DOM.transform] = "translate3d(0, -200px, 0)";
+        }
+    };
+
     g.viewMgr.pick = function(x, y) {
         if (x !== undefined) {
             g.DOM.slider1.value = Math.min(x, g.DOM.slider1.max);
@@ -293,60 +297,50 @@ var viewer = function() {
         }
     };
 
-    var loadShaders = function(shaders, callback) {
-        var responses = shaders.map(function() {return null});
-        var aggregateResponses = function(shaderText, i) {
-            responses[i] = shaderText;
-            if (responses.every(function(r){return r !== null})) {
-                callback(responses);
-            }
-        };
-        shaders.forEach(function(shader, i) {
-            g.xhr2("shaders/" + shader, "text", aggregateResponses, i);
+    ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs"].forEach(function(shaderFile) {
+        g.xhr2("shaders/" + shaderFile, function(shader) {
+            g.viewMgr[shaderFile.split(".")[0]] = shader;
         });
-    };
-    loadShaders(["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicProteic.fs"], function(shaders) {
-        g.viewMgr.vertex = shaders[0];
-        g.viewMgr.frag1  = shaders[1];
-        g.viewMgr.frag2  = shaders[2];
-        g.viewMgr.frag3  = shaders[3];
-        g.executeAfterDOM(function() {
-            var webglInput = g.$("webgl");
-            webglInput.addEventListener("click", function() {
-                webglInput.disabled = true;
-                webglInput.value    = "Rendering…";
-                var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
-                g.DOM.red.disabled   = false;
-                g.DOM.green.disabled = false;
-                g.DOM.blue.disabled  = false;
-                var nucleicMatrix = false;
-                var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
-                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex];
-                if (seq1.dataset.type === seq2.dataset.type) {
-                    if (seq1.dataset.type === "nucleic") {
-                        nucleicMatrix = true;
-                    } else {
-                        g.DOM.red.disabled   = true;
-                        g.DOM.green.disabled = true;
-                        g.DOM.blue.disabled  = true;
-                    }
+    });
+
+    g.executeAfterDOM(function() {
+        var webglInput = g.$("webgl");
+        webglInput.addEventListener("click", function() {
+            webglInput.disabled = true;
+            webglInput.value    = "Rendering…";
+            var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
+            g.DOM.red.disabled   = false;
+            g.DOM.green.disabled = false;
+            g.DOM.blue.disabled  = false;
+            var nucleicMatrix = false;
+            var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
+                seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex];
+            if (seq1.dataset.type === seq2.dataset.type) {
+                if (seq1.dataset.type === "nucleic") {
+                    nucleicMatrix = true;
+                } else {
+                    g.DOM.red.disabled   = true;
+                    g.DOM.green.disabled = true;
+                    g.DOM.blue.disabled  = true;
                 }
-                g.viewMgr.render({
-                    seq1: {
-                        type: seq1.dataset.type,
-                        key:  seq1.dataset.key,
-                        size: parseInt(seq1.dataset.size)
-                    },
-                    seq2: {
-                        type: seq2.dataset.type,
-                        key:  seq2.dataset.key,
-                        size: parseInt(seq2.dataset.size)
-                    },
-                    nucleicMatrix: nucleicMatrix,
-                    offset: offset
-                });
-            }, false);
-            webglInput.disabled = false;
-        });
+            }
+            render({
+                seq1: {
+                    type: seq1.dataset.type,
+                    key:  parseInt(seq1.dataset.key),
+                    name: seq1.textContent,
+                    size: parseInt(seq1.dataset.size)
+                },
+                seq2: {
+                    type: seq2.dataset.type,
+                    key:  parseInt(seq2.dataset.key),
+                    name: seq2.textContent,
+                    size: parseInt(seq2.dataset.size)
+                },
+                nucleicMatrix: nucleicMatrix,
+                offset: offset
+            });
+        }, false);
+        webglInput.disabled = false;
     });
 };

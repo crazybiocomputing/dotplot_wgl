@@ -30,31 +30,35 @@
         script.src = "core/firstLoad.js";
         document.head.appendChild(script);
     };
-    var request = window.indexedDB.open("dotplot", g.dbVersion);
-    request.addEventListener("error", function(e) {
-        console.log("Error opening the DB");
-        console.log(e);
-        alert("Error opening the DB");
-        //FUTURE implement sequence management without IndexedDB
-        /*matrices();
-        firstLoad();*/
-    }, false);
+    if (indexedDB) {
+        var request = indexedDB.open("dotplot", g.dbVersion);
+        request.addEventListener("error", function() {
+            console.log("Error opening the DB, loading data in memory");
+            setTimeout(function() {
+                matrices();
+                firstLoad();
+            }, 100);
+        }, false);
 
-    request.addEventListener("success", function(e) {
-        g.db = e.target.result;
+        request.addEventListener("success", function(e) {
+            g.db = e.target.result;
+            matrices();
+            if (!localStorage.getItem("alreadyVisited")) {
+                firstLoad();
+            }
+        }, false);
+
+        request.addEventListener("upgradeneeded", function(e) {
+            g.db = e.target.result;
+            if (!g.db.objectStoreNames.contains("sequencesMetadata")) {
+                g.db.createObjectStore("sequencesMetadata", {keyPath: "key"});
+            }
+            if (!g.db.objectStoreNames.contains("sequences")) {
+                g.db.createObjectStore("sequences", {autoIncrement: true});
+            }
+        }, false);
+    } else {
         matrices();
-        if (!localStorage.getItem("alreadyVisited")) {
-            firstLoad();
-        }
-    });
-
-    request.addEventListener("upgradeneeded", function(e) {
-        g.db = e.target.result;
-        if (!g.db.objectStoreNames.contains("sequencesMetadata")) {
-            g.db.createObjectStore("sequencesMetadata", {keyPath: "key"});
-        }
-        if (!g.db.objectStoreNames.contains("sequences")) {
-            g.db.createObjectStore("sequences", {autoIncrement: true});
-        }
-    });
+        firstLoad();
+    }
 })();
