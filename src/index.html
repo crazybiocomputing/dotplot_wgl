@@ -11,14 +11,20 @@
     <link rel='icon' href='images/favicon-128.png' sizes='128x128'>
     <link rel='stylesheet' href='stylesheets/style.css'>
     <title>{{name}} | {{description}}</title>
-    <script src='core/1-global.js'></script>
-    <script src='core/2-interface.js'></script>
-    <script src='core/3-viewer.js'></script>
-    <script src='core/4-sequences.js'></script>
-    <script src='core/5-matrices.js'></script>
-    <script src='core/6-main.js'></script>
+    <script src='core/global.js'></script>
+    <script src='core/interface.js'></script>
+    <script src='core/viewer.js'></script>
+    <script src='core/sequences.js'></script>
+    <script src='core/matrices.js'></script>
+    <script src='core/main.js'></script>
 </head>
 <body>
+    <div id='compatibility'>
+        <p>It seems your browser doesn't support some important features</p>
+        <p>{{name}} might not work at all with your configuration</p>
+        <p>You can try updating your current browser or download an other one</p>
+        <a href='https://www.mozilla.org/firefox/new/'>Download the latest version of Firefox</a>
+    </div>
     <section id='main' class='active-section'>
         <nav>
             <a data-target='settings' class='internal-nav'>Settings and Documentation</a>

@@ -25,13 +25,24 @@
  */
 
 (function() {
+    var testCanvas = document.createElement("canvas");
+    if (window.Worker && window.WebGLRenderingContext && (testCanvas.getContext("webgl") || testCanvas.getContext("experimental-webgl"))) {//test limiting features
+        g.executeAfterDOM(function () {
+            g.$("compatibility").classList.add("hidden");
+        });
+    } else {
+        document.addEventListener("click", function() {
+            g.$("compatibility").classList.add("hidden");
+            document.removeEventListener("click", arguments.callee, false);
+        }, false);
+    }
     var firstLoad = function() {
         var script = document.createElement("script");
         script.src = "core/firstLoad.js";
         document.head.appendChild(script);
     };
-    if (indexedDB) {
-        var request = indexedDB.open("dotplot", g.dbVersion);
+    if (window.indexedDB) {
+        var request = window.indexedDB.open("dotplot", g.dbVersion);
         request.addEventListener("error", function() {
             console.log("Error opening the DB, loading data in memory");
             setTimeout(function() {

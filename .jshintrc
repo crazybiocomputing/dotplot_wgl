@@ -13,9 +13,7 @@
         "g":            false,
         "sequences":    false,
         "matrices":     false,
-        "viewer":       false,
-        "Notification": false,
-        "indexedDB":    false
+        "viewer":       false
     },
     "lastsemic": true,
     "browser":   true,

@@ -57,8 +57,8 @@ var sequences = function() {
         w.addEventListener("message", function(message) {
             switch (message.data.status) {
                 case "error":
-                    if (Notification && Notification.permission === "granted") {
-                        new Notification("Error", {body: message.data.message, icon: "images/favicon-128.png"});
+                    if (window.Notification && window.Notification.permission === "granted") {
+                        new window.Notification("Error", {body: message.data.message, icon: "images/favicon-128.png"});
                     }
                     break;
                 case "sequence":
@@ -71,8 +71,8 @@ var sequences = function() {
                     addClean(message.data);
                     break;
                 case "done":
-                    if (Notification && Notification.permission === "granted") {
-                        new Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteic: " + proteics, tag: parseInt(Date.now() / 2000), icon: "images/favicon-128.png"});
+                    if (window.Notification && window.Notification.permission === "granted") {
+                        new window.Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteic: " + proteics, tag: parseInt(Date.now() / 2000), icon: "images/favicon-128.png"});
                     }
                     break;
             }
@@ -80,7 +80,8 @@ var sequences = function() {
         w.postMessage({
             rawInput:      rawInput,
             proposedNames: proposedNames,
-            type:          type
+            type:          type,
+            transf:        g.transf
         });
     };
 

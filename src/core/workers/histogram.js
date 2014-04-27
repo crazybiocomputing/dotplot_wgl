@@ -84,9 +84,7 @@ self.addEventListener("message", function(message) {
         maxLog.B         = Math.max(maxLog.B, histLog.B[i]);
     }
 
-    var test = new ArrayBuffer(1);
-    self.postMessage(test, [test]);
-    if (test) {
+    if (message.data.transf) {
         self.postMessage({
             maxCount:   maxCount,
             maxLog:     maxLog,

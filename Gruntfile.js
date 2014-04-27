@@ -33,7 +33,14 @@ module.exports = function(grunt) {
                 report: "gzip"
             },
             core: {
-                src: ["dist/<%= pkg.version %>/core/*.js", "!dist/<%= pkg.version %>/core/firstLoad.js"],
+                src: [
+                    "dist/<%= pkg.version %>/core/global.js",
+                    "dist/<%= pkg.version %>/core/interface.js",
+                    "dist/<%= pkg.version %>/core/viewer.js",
+                    "dist/<%= pkg.version %>/core/sequences.js",
+                    "dist/<%= pkg.version %>/core/matrices.js",
+                    "dist/<%= pkg.version %>/core/main.js"
+                ],
                 dest: "dist/<%= pkg.version %>/core/<%= pkg.name %>.min.js"
             },
             firstLoad: {
@@ -48,6 +55,9 @@ module.exports = function(grunt) {
             }
         },
         autoprefixer: {
+            options: {
+                browsers: ["last 2 versions", "Firefox >= 3.5", "Chrome >= 4", "Safari >= 4", "Opera >= 10.6", "Explorer >= 10", "iOS >= 5"]
+            },
             build: {
                 expand: true,
                 flatten: true,

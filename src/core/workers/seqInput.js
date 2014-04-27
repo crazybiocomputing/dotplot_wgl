@@ -224,6 +224,7 @@ var geneticCode = function(codon) {
         return "X";
     }
 };
+var transf;
 
 var xhr2 = function(url, names, type, callback) {
     var req = new XMLHttpRequest();
@@ -338,6 +339,7 @@ var fileToString = function(file, names, type) {
 };
 
 self.addEventListener("message", function(message) {
+    transf = message.data.transf;
     //gets and cleans up names passed by user
     var names = message.data.proposedNames.split(/\s*,\s*/).filter(function(name) {
         return Boolean(name);

@@ -11,6 +11,10 @@ body {
     font-family: Verdana, Geneva, sans-serif;
 }
 
+#compatibility {
+    background: lightcoral;
+}
+
 nav > a {
     margin: 0.1em;
     padding: 0.3em;

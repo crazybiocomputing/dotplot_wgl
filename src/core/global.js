@@ -42,10 +42,47 @@ var g = {
     seqMgr:    {},
     matMgr:    {},
     viewMgr:   {},
-    //Document Object Model handles
+    //Document Object Model handles and variables
     DOM:       {
-        liTempl: document.createElement("li")
+        liTempl:   (function() {
+            var li  = document.createElement("li"),
+                div = document.createElement("div");
+            li.appendChild(div.cloneNode(true));
+            li.appendChild(div.cloneNode(true));
+            div.classList.add("remove");
+            div.textContent = "×";
+            li.appendChild(div);
+            return li;
+        })(),
+        transform: (function() {
+            var test     = document.createElement("div"),
+                prefixes = ["transform", "MozTransform", "WebkitTransform", "OTransform", "msTransform"];
+            for (var i = 0; i < prefixes.length; i++) {
+                if (test.style[prefixes[i]] !== undefined) {
+                    return prefixes[i];
+                }
+            }
+        })()
     },
+    //Support for transferable objects in Workers
+    transf:    (function() {
+        var ab = new ArrayBuffer(1),
+            w  = new Worker(URL.createObjectURL(new Blob([""], {type: "application/javascript"})));
+        w.postMessage(ab, [ab]);
+        return ab.byteLength === 0;
+    })(),
+    //requestAnimationFrame, or fallback (do things at ≈ monitor refresh rate)
+    rAF:       (function() {
+        if (window.requestAnimationFrame) {
+            return function(callback) {window.requestAnimationFrame(callback);};
+        } else if (window.webkitRequestAnimationFrame) {
+            return function(callback) {window.webkitRequestAnimationFrame(callback);};
+        } else if (window.mozRequestAnimationFrame) {
+            return function(callback) {window.mozRequestAnimationFrame(callback);};
+        } else {
+            return function(callback) {setTimeout(callback, 16)};
+        }
+    })(),
     //useful functions
     //executes a function after DOM has loaded
     executeAfterDOM: function(callback) {
@@ -63,7 +100,7 @@ var g = {
     xhr2: function(url, callback, type) {
         var req = new XMLHttpRequest();
         req.open("GET", url, true);
-        req.responseType = type || "text";
+        req.responseType = type;
         req.addEventListener("load", function() {
             if (this.status === 200) {
                 callback(this.response);
@@ -72,24 +109,6 @@ var g = {
         req.send();
     }
 };
-
-(function() {
-    var div = document.createElement("div");
-    g.DOM.liTempl.appendChild(div.cloneNode(true));
-    g.DOM.liTempl.appendChild(div.cloneNode(true));
-    div.classList.add("remove");
-    div.textContent = "×";
-    g.DOM.liTempl.appendChild(div.cloneNode(true));
-
-    //Determine which vendor prefixes to use
-    var prefixes = ["transform", "MozTransform", "WebkitTransform", "OTransform", "msTransform"];
-    for (var i = 0; i < prefixes.length; i++) {
-        if (typeof div.style[prefixes[i]] !== "undefined") {
-            g.DOM.transform = prefixes[i];
-            break;
-        }
-    }
-}());
 
 g.executeAfterDOM(function() {
     g.DOM.canvas     = g.$("canvas");
@@ -114,11 +133,11 @@ g.executeAfterDOM(function() {
     g.DOM.windowSize.getValue = function() {
         return Math.max(Math.round(this.value), 1);
     };
-    var sliders = document.getElementsByClassName("picking-slider");
+    var sliders  = document.getElementsByClassName("picking-slider");
     g.DOM.slider1    = sliders[0];
     g.DOM.slider2    = sliders[1];
     g.DOM.pick       = g.$("picking-sequences-cont");
-    var pickers = document.getElementsByClassName("pickers");
+    var pickers  = document.getElementsByClassName("pickers");
     g.DOM.picker1    = pickers[0];
     g.DOM.picker2    = pickers[1];
 });

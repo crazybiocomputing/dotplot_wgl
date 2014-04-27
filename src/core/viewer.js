@@ -27,6 +27,7 @@
 
 /*exported viewer*/
 var viewer = function() {
+    g.viewMgr.rendering = false;
     var histData = {};
     var texMat   = {
         type:   null
@@ -257,7 +258,10 @@ var viewer = function() {
         console.log(pixels[2]);
         console.log(pixels[3]);
         console.log(pixels[4]);*/
-        w.postMessage({pixels: pixels});
+        w.postMessage({
+            pixels: pixels,
+            transf: g.transf
+        });
     };
 
     g.viewMgr.draw = function(updateHist) {
@@ -269,7 +273,10 @@ var viewer = function() {
         g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
         var webglInput      = g.$("webgl");
         webglInput.value    = "Render WebGL graph";
-        webglInput.disabled = false;
+        g.rAF(function() {
+            webglInput.disabled = false;
+        });
+        g.viewMgr.rendering = false;
         console.timeEnd("1");
     };
 
@@ -306,40 +313,43 @@ var viewer = function() {
     g.executeAfterDOM(function() {
         var webglInput = g.$("webgl");
         webglInput.addEventListener("click", function() {
-            webglInput.disabled = true;
-            webglInput.value    = "Rendering…";
-            var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
-            g.DOM.red.disabled   = false;
-            g.DOM.green.disabled = false;
-            g.DOM.blue.disabled  = false;
-            var nucleicMatrix = false;
-            var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
-                seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex];
-            if (seq1.dataset.type === seq2.dataset.type) {
-                if (seq1.dataset.type === "nucleic") {
-                    nucleicMatrix = true;
-                } else {
-                    g.DOM.red.disabled   = true;
-                    g.DOM.green.disabled = true;
-                    g.DOM.blue.disabled  = true;
+            if (!g.viewMgr.rendering) {
+                g.viewMgr.rendering = true;
+                webglInput.disabled = true;
+                webglInput.value    = "Rendering…";
+                var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
+                g.DOM.red.disabled   = false;
+                g.DOM.green.disabled = false;
+                g.DOM.blue.disabled  = false;
+                var nucleicMatrix = false;
+                var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
+                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex];
+                if (seq1.dataset.type === seq2.dataset.type) {
+                    if (seq1.dataset.type === "nucleic") {
+                        nucleicMatrix = true;
+                    } else {
+                        g.DOM.red.disabled   = true;
+                        g.DOM.green.disabled = true;
+                        g.DOM.blue.disabled  = true;
+                    }
                 }
+                render({
+                    seq1: {
+                        type: seq1.dataset.type,
+                        key:  parseInt(seq1.dataset.key),
+                        name: seq1.textContent,
+                        size: parseInt(seq1.dataset.size)
+                    },
+                    seq2: {
+                        type: seq2.dataset.type,
+                        key:  parseInt(seq2.dataset.key),
+                        name: seq2.textContent,
+                        size: parseInt(seq2.dataset.size)
+                    },
+                    nucleicMatrix: nucleicMatrix,
+                    offset: offset
+                });
             }
-            render({
-                seq1: {
-                    type: seq1.dataset.type,
-                    key:  parseInt(seq1.dataset.key),
-                    name: seq1.textContent,
-                    size: parseInt(seq1.dataset.size)
-                },
-                seq2: {
-                    type: seq2.dataset.type,
-                    key:  parseInt(seq2.dataset.key),
-                    name: seq2.textContent,
-                    size: parseInt(seq2.dataset.size)
-                },
-                nucleicMatrix: nucleicMatrix,
-                offset: offset
-            });
         }, false);
         webglInput.disabled = false;
     });

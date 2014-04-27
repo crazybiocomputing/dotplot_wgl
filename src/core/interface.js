@@ -38,17 +38,18 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.DOM.windowSize.addEventListener("input", function() {
-        g.DOM.range1.value = 255;
-        g.DOM.range2.value = 0;
-        g.DOM.hist.style.background = "";
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMax");
-        g.context.uniform1f(g.program.windowUniform, 1.0);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uMin");
-        g.context.uniform1f(g.program.windowUniform, 0.0);
-        g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
-        g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
-        g.viewMgr.draw(true);
+        if (g.context && !g.viewMgr.rendering) {
+            g.viewMgr.rendering = true;
+            g.DOM.range1.value = 255;
+            g.DOM.range2.value = 0;
+            g.DOM.hist.style.background = "";
+            g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
+            g.context.uniform2f(g.program.windowUniform, 1.0, 0.0);
+            g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
+            g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
+            g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
+            g.viewMgr.draw(true);
+        }
     });
 
     g.$("download").addEventListener("click", function() {
@@ -80,18 +81,18 @@ g.executeAfterDOM(function() {
     }, false);
 
     g.$("clean-up").addEventListener("click", function() {
-        indexedDB.deleteDatabase("dotplot");
+        window.indexedDB.deleteDatabase("dotplot");
         try {
             localStorage.removeItem("alreadyVisited");
         } catch(err) {}
         location.reload(true);
     }, false);
 
-    if (Notification && Notification.permission !== "granted") {
+    if (window.Notification && window.Notification.permission !== "granted") {
         g.$("notifications").addEventListener("click", function() {
-            Notification.requestPermission(function(e) {
+            window.Notification.requestPermission(function(e) {
                 if (e === "granted") {
-                    new Notification("Success", {body: "Notifications will now be used when importing sequences", icon: "images/favicon-128.png"});
+                    new window.Notification("Success", {body: "Notifications will now be used when importing sequences", icon: "images/favicon-128.png"});
                 }
             });
         }, false);
@@ -192,19 +193,22 @@ g.executeAfterDOM(function() {
     g.DOM.hist.appendChild(fragment);
 
     var updateColor = function() {
-        var v1    = g.DOM.range1.value / 2.55,
-            v2    = g.DOM.range2.value / 2.55,
-            color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
-        if (v1 >= v2) {
-            g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
-        } else {
-            g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
-        }
-        g.DOM.countHist((g.DOM.red.checked ? "R" : "") + (g.DOM.green.checked ? "G" : "") + (g.DOM.blue.checked ? "B" : ""));
+        if (g.context && !g.viewMgr.rendering) {
+            g.viewMgr.rendering = true;
+            var v1    = g.DOM.range1.value / 2.55,
+                v2    = g.DOM.range2.value / 2.55,
+                color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
+            if (v1 >= v2) {
+                g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
+            } else {
+                g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
+            }
+            g.DOM.countHist((g.DOM.red.checked ? "R" : "") + (g.DOM.green.checked ? "G" : "") + (g.DOM.blue.checked ? "B" : ""));
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uColors");
-        g.context.uniform3i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0, g.DOM.green.checked ? 1 : 0, g.DOM.blue.checked ? 1 : 0);
-        g.viewMgr.draw(false);
+            g.program.windowUniform = g.context.getUniformLocation(g.program, "uColors");
+            g.context.uniform3i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0, g.DOM.green.checked ? 1 : 0, g.DOM.blue.checked ? 1 : 0);
+            g.viewMgr.draw(false);
+        }
     };
 
     g.DOM.red.addEventListener("change", updateColor, false);
@@ -220,19 +224,22 @@ g.executeAfterDOM(function() {
     };
 
     var updateTransfer = function() {
-        var v1    = g.DOM.range1.value / 2.55,
-            v2    = g.DOM.range2.value / 2.55,
-            color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
-        if (v1 >= v2) {
-            g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
-        } else {
-            g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
-        }
+        if (g.context && !g.viewMgr.rendering) {
+            g.viewMgr.rendering = true;
+            var v1    = g.DOM.range1.value / 2.55,
+                v2    = g.DOM.range2.value / 2.55,
+                color = (g.DOM.red.checked ? "f" : "0") + (g.DOM.green.checked ? "f" : "0") + (g.DOM.blue.checked ? "f" : "0");
+            if (v1 >= v2) {
+                g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 " + v2 + "%, #" + color + " " + v1 + "%, #" + color + " 100%)";
+            } else {
+                g.DOM.hist.style.background = "linear-gradient(to right, #" + color + " 0, #" + color + " " + v1 + "%, #000 " + v2 + "%, #000 100%)";
+            }
 
-        var params = linearEq(v2, v1);
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
-        g.context.uniform2f(g.program.windowUniform, params.a, params.b);
-        g.viewMgr.draw(false);
+            var params = linearEq(v2, v1);
+            g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
+            g.context.uniform2f(g.program.windowUniform, params.a, params.b);
+            g.viewMgr.draw(false);
+        }
     };
 
     g.DOM.range1.addEventListener("input", updateTransfer, false);
