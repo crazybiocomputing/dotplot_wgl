@@ -28,20 +28,18 @@
 /*exported viewer*/
 var viewer = function() {
     g.viewMgr.rendering = false;
-    var histData = {};
-    var texMat   = {
-        type:   null
-    };
+    var histData = {},
+        gl, prog;
 
     var prepareShaders = function(fragment) {
-        var vert = g.context.createShader(g.context.VERTEX_SHADER);
-        g.context.shaderSource(vert, g.viewMgr.DotPlot);
-        g.context.compileShader(vert);
-        g.context.attachShader(g.program, vert);
-        var frag = g.context.createShader(g.context.FRAGMENT_SHADER);
-        g.context.shaderSource(frag, g.viewMgr[fragment]);
-        g.context.compileShader(frag);
-        g.context.attachShader(g.program, frag);
+        var vert = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vert, g.viewMgr.DotPlot);
+        gl.compileShader(vert);
+        gl.attachShader(prog, vert);
+        var frag = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(frag, g.viewMgr[fragment]);
+        gl.compileShader(frag);
+        gl.attachShader(prog, frag);
     };
 
     var render = function(params) {
@@ -64,89 +62,78 @@ var viewer = function() {
         g.DOM.canvas.style.height  = h + "px";
         g.DOM.picker1.style.height = (h + 1 - wS) + "px";
         g.DOM.picker2.style.width  = (w + 1 - wS) + "px";
-        g.context = g.DOM.canvas.getContext(
+        gl = g.context = g.DOM.canvas.getContext(
             "webgl", {alpha: false, preserveDrawingBuffer: true}
         ) || g.DOM.canvas.getContext(
             "experimental-webgl", {alpha: false, preserveDrawingBuffer: true}
         );
-        g.context.viewport(0, 0, w, h);
-        g.context.clearColor(1.0, 1.0, 1.0, 1.0);
-        g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
+        gl.viewport(0, 0, w, h);
+        gl.clearColor(1.0, 1.0, 1.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
-        g.program = g.context.createProgram();
+        prog = g.program = gl.createProgram();
 
         if (params.nucleicMatrix) {
-            prepareShaders("NucleicNucleic");
+            prepareShaders("NucleicNucleic", gl);
         } else {
             if (params.seq1.type === params.seq2.type) {
-                prepareShaders("ProteicProteic");
+                prepareShaders("ProteicProteic", gl);
             } else {
                 if (params.seq1.type === "proteic") {
-                    prepareShaders("ProteicNucleic");
+                    prepareShaders("ProteicNucleic", gl);
                 } else {
-                    prepareShaders("NucleicProteic");
+                    prepareShaders("NucleicProteic", gl);
                 }
             }
         }
 
-        g.context.linkProgram(g.program);
-        g.context.useProgram(g.program);
+        gl.linkProgram(prog);
+        gl.useProgram(prog);
 
-        g.context.bindBuffer(g.context.ARRAY_BUFFER, g.context.createBuffer());
-        g.context.bufferData(g.context.ARRAY_BUFFER, new Float32Array([
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
             -1,  1,  1,  1,  1, -1,
             -1,  1,  1, -1, -1, -1
-        ]), g.context.STATIC_DRAW);
-        g.program.vertexPosAttrib = g.context.getAttribLocation(g.program, "aVertexPosition");
-        g.context.enableVertexAttribArray(g.program.vertexPosArray);
-        g.context.vertexAttribPointer(g.program.vertexPosAttrib, 2, g.context.FLOAT, false, 0, 0);
+        ]), gl.STATIC_DRAW);
+        var vertexPosAttrib = gl.getAttribLocation(prog, "aVertexPosition");
+        gl.enableVertexAttribArray(vertexPosAttrib);
+        gl.vertexAttribPointer(vertexPosAttrib, 2, gl.FLOAT, false, 0, 0);
 
-        g.program.umat = g.context.getUniformLocation(g.program, "uSamplerMat");
-        g.context.uniform1i(g.program.umat, 0);
-        g.program.utex1 = g.context.getUniformLocation(g.program, "uSampler1");
-        g.context.uniform1i(g.program.utex1, 1);
-        g.program.utex2 = g.context.getUniformLocation(g.program, "uSampler2");
-        g.context.uniform1i(g.program.utex2, 2);
+        gl.uniform1i(gl.getUniformLocation(prog, "uSamplerMat"), 0);
+        gl.uniform1i(gl.getUniformLocation(prog, "uSampler1"), 1);
+        gl.uniform1i(gl.getUniformLocation(prog, "uSampler2"), 2);
 
-        g.program.sizesUniform = g.context.getUniformLocation(g.program, "uSizes");
-        g.context.uniform2f(g.program.sizesUniform, w, h);
-
-        texMat.type = (params.seq1.type === "proteic" || params.seq2.type === "proteic" ) ? "proteic" : "nucleic";
+        gl.uniform2f(gl.getUniformLocation(prog, "uSizes"), w, h);
 
         var tex = params.nucleicMatrix ? g.nucleicTex : g.proteicTex;
         var texWidth = params.nucleicMatrix ? 16 : 24;
-        g.program.sizesUniform = g.context.getUniformLocation(g.program, "uOffset");
-        g.context.uniform2f(g.program.sizesUniform, params.offset * texWidth / tex.length, texWidth * texWidth / tex.length);
+        gl.uniform2f(gl.getUniformLocation(prog, "uOffset"), params.offset * texWidth / tex.length, texWidth * texWidth / tex.length);
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
-        g.context.uniform1i(g.program.windowUniform, wS);
+        gl.uniform1i(gl.getUniformLocation(prog, "uWindow"), wS);
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uColors");
-        g.context.uniform3i(g.program.windowUniform, 1, 1, 1);
+        gl.uniform3i(gl.getUniformLocation(prog, "uColors"), 1, 1, 1);
 
-        g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
-        g.context.uniform2f(g.program.windowUniform, 1.0, 0.0);
+        gl.uniform2f(gl.getUniformLocation(prog, "uTransfer"), 1.0, 0.0);
 
-        var texCoordLocation = g.context.getAttribLocation(g.program, "aTexCoord");
-        g.context.bindBuffer(g.context.ARRAY_BUFFER, g.context.createBuffer());
-        g.context.bufferData(g.context.ARRAY_BUFFER, new Float32Array([
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
             0, 0, 1, 0, 1, 1,
             0, 0, 1, 1, 0, 1
-        ]), g.context.STATIC_DRAW);
-        g.context.enableVertexAttribArray(texCoordLocation);
-        g.context.vertexAttribPointer(texCoordLocation, 2, g.context.FLOAT, false, 0, 0);
+        ]), gl.STATIC_DRAW);
+        var texCoordLocation = gl.getAttribLocation(prog, "aTexCoord");
+        gl.enableVertexAttribArray(texCoordLocation);
+        gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
-        var mat = g.context.createTexture();
-        g.context.activeTexture(g.context.TEXTURE0);
-        g.context.bindTexture(g.context.TEXTURE_2D, mat);
-        g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.LUMINANCE, texWidth, tex.length / texWidth, 0, g.context.LUMINANCE, g.context.UNSIGNED_BYTE, tex);
-        g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
-        g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
-        g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
-        g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
         var texLoaded = false;
-        g.seqMgr.get(params.seq1.key, texMat.type, function(texture, string) {
+        g.seqMgr.get(params.seq1.key, params.nucleicMatrix, function(texture, string) {
             g.DOM.slider1.max    = texture.length - wS;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = params.seq1.name;
@@ -184,14 +171,13 @@ var viewer = function() {
                 });
             }
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
-            var tex = g.context.createTexture();
-            g.context.activeTexture(g.context.TEXTURE1);
-            g.context.bindTexture(g.context.TEXTURE_2D, tex);
-            g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.LUMINANCE, w, 1, 0, g.context.LUMINANCE, g.context.UNSIGNED_BYTE, texture);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             if (texLoaded) {
                 g.viewMgr.draw(true);
             } else {
@@ -199,7 +185,7 @@ var viewer = function() {
             }
         });
 
-        g.seqMgr.get(params.seq2.key, texMat.type, function(texture, string) {
+        g.seqMgr.get(params.seq2.key, params.nucleicMatrix, function(texture, string) {
             g.DOM.slider2.max    = texture.length - wS;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = params.seq2.name;
@@ -222,14 +208,13 @@ var viewer = function() {
                 });
             }
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
-            var tex = g.context.createTexture();
-            g.context.activeTexture(g.context.TEXTURE2);
-            g.context.bindTexture(g.context.TEXTURE_2D, tex);
-            g.context.texImage2D(g.context.TEXTURE_2D, 0, g.context.LUMINANCE, h, 1, 0, g.context.LUMINANCE, g.context.UNSIGNED_BYTE, texture);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_S, g.context.CLAMP_TO_EDGE);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_WRAP_T, g.context.CLAMP_TO_EDGE);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MAG_FILTER, g.context.NEAREST);
-            g.context.texParameteri(g.context.TEXTURE_2D, g.context.TEXTURE_MIN_FILTER, g.context.NEAREST);
+            gl.activeTexture(gl.TEXTURE2);
+            gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             if (texLoaded) {
                 g.viewMgr.draw(true);
             } else {
@@ -252,7 +237,7 @@ var viewer = function() {
         //FIXME problem with window size (white pixels)
         var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
         //console.log(pixels.length);
-        g.context.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, g.context.RGBA, g.context.UNSIGNED_BYTE, pixels);
+        gl.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
         /*console.log(pixels[0]);
         console.log(pixels[1]);
         console.log(pixels[2]);
@@ -265,7 +250,7 @@ var viewer = function() {
     };
 
     g.viewMgr.draw = function(updateHist) {
-        g.context.drawArrays(g.context.TRIANGLES, 0, 6);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
         if (updateHist) {
             renderHist();
             g.viewMgr.pick(0, 0);

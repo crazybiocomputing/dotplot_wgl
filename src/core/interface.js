@@ -43,11 +43,9 @@ g.executeAfterDOM(function() {
             g.DOM.range1.value = 255;
             g.DOM.range2.value = 0;
             g.DOM.hist.style.background = "";
-            g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
-            g.context.uniform2f(g.program.windowUniform, 1.0, 0.0);
             g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
-            g.program.windowUniform = g.context.getUniformLocation(g.program, "uWindow");
-            g.context.uniform1i(g.program.windowUniform, g.DOM.windowSize.getValue());
+            g.context.uniform2f(g.context.getUniformLocation(g.program, "uTransfer"), 1.0, 0.0);
+            g.context.uniform1i(g.context.getUniformLocation(g.program, "uWindow"), g.DOM.windowSize.getValue());
             g.viewMgr.draw(true);
         }
     });
@@ -167,8 +165,8 @@ g.executeAfterDOM(function() {
         cleanAfterInput();
     }, false);
 
-    var fragment = document.createDocumentFragment();
-    var barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    var fragment = document.createDocumentFragment(),
+        barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
     barCount.classList.add("count");
     barCount.setAttribute("y1", "200.5%");
     barCount.setAttribute("y2", "100.5%");
@@ -205,8 +203,7 @@ g.executeAfterDOM(function() {
             }
             g.DOM.countHist((g.DOM.red.checked ? "R" : "") + (g.DOM.green.checked ? "G" : "") + (g.DOM.blue.checked ? "B" : ""));
 
-            g.program.windowUniform = g.context.getUniformLocation(g.program, "uColors");
-            g.context.uniform3i(g.program.windowUniform, g.DOM.red.checked ? 1 : 0, g.DOM.green.checked ? 1 : 0, g.DOM.blue.checked ? 1 : 0);
+            g.context.uniform3i(g.context.getUniformLocation(g.program, "uColors"), g.DOM.red.checked ? 1 : 0, g.DOM.green.checked ? 1 : 0, g.DOM.blue.checked ? 1 : 0);
             g.viewMgr.draw(false);
         }
     };
@@ -236,8 +233,7 @@ g.executeAfterDOM(function() {
             }
 
             var params = linearEq(v2, v1);
-            g.program.windowUniform = g.context.getUniformLocation(g.program, "uTransfer");
-            g.context.uniform2f(g.program.windowUniform, params.a, params.b);
+            g.context.uniform2f(g.context.getUniformLocation(g.program, "uTransfer"), params.a, params.b);
             g.viewMgr.draw(false);
         }
     };

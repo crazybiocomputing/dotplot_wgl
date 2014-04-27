@@ -144,7 +144,8 @@ var sequences = function() {
             }, false);
         };
 
-        g.seqMgr.get = function(key, type, callback) {
+        g.seqMgr.get = function(key, nucleic, callback) {
+            var type = nucleic ? "nucleic" : "proteic";
             g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(key).addEventListener("success", function(e) {
                 callback(e.target.result[type], e.target.result[type + "S"]);
             }, false);
@@ -183,8 +184,9 @@ var sequences = function() {
             addDOM([item]);
         };
 
-        g.seqMgr.get = function(key, type, callback) {
-            var item;
+        g.seqMgr.get = function(key, nucleic, callback) {
+            var type = nucleic ? "nucleic" : "proteic",
+                item;
             for (var i = 0; i < list.length; i++) {
                 if (list[i].key === key) {
                     item = list[i];

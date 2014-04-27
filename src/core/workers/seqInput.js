@@ -247,10 +247,10 @@ var xhr2 = function(url, names, type, callback) {
 };
 
 var sequenceParser = function(wholeSequence, i) {
-    var type     = this.type;
-    var comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/);
+    var type     = this.type,
+        comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/),
+        sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/\s/g, "");
     comment = (comment) ? comment[0] : "";
-    var sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/\s/g, "");
     if (type === "unknown") {
         type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
     }
@@ -267,10 +267,9 @@ var sequenceParser = function(wholeSequence, i) {
             this.names[i] = "sequence " + (i + 1);
         }
     }
-    var seq;
     if (type === "nucleic") {
-        seq = sequence.toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N");
-        var interlacedProt = "";
+        var seq = sequence.toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N"),
+            interlacedProt = "";
         for (var j = 0; j < seq.length - 2; j++) {
             interlacedProt += geneticCode(seq.charAt(j) + seq.charAt(j + 1) + seq.charAt(j + 2));
         }
@@ -289,7 +288,7 @@ var sequenceParser = function(wholeSequence, i) {
             status: "sequence"
         });
     } else {
-        seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
+        var seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
         self.postMessage({
             proteic: stringToTypedArray(seq, normProt),
             proteicS: seq,
@@ -341,9 +340,7 @@ var fileToString = function(file, names, type) {
 self.addEventListener("message", function(message) {
     transf = message.data.transf;
     //gets and cleans up names passed by user
-    var names = message.data.proposedNames.split(/\s*,\s*/).filter(function(name) {
-        return Boolean(name);
-    });
+    var names = message.data.proposedNames.split(/\s*,\s*/).filter(function(e) {return e;});
     if (typeof message.data.rawInput !== "string") {//A File was passed
         var type = message.data.type;
         if (type === "unknown") {
