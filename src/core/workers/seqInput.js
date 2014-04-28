@@ -246,6 +246,25 @@ var xhr2 = function(url, names, type, callback) {
     req.send();
 };
 
+var comp = {
+    "A": "T",
+    "T": "A",
+    "U": "A",
+    "C": "G",
+    "G": "C",
+    "K": "M",
+    "M": "K",
+    "R": "Y",
+    "Y": "R",
+    "S": "S",
+    "W": "W",
+    "B": "V",
+    "V": "B",
+    "H": "D",
+    "D": "H",
+    "N": "N"
+};
+
 var sequenceParser = function(wholeSequence, i) {
     var type     = this.type,
         comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/),
@@ -273,19 +292,32 @@ var sequenceParser = function(wholeSequence, i) {
         for (var j = 0; j < seq.length - 2; j++) {
             interlacedProt += geneticCode(seq.charAt(j) + seq.charAt(j + 1) + seq.charAt(j + 2));
         }
+	var rev = "";
+	for (j = seq.length; j; j--) {
+	    rev += seq.charAt(j - 1);
+	}
+	var revComp = "";
+	for (j = 0; j < rev.length; j++){
+	    revComp += comp[rev.charAt(j)];
+	}
+	var interlacedNuc = "";
+	for (j = 0; j < seq.length; j++) {
+	    interlacedNuc += seq.charAt(j) + rev.charAt(j) + revComp.charAt(j);
+	}
         var sequenceTrS = ["", "", ""];
         for (j = 0; j < interlacedProt.length; j++) {
             sequenceTrS[j % 3] += interlacedProt.charAt(j);
         }
         self.postMessage({
-            nucleic: stringToTypedArray(seq, normDNA),
-            nucleicS: seq,
+            nucleic: stringToTypedArray(interlacedNuc, normDNA),
+            nucleicS: [seq, rev, revComp],
             proteic: stringToTypedArray(interlacedProt, normProt),
             proteicS: sequenceTrS,
             name: this.names[i],
             type: type,
             comment: comment,
-            status: "sequence"
+            status: "sequence",
+	    size: seq.length
         });
     } else {
         var seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
@@ -295,7 +327,8 @@ var sequenceParser = function(wholeSequence, i) {
             name: this.names[i],
             type: type,
             comment: comment,
-            status: "sequence"
+            status: "sequence",
+	    size: seq.length
         });
     }
 };

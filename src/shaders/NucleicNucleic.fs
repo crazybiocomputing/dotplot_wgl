@@ -10,7 +10,7 @@ uniform ivec3 uColors;
 uniform vec2 uSizes;
 vec2 onePixel = 1.0 / uSizes;
 
-float calc(bool reverse) {
+float calc(bool reverse, int index) {
     float channel = 0.0;
     for (int i = 0; i != -1; i++) {
             if (i == uWindow) {
@@ -18,8 +18,8 @@ float calc(bool reverse) {
             }
             channel += texture2D(uSamplerMat, vec2(
                 texture2D(
-                    uSampler1, (reverse) ? (1.0 - (vTexCoord.xy - float(i + 1 - uWindow) * onePixel.xy)) : (vTexCoord.xy - float(i + 1 - uWindow) * onePixel.xy)
-                ).r,
+                    uSampler1, vTexCoord.xy - float(i + 1 - uWindow) * onePixel.xy
+                ).g,
                 texture2D(
                     uSampler2, vTexCoord.yx - float(i + 1 - uWindow) * onePixel.yx
                 ).r * uOffset[1] + uOffset[0]
@@ -36,9 +36,10 @@ void main() {
         discard;
     }
     gl_FragColor = vec4(
-        uTransfer[0] * ((uColors.r == 1) ? calc(false) : 0.0) + uTransfer[1],
-        uTransfer[0] * ((uColors.g == 1) ? calc(true) : 0.0) + uTransfer[1],
-        (uColors.b == 1) ? 1.0 : 0.0,
+    //fixme !
+        uTransfer[0] * ((uColors.r == 1) ? calc(false, 0) : 0.0) + uTransfer[1],
+        uTransfer[0] * ((uColors.g == 1) ? calc(true, 1) : 0.0) + uTransfer[1],
+        uTransfer[0] * ((uColors.b == 1) ? calc(true, 2) : 0.0) + uTransfer[1],
         1.0
     );
 }

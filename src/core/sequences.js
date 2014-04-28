@@ -132,7 +132,7 @@ var sequences = function() {
                 var seqTemp = {
                     name:    cleaned.name,
                     type:    cleaned.type,
-                    size:    cleaned.proteic.length,
+                    size:    cleaned.size,
                     comment: cleaned.comment,
                     key:     e.target.result
                 };
@@ -170,7 +170,7 @@ var sequences = function() {
             var item = {
                 name:     cleaned.name,
                 type:     cleaned.type,
-                size:     cleaned.proteic.length,
+                size:     cleaned.size,
                 comment:  cleaned.comment,
                 key:      Date.now(),
                 proteic:  cleaned.proteic,

@@ -74,15 +74,15 @@ var viewer = function() {
         prog = g.program = gl.createProgram();
 
         if (params.nucleicMatrix) {
-            prepareShaders("NucleicNucleic", gl);
+            prepareShaders("NucleicNucleic");
         } else {
             if (params.seq1.type === params.seq2.type) {
-                prepareShaders("ProteicProteic", gl);
+                prepareShaders("ProteicProteic");
             } else {
                 if (params.seq1.type === "proteic") {
-                    prepareShaders("ProteicNucleic", gl);
+                    prepareShaders("ProteicNucleic");
                 } else {
-                    prepareShaders("NucleicProteic", gl);
+                    prepareShaders("NucleicProteic");
                 }
             }
         }
@@ -134,7 +134,7 @@ var viewer = function() {
 
         var texLoaded = false;
         g.seqMgr.get(params.seq1.key, params.nucleicMatrix, function(texture, string) {
-            g.DOM.slider1.max    = texture.length - wS;
+            g.DOM.slider1.max    = params.seq1.length - wS;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = params.seq1.name;
             g.DOM.pickDiv1.classList.add("picking-sequences");
@@ -173,7 +173,11 @@ var viewer = function() {
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+	    if (params.seq1.type === "nucleic") {
+	        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, texture);
+	    } else {
+	        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+	    }
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -186,7 +190,7 @@ var viewer = function() {
         });
 
         g.seqMgr.get(params.seq2.key, params.nucleicMatrix, function(texture, string) {
-            g.DOM.slider2.max    = texture.length - wS;
+            g.DOM.slider2.max    = params.seq2.length - wS;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = params.seq2.name;
             g.DOM.pickDiv2.classList.add("picking-sequences");
@@ -210,7 +214,11 @@ var viewer = function() {
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+	    if (params.seq2.type === "nucleic") {
+	        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, texture);
+	    } else {
+	        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+	    }
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -226,23 +234,14 @@ var viewer = function() {
     var renderHist = function() {
         var w = new Worker("core/workers/histogram.js");
         w.addEventListener("message", function(message) {
-            if (typeof message.data.byteLength === "undefined") {
-                Object.keys(message.data).forEach(function(key) {
-                    histData[key] = message.data[key];
-                });
-                g.DOM.countHist("RGB");
-            }
+            Object.keys(message.data).forEach(function(key) {
+                histData[key] = message.data[key];
+            });
+            g.DOM.countHist("RGB");
         }, false);
         var wS = g.DOM.windowSize.getValue();
-        //FIXME problem with window size (white pixels)
         var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
-        //console.log(pixels.length);
-        gl.readPixels(0, 0, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-        /*console.log(pixels[0]);
-        console.log(pixels[1]);
-        console.log(pixels[2]);
-        console.log(pixels[3]);
-        console.log(pixels[4]);*/
+        gl.readPixels(0, wS - 1, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
         w.postMessage({
             pixels: pixels,
             transf: g.transf
