@@ -37,6 +37,31 @@ g.executeAfterDOM(function() {
         );
     }, false);
 
+    var scale = function(v) {
+        innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + v + ")");
+    };
+    g.$("container").addEventListener("wheel", function(e) {
+        if (e.ctrlKey || e.altKey || e.shiftKey) {
+            e.preventDefault();
+            if (e.deltaY) {
+                var value = Math.max(Number((g.DOM.zoom.valueAsNumber + ((e.deltaY > 0) ? 0.1 : -0.1)).toFixed(1)), 0.1);
+                g.DOM.zoom.value = value;
+                scale(1 / value);
+            }
+        }
+    });
+    g.DOM.zoom.addEventListener("input", function() {
+        scale(1 / this.valueAsNumber);
+    }, false);
+    document.addEventListener("keypress", function(e) {
+        if (e.key === "+" || e.key === "-") {
+            e.preventDefault();
+            var value = Math.max(Number((g.DOM.zoom.valueAsNumber + ((e.key === "-") ? 0.1 : -0.1)).toFixed(1)), 0.1);
+            g.DOM.zoom.value = value;
+            scale(1 / value);
+        }
+    }, false);
+
     g.DOM.windowSize.addEventListener("input", function() {
         if (g.context && !g.viewMgr.rendering) {
             g.viewMgr.rendering = true;
@@ -72,10 +97,6 @@ g.executeAfterDOM(function() {
         } else if (document.documentElement.webkitRequestFullscreen) {
             document.documentElement.webkitRequestFullscreen();
         }
-    }, false);
-
-    g.DOM.zoom.addEventListener("input", function(e) {
-        g.$("inner-container").style[g.DOM.transform] = g.$("inner-container").style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1/e.target.value) + ")");
     }, false);
 
     g.$("clean-up").addEventListener("click", function() {
@@ -121,15 +142,15 @@ g.executeAfterDOM(function() {
     }
 
     //nav buttons
-    var nav = function(e) {
-        g.$(e.target.dataset.target).classList.toggle("active-section");
+    var nav = function() {
+        g.$(this.dataset.target).classList.toggle("active-section");
     };
     Array.prototype.forEach.call(document.getElementsByClassName("internal-nav"), function(anchor) {
         anchor.addEventListener("click", nav, false);
     });
 
     g.$("sequence-list").addEventListener("click", function(e) {
-        if (e.target.tagName === "DIV") {
+        if (e.target.classList.contains("remove")) {
             g.seqMgr.remove(parseInt(e.target.dataset.key));
         }
     }, false);
