@@ -55,7 +55,7 @@ var viewer = function() {
         var wS = g.DOM.windowSize.getValue(),
         w, h;
         if (params.compType % 2) {
-            if (params.compType === 1) {
+            if (params.compType === 3) {
                 w = Math.floor(params.seq1.size / 3);
                 h = params.seq2.size;
             } else {
