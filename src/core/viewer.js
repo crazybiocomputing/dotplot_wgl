@@ -52,9 +52,20 @@ var viewer = function() {
         g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 0%, #fff 100%, #fff 100%)";
         g.DOM.slider1.value = 0;
         g.DOM.slider2.value = 0;
-        var w = params.seq1.size,
-            h = params.seq2.size,
-            wS = g.DOM.windowSize.getValue();
+        var wS = g.DOM.windowSize.getValue(),
+	    w, h;
+	if (params.seq1.type !== params.seq2.type) {
+	    if (params.seq1.type === "nucleic") {
+	        w = Math.ceil(params.seq1.size / 3);
+		h = params.seq2.size;
+	    } else {
+	        w = params.seq1.size;
+		h = Math.ceil(params.seq2.size / 3);
+	    }
+	} else {
+	    w = params.seq1.size;
+	    h = params.seq2.size;
+	}
         g.$("window-viewer").style.width = wS + "ch";
         g.DOM.canvas.width         = w;
         g.DOM.canvas.height        = h;
@@ -215,9 +226,9 @@ var viewer = function() {
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
             if (params.seq2.type === "nucleic") {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, h, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, texture);
             } else {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
             }
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);

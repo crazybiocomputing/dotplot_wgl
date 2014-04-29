@@ -292,6 +292,7 @@ var sequenceParser = function(wholeSequence, i) {
         for (var j = 0; j < seq.length - 2; j++) {
             interlacedProt += geneticCode(seq.charAt(j) + seq.charAt(j + 1) + seq.charAt(j + 2));
         }
+        interlacedProt += "XX";
         var rev = "";
         for (j = seq.length; j; j--) {
             rev += seq.charAt(j - 1);

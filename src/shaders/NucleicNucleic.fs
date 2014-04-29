@@ -62,6 +62,7 @@ float blue() {
     return channel /= float(uWindow);
 }
 
+
 void main() {
     if (
         vTexCoord.x > (uSizes.x - float(uWindow - 1)) * onePixel.x ||
@@ -69,10 +70,19 @@ void main() {
     ) {
         discard;
     }
-    gl_FragColor = vec4(
-        uTransfer[0] * ((uColors.r == 1) ? red() : 0.0) + uTransfer[1],
-        uTransfer[0] * ((uColors.g == 1) ? green() : 0.0) + uTransfer[1],
-        uTransfer[0] * ((uColors.b == 1) ? blue() : 0.0) + uTransfer[1],
-        1.0
-    );
+    vec4 color = vec4(0.0,0.0,0.0,1.0);
+    if ( uColors.r == 1)
+    {
+      color[0] = uTransfer[0] * red() + uTransfer[1];
+    }
+    if ( uColors.g == 1)
+    {
+      color[1] = uTransfer[0] * green() + uTransfer[1];
+    }
+    if ( uColors.b == 1)
+    {
+      color[2] = uTransfer[0] * blue() + uTransfer[1];
+    }
+    
+    gl_FragColor = color;
 }

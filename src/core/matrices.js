@@ -34,8 +34,8 @@ var matrices = function() {
         var type;
         try {
             type = (
-                g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic" &&
-                g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type === "nucleic"
+                g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type === "nucleic" &&
+                g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic"
             ) ? "nucleic" : "proteic";
         } catch(err) {
             return;
