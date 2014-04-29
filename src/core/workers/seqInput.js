@@ -30,7 +30,7 @@
 "use strict";
 
 var norm = function(e, i, arr) {
-    this[e] = Math.ceil(i * 255 / (arr.length + 1) + (127.5 / arr.length));
+    this[e] = Math.round(i * 255 / arr.length + (127.5 / arr.length));
 };
 var normProt = {};
 var normDNA = {};

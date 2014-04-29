@@ -37,10 +37,10 @@ float orf2() {
             channel += texture2D(uSamplerMat, vec2(
                 texture2D(
                     uSampler1, vTexCoord.xy - float(i + 1 - uWindow) * onePixel.xy
-                ).g,
+                ).r,
                 texture2D(
                     uSampler2, vTexCoord.yx - float(i + 1 - uWindow) * onePixel.yx
-                ).r * uOffset[1] + uOffset[0]
+                ).g * uOffset[1] + uOffset[0]
             )).r;
     }
     return channel /= float(uWindow);
@@ -55,10 +55,10 @@ float orf3() {
             channel += texture2D(uSamplerMat, vec2(
                 texture2D(
                     uSampler1, vTexCoord.xy - float(i + 1 - uWindow) * onePixel.xy
-                ).b,
+                ).r,
                 texture2D(
                     uSampler2, vTexCoord.yx - float(i + 1 - uWindow) * onePixel.yx
-                ).r * uOffset[1] + uOffset[0]
+                ).b * uOffset[1] + uOffset[0]
             )).r;
     }
     return channel /= float(uWindow);

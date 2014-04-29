@@ -53,19 +53,19 @@ var viewer = function() {
         g.DOM.slider1.value = 0;
         g.DOM.slider2.value = 0;
         var wS = g.DOM.windowSize.getValue(),
-	    w, h;
-	if (params.seq1.type !== params.seq2.type) {
-	    if (params.seq1.type === "nucleic") {
-	        w = Math.ceil(params.seq1.size / 3);
-		h = params.seq2.size;
-	    } else {
-	        w = params.seq1.size;
-		h = Math.ceil(params.seq2.size / 3);
-	    }
-	} else {
-	    w = params.seq1.size;
-	    h = params.seq2.size;
-	}
+        w, h;
+        if (params.compType % 2) {
+            if (params.compType === 1) {
+                w = Math.floor(params.seq1.size / 3);
+                h = params.seq2.size;
+            } else {
+                w = params.seq1.size;
+                h = Math.floor(params.seq2.size / 3);
+            }
+        } else {
+            w = params.seq1.size;
+            h = params.seq2.size;
+        }
         g.$("window-viewer").style.width = wS + "ch";
         g.DOM.canvas.width         = w;
         g.DOM.canvas.height        = h;
@@ -84,18 +84,19 @@ var viewer = function() {
 
         prog = g.program = gl.createProgram();
 
-        if (params.nucleicMatrix) {
-            prepareShaders("NucleicNucleic");
-        } else {
-            if (params.seq1.type === params.seq2.type) {
+        switch (params.compType) {
+            case 0:
                 prepareShaders("ProteicProteic");
-            } else {
-                if (params.seq1.type === "proteic") {
-                    prepareShaders("ProteicNucleic");
-                } else {
-                    prepareShaders("NucleicProteic");
-                }
-            }
+                break;
+            case 1:
+                prepareShaders("ProteicNucleic");
+                break;
+            case 2:
+                prepareShaders("NucleicNucleic");
+                break;
+            case 3:
+                prepareShaders("NucleicProteic");
+                break;
         }
 
         gl.linkProgram(prog);
@@ -116,8 +117,8 @@ var viewer = function() {
 
         gl.uniform2f(gl.getUniformLocation(prog, "uSizes"), w, h);
 
-        var tex = params.nucleicMatrix ? g.nucleicTex : g.proteicTex;
-        var texWidth = params.nucleicMatrix ? 16 : 24;
+        var tex = (params.compType === 2) ? g.nucleicTex : g.proteicTex;
+        var texWidth = (params.compType === 2) ? 16 : 24;
         gl.uniform2f(gl.getUniformLocation(prog, "uOffset"), params.offset * texWidth / tex.length, texWidth * texWidth / tex.length);
 
         gl.uniform1i(gl.getUniformLocation(prog, "uWindow"), wS);
@@ -144,12 +145,12 @@ var viewer = function() {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
         var texLoaded = false;
-        g.seqMgr.get(params.seq1.key, params.nucleicMatrix, function(texture, string) {
+        g.seqMgr.get(params.seq1.key, params.compType === 2, function(texture, string) {
             g.DOM.slider1.max    = params.seq1.length - wS;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = params.seq1.name;
             g.DOM.pickDiv1.classList.add("picking-sequences");
-            if (typeof string === "string") {
+            if (params.seq1.type === params.seq2.type) {
                 if (params.seq1.type === "proteic") {
                     for (var i = 0; i < string.length; i++) {
                         var temp = document.createElement("span");
@@ -200,7 +201,7 @@ var viewer = function() {
             }
         });
 
-        g.seqMgr.get(params.seq2.key, params.nucleicMatrix, function(texture, string) {
+        g.seqMgr.get(params.seq2.key, params.compType === 2, function(texture, string) {
             g.DOM.slider2.max    = params.seq2.length - wS;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = params.seq2.name;
@@ -316,16 +317,25 @@ var viewer = function() {
                 g.DOM.red.disabled   = false;
                 g.DOM.green.disabled = false;
                 g.DOM.blue.disabled  = false;
-                var nucleicMatrix = false;
                 var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
-                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex];
+                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex],
+                    compType;
                 if (seq1.dataset.type === seq2.dataset.type) {
-                    if (seq1.dataset.type === "nucleic") {
-                        nucleicMatrix = true;
+                    if (seq2.dataset.type === "nucleic") {
+                        compType = 2;
+                        //forward/reverse/reversecomp'd
                     } else {
+                        compType = 0;
                         g.DOM.red.disabled   = true;
                         g.DOM.green.disabled = true;
                         g.DOM.blue.disabled  = true;
+                    }
+                } else {
+                    //reading frames
+                    if (seq2.dataset.type === "nucleic") {
+                        compType = 1;
+                    } else {
+                        compType = 3;
                     }
                 }
                 render({
@@ -341,7 +351,7 @@ var viewer = function() {
                         name: seq2.textContent,
                         size: parseInt(seq2.dataset.size)
                     },
-                    nucleicMatrix: nucleicMatrix,
+                    compType: compType,
                     offset: offset
                 });
             }
