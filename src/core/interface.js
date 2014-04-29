@@ -38,32 +38,27 @@ g.executeAfterDOM(function() {
     }, false);
 
     var scale = function(v) {
-        innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + v + ")");
+        innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
     };
     g.$("container").addEventListener("wheel", function(e) {
         if (e.ctrlKey || e.altKey || e.shiftKey) {
             e.preventDefault();
             if (e.deltaY) {
-                var value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.deltaY > 0) ? 0.1 : -0.1)).toFixed(1)), 0.1);
-                g.DOM.zoom.value = value;
-                scale(1 / value);
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.deltaY > 0) ? 0.1 : -0.1)).toFixed(1)), 0.1));
             }
         }
     });
-    
-    g.DOM.zoom.addEventListener("input", function() {
-        scale(1 / this.value);
-    }, false);
-    g.DOM.zoom.addEventListener("change", function() {
-        scale(1 / this.value);
-    }, false);
     document.addEventListener("keypress", function(e) {
         if (e.charCode === 43 || e.charCode === 45) {
-            e.preventDefault();
-            var value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1);
-            g.DOM.zoom.value = value;
-            scale(1 / value);
+            scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
         }
+    }, false);
+    
+    g.DOM.zoom.addEventListener("input", function() {
+        scale(this.value);
+    }, false);
+    g.DOM.zoom.addEventListener("change", function() {
+        scale(this.value);
     }, false);
 
     g.DOM.windowSize.addEventListener("input", function() {

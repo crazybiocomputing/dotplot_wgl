@@ -292,18 +292,18 @@ var sequenceParser = function(wholeSequence, i) {
         for (var j = 0; j < seq.length - 2; j++) {
             interlacedProt += geneticCode(seq.charAt(j) + seq.charAt(j + 1) + seq.charAt(j + 2));
         }
-	var rev = "";
-	for (j = seq.length; j; j--) {
-	    rev += seq.charAt(j - 1);
-	}
-	var revComp = "";
-	for (j = 0; j < rev.length; j++){
-	    revComp += comp[rev.charAt(j)];
-	}
-	var interlacedNuc = "";
-	for (j = 0; j < seq.length; j++) {
-	    interlacedNuc += seq.charAt(j) + rev.charAt(j) + revComp.charAt(j);
-	}
+        var rev = "";
+        for (j = seq.length; j; j--) {
+            rev += seq.charAt(j - 1);
+        }
+        var revComp = "";
+        for (j = 0; j < rev.length; j++){
+            revComp += comp[rev.charAt(j)];
+        }
+        var interlacedNuc = "";
+        for (j = 0; j < seq.length; j++) {
+            interlacedNuc += seq.charAt(j) + rev.charAt(j) + revComp.charAt(j);
+        }
         var sequenceTrS = ["", "", ""];
         for (j = 0; j < interlacedProt.length; j++) {
             sequenceTrS[j % 3] += interlacedProt.charAt(j);
@@ -311,24 +311,24 @@ var sequenceParser = function(wholeSequence, i) {
         self.postMessage({
             nucleic: stringToTypedArray(interlacedNuc, normDNA),
             nucleicS: [seq, rev, revComp],
-            proteic: stringToTypedArray(interlacedProt, normProt),
+            proteic:  stringToTypedArray(interlacedProt, normProt),
             proteicS: sequenceTrS,
-            name: this.names[i],
-            type: type,
-            comment: comment,
-            status: "sequence",
-	    size: seq.length
+            name:     this.names[i],
+            type:     type,
+            comment:  comment,
+            status:   "sequence",
+            size:     seq.length
         });
     } else {
         var seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
         self.postMessage({
-            proteic: stringToTypedArray(seq, normProt),
+            proteic:  stringToTypedArray(seq, normProt),
             proteicS: seq,
-            name: this.names[i],
-            type: type,
-            comment: comment,
-            status: "sequence",
-	    size: seq.length
+            name:     this.names[i],
+            type:     type,
+            comment:  comment,
+            status:   "sequence",
+            size:     seq.length
         });
     }
 };
