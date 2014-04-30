@@ -1,8 +1,0 @@
-{
-    "ids":                        false,
-    "compatible-vendor-prefixes": false,
-    "known-properties":           false,
-    "universal-selector":         false,
-    "box-sizing":                 false,
-    "box-model":                  false
-}
