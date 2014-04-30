@@ -1,0 +1,24 @@
+CACHE MANIFEST
+# rev 1 - 2014-04-30T13:18:33.959Z
+
+CACHE:
+core/Dotplot_wgl.min.js
+core/firstLoad.min.js
+core/workers/histogram.min.js
+core/workers/seqInput.min.js
+images/favicon-128.png
+images/favicon-16.png
+images/favicon-32.png
+images/favicon-64.png
+index.html
+matrices/NucleicMatrices.texture
+matrices/ProteicMatrices.texture
+shaders/DotPlot.vs
+shaders/NucleicNucleic.fs
+shaders/NucleicProteic.fs
+shaders/ProteicNucleic.fs
+shaders/ProteicProteic.fs
+stylesheets/style.min.css
+
+NETWORK:
+*

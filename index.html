@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html manifest='manifest.appcache'>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width'>
+    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <meta name='mobile-web-app-capable' content='yes'>
+    <link rel='icon' href='images/favicon-16.png' sizes='16x16' >
+    <link rel='icon' href='images/favicon-32.png' sizes='32x32'>
+    <link rel='icon' href='images/favicon-64.png' sizes='64x64'>
+    <link rel='icon' href='images/favicon-128.png' sizes='128x128'>
+    <link rel='stylesheet' href='stylesheets/style.min.css'>
+    <title>Dotplot_wgl | Dotplot using Javascript and WebGL</title>
+    <script src='core/Dotplot_wgl.min.js' async></script>
+</head>
+<body>
+    <div id='compatibility'>
+        <p>It seems your browser doesn't support some important features</p>
+        <p>Dotplot_wgl might not work at all with your configuration</p>
+        <p>You can try updating your current browser or download an other one</p>
+        <a href='https://www.mozilla.org/firefox/new/'>Download the latest version of Firefox</a>
+    </div>
+    <section id='main' class='active-section'>
+        <nav>
+            <a data-target='settings' class='internal-nav'>Settings and Documentation</a>
+            <a data-target='sequences'  class='internal-nav'>Sequences</a>
+        </nav>
+        <h1>Dotplot_wgl</h1>
+        <div class='flex around'>
+            <div>
+                <select id='seq1'></select>
+                <input type='button' data-target='sequences'  class='internal-nav' value='+'>
+            </div>
+            <div>
+                <select id='seq2'></select>
+                <input type='button' data-target='sequences'  class='internal-nav' value='+'>
+            </div>
+            <input type='button' id='webgl' value='Render WebGL graph' disabled>
+            <select id='mat'></select>
+        </div>
+        <div class='flex around'>
+            <div>
+                <label for='window'>Window size: </label>
+                <input type='number' id='window' min='1' step='1' value='1'>
+            </div>
+            <div>
+                <label for='zoom'>Zoom 1:</label>
+                <input type='number' id='zoom' min='0.1' step='0.1' value='1.0'>
+            </div>
+            <input type='button' id='download' value='Download as png file'>
+            <input type='button' id='fullscreen' value='View fullscreen'>
+        </div>
+        <div id='container-hist' class='flex grow'>
+            <div id='hist' class='flex col'>
+                <div></div>
+                <div>
+                    <input type='checkbox' id='red' class='channel' checked disabled>
+                    <label for='red'></label>
+                </div>
+                <div>
+                    <input type='checkbox' id='green' class='channel' checked disabled>
+                    <label for='green'></label>
+                </div>
+                <div>
+                    <input type='checkbox' id='blue' class='channel' checked disabled>
+                    <label for='blue'></label>
+                </div>
+                <input type='range' min='0' max='255' value='255' class='range'>
+                <svg id='svg' viewBox='0 0 256 200' preserveAspectRatio='none' class='grow'></svg>
+                <input type='range' min='0' max='255' value='0' class='range'>
+            </div>
+            <div id='container'>
+                <div id='inner-container'>
+                    <canvas id='canvas' width='0' height='0'></canvas>
+                    <div id='picker1' class='pickers'></div>
+                    <div id='picker2' class='pickers'></div>
+                </div>
+            </div>
+        </div>
+        <div id='picking'>
+            <input type='range' class='picking-slider' min='0' max='0' value='0' data-num='1'><br>
+            <div id='picking-sequences-cont'>
+                <div class='picking-sequences'></div>
+                <div class='picking-sequences'></div>
+                <div id='window-viewer'></div>
+            </div>
+            <input type='range' class='picking-slider' min='0' max='0' value='0' data-num='2'><br>
+        </div>
+        <a id='ghost-anchor' class='hidden'></a>
+    </section>
+    <section id='settings'>
+        <nav>
+            <a data-target='settings' class='internal-nav'>Back</a>
+        </nav>
+        <h1>Settings</h1>
+        <div id='clean-up'>
+            <input type='button' value='Clean data'>
+            <label>Remove all cached data and reload</label>
+        </div>
+        <div id='notifications'>
+            <input type='button' value='Request permission'>
+            <label>Use notifications</label>
+        </div>
+        <div id='install'>
+            <input type='button' value='Install'>
+            <label>Install as an Open Web App (beta)</label>
+        </div>
+        <h1>Documentation</h1>
+        <a href='https://github.com/jeesay/dotplot_wgl' target='_blank'>Github repository</a>
+        <a href='' target='_blank'>Documentation</a>
+        <h1>Version: 0.9.0</h1>
+    </section>
+    <section id='sequences'>
+        <nav>
+            <a data-target='sequences' class='internal-nav'>Back</a>
+        </nav>
+        <div class='flex grow'>
+            <div class='flex col grow'>
+                <h1>Add a new sequence</h1>
+                <label>Name(s) of sequence(s) (optional): </label>
+                <input id='names' type='text'><br>
+                <label>Type of sequence(s) (optional): </label>
+                <select id='type'>
+                    <option value='unknown'>Unknown</option>
+                    <option value='proteic'>Proteic</option>
+                    <option value='nucleic'>Nucleic</option>
+                </select><br>
+                <textarea id='input-zone' placeholder='Either input sequence, NCBI gi number or UniProt accession number here or drag and drop FASTA file'></textarea><br>
+                <input id='input-submit' type='button' value='Submit'>
+            </div>
+            <div class='flex col grow'>
+                <h1>List of available sequences</h1>
+                <ul id='sequence-list'></ul>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
