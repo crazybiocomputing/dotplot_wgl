@@ -86,7 +86,8 @@ module.exports = function(grunt) {
                     {from: /\n    <script.*><\/script>/g, to: ""},
                     {from: /(<\/head>)/g, to: "    <script src='core/<%= pkg.name %>.min.js' async></script>\n$1"},
                     {from: /\{\{name\}\}/g, to: "<%= pkg.name %>"},
-                    {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"}
+                    {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"},
+                    {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"},
                 ]
             },
             js: {

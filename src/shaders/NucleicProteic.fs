@@ -10,7 +10,7 @@ uniform ivec3 uColors;
 uniform vec2 uSizes;
 vec2 onePixel = 1.0 / uSizes;
 
-float orf1() {
+float rf0() {
     float channel = 0.0;
     for (int i = 0; i != -1; i++) {
             if (i == uWindow) {
@@ -28,7 +28,7 @@ float orf1() {
     return channel /= float(uWindow);
 }
 
-float orf2() {
+float rf1() {
     float channel = 0.0;
     for (int i = 0; i != -1; i++) {
             if (i == uWindow) {
@@ -46,7 +46,7 @@ float orf2() {
     return channel /= float(uWindow);
 }
 
-float orf3() {
+float rf2() {
     float channel = 0.0;
     for (int i = 0; i != -1; i++) {
             if (i == uWindow) {
@@ -74,15 +74,15 @@ void main() {
     vec4 color = vec4(0.0,0.0,0.0,1.0);
     if ( uColors.r == 1)
     {
-      color[0] = uTransfer[0] * orf1() + uTransfer[1];
+      color[0] = uTransfer[0] * rf0() + uTransfer[1];
     }
     if ( uColors.g == 1)
     {
-      color[1] = uTransfer[0] * orf2() + uTransfer[1];
+      color[1] = uTransfer[0] * rf1() + uTransfer[1];
     }
     if ( uColors.b == 1)
     {
-      color[2] = uTransfer[0] * orf3() + uTransfer[1];
+      color[2] = uTransfer[0] * rf2() + uTransfer[1];
     }
     
     gl_FragColor = color;

@@ -125,6 +125,7 @@ g.executeAfterDOM(function() {
     g.DOM.range1     = ranges[0];
     g.DOM.range2     = ranges[1];
     var channels = document.getElementsByClassName("channel");
+    g.DOM.colors     = g.$("hist").firstChild;
     g.DOM.red        = channels[0];
     g.DOM.green      = channels[1];
     g.DOM.blue       = channels[2];

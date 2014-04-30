@@ -146,7 +146,7 @@ var viewer = function() {
 
         var texLoaded = false;
         g.seqMgr.get(params.seq1.key, params.compType === 2, function(texture, string) {
-            g.DOM.slider1.max    = params.seq1.length - wS;
+            g.DOM.slider1.max    = w - 1;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = params.seq1.name;
             g.DOM.pickDiv1.classList.add("picking-sequences");
@@ -202,7 +202,7 @@ var viewer = function() {
         });
 
         g.seqMgr.get(params.seq2.key, params.compType === 2, function(texture, string) {
-            g.DOM.slider2.max    = params.seq2.length - wS;
+            g.DOM.slider2.max    = h - 1;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = params.seq2.name;
             g.DOM.pickDiv2.classList.add("picking-sequences");
@@ -288,12 +288,12 @@ var viewer = function() {
     };
 
     g.viewMgr.pick = function(x, y) {
-        if (x !== undefined) {
+        if (x !== undefined && x < g.DOM.canvas.width) {
             g.DOM.slider1.value = Math.min(x, g.DOM.slider1.max);
             g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + x + "ch)";
             g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + x + "px)";
         }
-        if (y !== undefined) {
+        if (y !== undefined && y < g.DOM.canvas.height) {
             g.DOM.slider2.value = Math.min(y, g.DOM.slider2.max);
             g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + y + "ch)";
             g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + y + "px)";
@@ -323,15 +323,25 @@ var viewer = function() {
                 if (seq1.dataset.type === seq2.dataset.type) {
                     if (seq2.dataset.type === "nucleic") {
                         compType = 2;
-                        //forward/reverse/reversecomp'd
+                        g.DOM.colors.textContent = "Nucleic strand:";
+                        g.DOM.red.nextElementSibling.textContent   = "forward";
+                        g.DOM.green.nextElementSibling.textContent = "reverse";
+                        g.DOM.blue.nextElementSibling.textContent  = "reverse comp.";
                     } else {
                         compType = 0;
                         g.DOM.red.disabled   = true;
                         g.DOM.green.disabled = true;
                         g.DOM.blue.disabled  = true;
+                        g.DOM.colors.textContent = "";
+                        g.DOM.red.nextElementSibling.textContent   = "";
+                        g.DOM.green.nextElementSibling.textContent = "";
+                        g.DOM.blue.nextElementSibling.textContent  = "";
                     }
                 } else {
-                    //reading frames
+                    g.DOM.colors.textContent = "Reading frame offsets:";
+                    g.DOM.red.nextElementSibling.textContent   = "0";
+                    g.DOM.green.nextElementSibling.textContent = "1";
+                    g.DOM.blue.nextElementSibling.textContent  = "2";
                     if (seq2.dataset.type === "nucleic") {
                         compType = 1;
                     } else {
