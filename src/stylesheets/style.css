@@ -193,6 +193,10 @@ canvas {
     margin-bottom: 0.2em;
 }
 
+.picking-sequences span {
+    background: lightgrey;
+}
+
 #window-viewer {
     position: absolute;
     top: 0;

@@ -61,6 +61,24 @@ g.executeAfterDOM(function() {
         scale(this.value);
     }, false);
 
+    g.DOM.mat.addEventListener("change", function() {
+        if (g.context && !g.viewMgr.rendering) {
+            g.viewMgr.rendering = true;
+            g.DOM.range1.value = 255;
+            g.DOM.range2.value = 0;
+            g.DOM.hist.style.background = "";
+            g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
+            g.context.uniform2f(g.context.getUniformLocation(g.program, "uTransfer"), 1.0, 0.0);
+            g.context.uniform1i(g.context.getUniformLocation(g.program, "uWindow"), g.DOM.windowSize.getValue());
+            g.context.uniform2f(
+                g.context.getUniformLocation(g.program, "uOffset"),
+                parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
+                parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset1)
+            );
+            g.viewMgr.draw(true);
+        }
+    });
+
     g.DOM.windowSize.addEventListener("input", function() {
         if (g.context && !g.viewMgr.rendering) {
             g.viewMgr.rendering = true;

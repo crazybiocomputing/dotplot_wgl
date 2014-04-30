@@ -72,4 +72,14 @@ g.seqMgr.add(
 try {
     localStorage.setItem("alreadyVisited", true);
 } catch(err) {}
-setTimeout(g.matMgr.updateDOM, 250);
+
+var timeOut = 5000,
+    time    = 0;
+var interval = setInterval(function() {
+    if (g.DOM.opt1.options.length > 8 || time > timeOut) {
+        clearInterval(interval);
+        g.matMgr.updateDOM();
+    } else {
+        time += 200;
+    }
+}, 200);

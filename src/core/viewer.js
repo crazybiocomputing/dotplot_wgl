@@ -117,9 +117,11 @@ var viewer = function() {
 
         gl.uniform2f(gl.getUniformLocation(prog, "uSizes"), w, h);
 
-        var tex = (params.compType === 2) ? g.nucleicTex : g.proteicTex;
-        var texWidth = (params.compType === 2) ? 16 : 24;
-        gl.uniform2f(gl.getUniformLocation(prog, "uOffset"), params.offset * texWidth / tex.length, texWidth * texWidth / tex.length);
+        gl.uniform2f(
+            gl.getUniformLocation(prog, "uOffset"),
+            parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
+            parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset1)
+        );
 
         gl.uniform1i(gl.getUniformLocation(prog, "uWindow"), wS);
 
@@ -136,6 +138,8 @@ var viewer = function() {
         gl.enableVertexAttribArray(texCoordLocation);
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
+        var texWidth = (params.compType === 2) ? 16 : 24,
+            tex = (params.compType === 2) ? g.nucleicTex : g.proteicTex;
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
@@ -149,39 +153,7 @@ var viewer = function() {
             g.DOM.slider1.max    = w - 1;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = params.seq1.name;
-            g.DOM.pickDiv1.classList.add("picking-sequences");
-            if (params.seq1.type === params.seq2.type) {
-                if (params.seq1.type === "proteic") {
-                    for (var i = 0; i < string.length; i++) {
-                        var temp = document.createElement("span");
-                        temp.textContent = string.charAt(i);
-                        g.DOM.pickDiv1.appendChild(temp);
-                    }
-                } else {
-                    var forward = document.createElement("div"),
-                        reverse = document.createElement("div");
-                    for (var i = 0; i < string.length; i++) {
-                        var temp1 = document.createElement("span"),
-                            temp2 = document.createElement("span");
-                        temp1.textContent = string.charAt(i);
-                        temp2.textContent = string.charAt(string.length - 1 - i);
-                        forward.appendChild(temp1);
-                        reverse.appendChild(temp2);
-                    }
-                    g.DOM.pickDiv1.appendChild(forward);
-                    g.DOM.pickDiv1.appendChild(reverse);
-                }
-            } else {
-                string.forEach(function(string) {
-                    var tempDiv = document.createElement("div");
-                    for (var i = 0; i < string.length; i++) {
-                        var temp = document.createElement("span");
-                        temp.textContent = string.charAt(i);
-                        tempDiv.appendChild(temp);
-                    }
-                    g.DOM.pickDiv1.appendChild(tempDiv);
-                });
-            }
+            fillDivs(string, params.compType, "1");
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
@@ -205,24 +177,7 @@ var viewer = function() {
             g.DOM.slider2.max    = h - 1;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = params.seq2.name;
-            g.DOM.pickDiv2.classList.add("picking-sequences");
-            if (typeof string === "string") {
-                for (var i = 0; i < string.length; i++) {
-                    var temp = document.createElement("span");
-                    temp.textContent = string.charAt(i);
-                    g.DOM.pickDiv2.appendChild(temp);
-                }
-            } else {
-                string.forEach(function(string) {
-                    var tempDiv = document.createElement("div");
-                    for (var i = 0; i < string.length; i++) {
-                        var temp = document.createElement("span");
-                        temp.textContent = string.charAt(i);
-                        tempDiv.appendChild(temp);
-                    }
-                    g.DOM.pickDiv2.appendChild(tempDiv);
-                });
-            }
+            fillDivs(string, params.compType, "2");
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
@@ -241,6 +196,35 @@ var viewer = function() {
                 texLoaded = true;
             }
         });
+    };
+
+    var divBuilder = function(string) {
+        var div = document.createElement("div");
+        for (var i = 0; i < string.length; i++) {
+            var span = document.createElement("span");
+            span.textContent = string.charAt(i);
+            div.appendChild(span);
+        }
+        return div;
+    };
+
+    var fillDivs = function(string, compType, num) {
+        var div = g.DOM["pickDiv" + num];
+        div.classList.add("picking-sequences");
+        switch (compType + num) {
+            case "22":
+                div.appendChild(divBuilder(string[0]));
+                break;
+            case "12":
+            case "21":
+            case "31":
+                string.forEach(function(string) {
+                    div.appendChild(divBuilder(string));
+                });
+                break;
+            default:
+                div.appendChild(divBuilder(string));
+        }
     };
 
     var renderHist = function() {
@@ -313,12 +297,11 @@ var viewer = function() {
                 g.viewMgr.rendering = true;
                 webglInput.disabled = true;
                 webglInput.value    = "Rendering…";
-                var offset = parseInt(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset);
                 g.DOM.red.disabled   = false;
                 g.DOM.green.disabled = false;
                 g.DOM.blue.disabled  = false;
-                var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
-                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex],
+                var seq1 = g.DOM.opt1.selectedOptions[0],
+                    seq2 = g.DOM.opt2.selectedOptions[0],
                     compType;
                 if (seq1.dataset.type === seq2.dataset.type) {
                     if (seq2.dataset.type === "nucleic") {
@@ -361,8 +344,7 @@ var viewer = function() {
                         name: seq2.textContent,
                         size: parseInt(seq2.dataset.size)
                     },
-                    compType: compType,
-                    offset: offset
+                    compType: compType
                 });
             }
         }, false);

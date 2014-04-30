@@ -34,8 +34,8 @@ var matrices = function() {
         var type;
         try {
             type = (
-                g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type === "nucleic" &&
-                g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic"
+                g.DOM.opt2.selectedOptions[0].dataset.type === "nucleic" &&
+                g.DOM.opt1.selectedOptions[0].dataset.type === "nucleic"
             ) ? "nucleic" : "proteic";
         } catch(err) {
             return;
@@ -54,15 +54,16 @@ var matrices = function() {
         }
     };
 
-    var init = function(mat, i) {
+    var init = function(mat, i, a) {
         var dom = document.createElement("option");
         dom.textContent = mat;
         dom.dataset.type = this.type;
-        dom.dataset.offset = i * this.size;
+        dom.dataset.offset0 = (i * this.size) / (this.size * a.length);
+        dom.dataset.offset1 = this.size / (this.size * a.length);
         list.push(dom);
     };
-    ["Blosum 30", "Blosum 35", "Blosum 40", "Blosum 45", "Blosum 50", "Blosum 55", "Blosum 60", "Blosum 62-12", "Blosum 62", "Blosum 65", "Blosum 70", "Blosum 75", "Blosum 80", "Blosum 85", "Blosum 90", "Blosum N", "Identity", "PAM 10", "PAM 20", "PAM 30", "PAM 40", "PAM 50", "PAM 60", "PAM 70", "PAM 80", "PAM 90", "PAM 100", "PAM 110", "PAM 120", "PAM 130", "PAM 140", "PAM 150", "PAM 160", "PAM 170", "PAM 180", "PAM 190", "PAM 200", "PAM 210", "PAM 220", "PAM 230", "PAM 240", "PAM 250", "PAM 260", "PAM 270", "PAM 280", "PAM 290", "PAM 300", "PAM 310", "PAM 320", "PAM 330", "PAM 340", "PAM 350", "PAM 360", "PAM 370", "PAM 380", "PAM 390", "PAM 400", "PAM 410", "PAM 420", "PAM 430", "PAM 440", "PAM 450", "PAM 460", "PAM 470", "PAM 480", "PAM 490", "PAM 500"].forEach(init, {type: "proteic", size: 24});
-    ["DNA Full", "Identity"].forEach(init, {type: "nucleic", size: 16});
+    ["Blosum 30", "Blosum 35", "Blosum 40", "Blosum 45", "Blosum 50", "Blosum 55", "Blosum 60", "Blosum 62-12", "Blosum 62", "Blosum 65", "Blosum 70", "Blosum 75", "Blosum 80", "Blosum 85", "Blosum 90", "Blosum N", "Identity", "PAM 10", "PAM 20", "PAM 30", "PAM 40", "PAM 50", "PAM 60", "PAM 70", "PAM 80", "PAM 90", "PAM 100", "PAM 110", "PAM 120", "PAM 130", "PAM 140", "PAM 150", "PAM 160", "PAM 170", "PAM 180", "PAM 190", "PAM 200", "PAM 210", "PAM 220", "PAM 230", "PAM 240", "PAM 250", "PAM 260", "PAM 270", "PAM 280", "PAM 290", "PAM 300", "PAM 310", "PAM 320", "PAM 330", "PAM 340", "PAM 350", "PAM 360", "PAM 370", "PAM 380", "PAM 390", "PAM 400", "PAM 410", "PAM 420", "PAM 430", "PAM 440", "PAM 450", "PAM 460", "PAM 470", "PAM 480", "PAM 490", "PAM 500"].forEach(init, {type: "proteic", size: 24 * 24});
+    ["DNA Full", "Identity"].forEach(init, {type: "nucleic", size: 16 * 16});
 
     g.executeAfterDOM(function() {
         g.matMgr.updateDOM();
