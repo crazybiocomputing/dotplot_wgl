@@ -70,6 +70,8 @@ g.executeAfterDOM(function() {
             g.context.clear(g.context.COLOR_BUFFER_BIT|g.context.DEPTH_BUFFER_BIT);
             g.context.uniform2f(g.context.getUniformLocation(g.program, "uTransfer"), 1.0, 0.0);
             g.context.uniform1i(g.context.getUniformLocation(g.program, "uWindow"), g.DOM.windowSize.getValue());
+            g.DOM.red.checked = g.DOM.green.checked = g.DOM.blue.checked = true;
+            g.context.uniform3i(g.context.getUniformLocation(g.program, "uColors"), 1, 1, 1);
             g.context.uniform2f(
                 g.context.getUniformLocation(g.program, "uOffset"),
                 parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
@@ -93,7 +95,7 @@ g.executeAfterDOM(function() {
     });
 
     g.$("download").addEventListener("click", function() {
-        var ghostAnchor = g.$("ghost-anchor");
+        var ghostAnchor      = g.$("ghost-anchor");
         ghostAnchor.download = "image.png";
         try {
             g.DOM.canvas.toBlob(function(blob) {
@@ -138,7 +140,7 @@ g.executeAfterDOM(function() {
 
     if (navigator.mozApps) {//supports Open Web Apps
         var manifest = location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp";
-        var req = navigator.mozApps.checkInstalled(manifest);
+        var req      = navigator.mozApps.checkInstalled(manifest);
         req.addEventListener("success", function(e) {
             if (e.result) {//already installed
                 g.$("install").classList.add("hidden");
@@ -173,8 +175,8 @@ g.executeAfterDOM(function() {
     }, false);
 
     var cleanAfterInput = function() {
-        g.DOM.names.value = "";
-        g.DOM.type.value = "unknown";
+        g.DOM.names.value     = "";
+        g.DOM.type.value      = "unknown";
         g.DOM.inputZone.value = "";
     };
     g.DOM.inputZone.addEventListener("dragover", function(e) {

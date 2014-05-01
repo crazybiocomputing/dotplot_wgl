@@ -31,23 +31,23 @@
 var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
     maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
     histCount = {
-    RGB: new Uint32Array(256),
-    RG: new Uint32Array(256),
-    GB: new Uint32Array(256),
-    RB: new Uint32Array(256),
-    R: new Uint32Array(256),
-    G: new Uint32Array(256),
-    B: new Uint32Array(256)
-},
+        RGB: new Uint32Array(256),
+        RG:  new Uint32Array(256),
+        GB:  new Uint32Array(256),
+        RB:  new Uint32Array(256),
+        R:   new Uint32Array(256),
+        G:   new Uint32Array(256),
+        B:   new Uint32Array(256)
+    },
     histLog = {
-    RGB: new Uint32Array(256),
-    RG: new Uint32Array(256),
-    GB: new Uint32Array(256),
-    RB: new Uint32Array(256),
-    R: new Uint32Array(256),
-    G: new Uint32Array(256),
-    B: new Uint32Array(256)
-};
+        RGB: new Uint32Array(256),
+        RG:  new Uint32Array(256),
+        GB:  new Uint32Array(256),
+        RB:  new Uint32Array(256),
+        R:   new Uint32Array(256),
+        G:   new Uint32Array(256),
+        B:   new Uint32Array(256)
+    };
 
 self.addEventListener("message", function(message) {
     var pixels = message.data.pixels;

@@ -198,14 +198,19 @@ var viewer = function() {
         });
     };
 
-    var divBuilder = function(string) {
-        var div = document.createElement("div");
-        for (var i = 0; i < string.length; i++) {
+    var divBuilder = function(string, div, index) {
+        var frag = document.createDocumentFragment(),
+            i    = 0;
+        while (i < 200 && (index + i) < string.length) {
             var span = document.createElement("span");
-            span.textContent = string.charAt(i);
-            div.appendChild(span);
+            span.textContent = string.charAt(index + i);
+            frag.appendChild(span);
+            i++;
         }
-        return div;
+        div.appendChild(frag);
+        if ((index + i) < string.length) {
+            setTimeout(divBuilder, 50, string, div, index + 200);
+        }
     };
 
     var fillDivs = function(string, compType, num) {
@@ -213,17 +218,23 @@ var viewer = function() {
         div.classList.add("picking-sequences");
         switch (compType + num) {
             case "22":
-                div.appendChild(divBuilder(string[0]));
+                var innerDiv = document.createElement("div");
+                div.appendChild(innerDiv);
+                divBuilder(string[0], innerDiv, 1);
                 break;
             case "12":
             case "21":
             case "31":
                 string.forEach(function(string) {
-                    div.appendChild(divBuilder(string));
+                    var innerDiv = document.createElement("div");
+                    div.appendChild(innerDiv);
+                    divBuilder(string, innerDiv, 1);
                 });
                 break;
             default:
-                div.appendChild(divBuilder(string));
+                var innerDiv = document.createElement("div");
+                div.appendChild(innerDiv);
+                divBuilder(string, innerDiv, 1);
         }
     };
 
@@ -297,9 +308,7 @@ var viewer = function() {
                 g.viewMgr.rendering = true;
                 webglInput.disabled = true;
                 webglInput.value    = "Rendering…";
-                g.DOM.red.disabled   = false;
-                g.DOM.green.disabled = false;
-                g.DOM.blue.disabled  = false;
+                g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = false;
                 var seq1 = g.DOM.opt1.selectedOptions[0],
                     seq2 = g.DOM.opt2.selectedOptions[0],
                     compType;
@@ -312,13 +321,8 @@ var viewer = function() {
                         g.DOM.blue.nextElementSibling.textContent  = "reverse comp.";
                     } else {
                         compType = 0;
-                        g.DOM.red.disabled   = true;
-                        g.DOM.green.disabled = true;
-                        g.DOM.blue.disabled  = true;
-                        g.DOM.colors.textContent = "";
-                        g.DOM.red.nextElementSibling.textContent   = "";
-                        g.DOM.green.nextElementSibling.textContent = "";
-                        g.DOM.blue.nextElementSibling.textContent  = "";
+                        g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = true;
+                        g.DOM.colors.textContent = g.DOM.red.nextElementSibling.textContent = g.DOM.green.nextElementSibling.textContent = g.DOM.blue.nextElementSibling.textContent = "";
                     }
                 } else {
                     g.DOM.colors.textContent = "Reading frame offsets:";
