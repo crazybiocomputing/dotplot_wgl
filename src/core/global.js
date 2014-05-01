@@ -45,13 +45,16 @@ var g = {
     //Document Object Model handles and variables
     DOM:       {
         liTempl:   (function() {
-            var li  = document.createElement("li"),
-                div = document.createElement("div");
-            li.appendChild(div.cloneNode(true));
-            li.appendChild(div.cloneNode(true));
-            div.classList.add("remove");
-            div.textContent = "×";
-            li.appendChild(div);
+            var li  = document.createElement("li");
+            for (var i = 0; i < 4; i++) {
+                li.appendChild(document.createElement("div"));
+            }
+            li.children[2].classList.add("download");
+            li.children[2].title = "save as fasta file";
+            li.children[2].textContent = "↓";
+            li.children[3].classList.add("remove");
+            li.children[3].title = "remove";
+            li.children[3].textContent = "×";
             return li;
         })(),
         transform: (function() {

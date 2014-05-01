@@ -41,7 +41,7 @@ var sequences = function() {
             g.DOM.opt1.appendChild(sequence.opt1);
             g.DOM.opt2.appendChild(sequence.opt2);
             sequence.li = g.DOM.liTempl.cloneNode(true);
-            sequence.li.children[2].dataset.key = sequence.key;
+            sequence.li.dataset.key = sequence.key;
             sequence.li.children[1].textContent = "(" + sequence.size + ((sequence.type === "proteic") ? " aa)" : " bp)");
             sequence.li.children[0].textContent = sequence.name;
             sequence.li.dataset.type = sequence.type;
@@ -108,9 +108,23 @@ var sequences = function() {
         }
     };
 
-    var addClean;
+    g.seqMgr.fasta = function(key, nucleic, callback) {
+        this.get(key, nucleic, function(seq) {
+            var w = new Worker("core/workers/fasta.js");
+            w.addEventListener("message", function(message) {
+                callback(window.URL.createObjectURL(message.data.blob), message.data.name);
+            }, false);
+            w.postMessage({
+                string:  nucleic ? seq.string[0] : seq.string,
+                name:    seq.name,
+                comment: seq.comment,
+                nucleic: nucleic
+            });
+        }, true);
+    };
+
     if (g.db) {
-        addClean = function(cleaned) {
+        var addClean = function(cleaned) {
             var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
             var seqOS = trans.objectStore("sequences");
             var request1;
@@ -144,11 +158,29 @@ var sequences = function() {
             }, false);
         };
 
-        g.seqMgr.get = function(key, nucleic, callback) {
+        g.seqMgr.get = function(key, nucleic, callback, details) {
             var type = nucleic ? "nucleic" : "proteic";
-            g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(key).addEventListener("success", function(e) {
-                callback(e.target.result[type], e.target.result[type + "S"]);
-            }, false);
+            if (details) {
+                var transaction = g.db.transaction(["sequences", "sequencesMetadata"], "readonly"),
+                    callbackObj = {};
+                transaction.addEventListener("complete", function() {
+                    callback(callbackObj);
+                }, false);
+                transaction.objectStore("sequencesMetadata").get(key).addEventListener("success", function(e) {
+                    callbackObj.name    = e.target.result.name;
+                    callbackObj.comment = e.target.result.comment;
+                }, false);
+                transaction.objectStore("sequences").get(key).addEventListener("success", function(e) {
+                    callbackObj.string  = e.target.result[type + "S"];
+                }, false);
+            } else {
+                g.db.transaction(["sequences"], "readonly").objectStore("sequences").get(key).addEventListener("success", function(e) {
+                    callback({
+                        string:     e.target.result[type + "S"],
+                        typedArray: e.target.result[type]
+                    });
+                }, false);
+            }
         };
 
         var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
@@ -166,7 +198,7 @@ var sequences = function() {
             }
         }, false);
     } else {
-        addClean = function(cleaned) {
+        var addClean = function(cleaned) {
             var item = {
                 name:     cleaned.name,
                 type:     cleaned.type,
@@ -184,7 +216,7 @@ var sequences = function() {
             addDOM([item]);
         };
 
-        g.seqMgr.get = function(key, nucleic, callback) {
+        g.seqMgr.get = function(key, nucleic, callback, details) {
             var type = nucleic ? "nucleic" : "proteic",
                 item;
             for (var i = 0; i < list.length; i++) {
@@ -194,7 +226,18 @@ var sequences = function() {
                 }
             }
             if (item) {
-                callback(item[type], item[type + "S"]);
+                if (details) {
+                    callback({
+                        string:  item[type + "S"],
+                        name:    item.name,
+                        comment: item.comment
+                    });
+                } else {
+                    callback({
+                        string:     item[type + "S"],
+                        typedArray: item[type]
+                    });
+                }
             }
         };
 

@@ -149,18 +149,18 @@ var viewer = function() {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
         var texLoaded = false;
-        g.seqMgr.get(params.seq1.key, params.compType === 2, function(texture, string) {
+        g.seqMgr.get(params.seq1.key, params.compType === 2, function(seq) {
             g.DOM.slider1.max    = w - 1;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = params.seq1.name;
-            fillDivs(string, params.compType, "1");
+            fillDivs(seq.string, params.compType, "1");
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
             if (params.seq1.type === "nucleic") {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, seq.typedArray);
             } else {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, seq.typedArray);
             }
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -173,18 +173,18 @@ var viewer = function() {
             }
         });
 
-        g.seqMgr.get(params.seq2.key, params.compType === 2, function(texture, string) {
+        g.seqMgr.get(params.seq2.key, params.compType === 2, function(seq) {
             g.DOM.slider2.max    = h - 1;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = params.seq2.name;
-            fillDivs(string, params.compType, "2");
+            fillDivs(seq.string, params.compType, "2");
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
             if (params.seq2.type === "nucleic") {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, h, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, h, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, seq.typedArray);
             } else {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, texture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, seq.typedArray);
             }
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);

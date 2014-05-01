@@ -268,7 +268,7 @@ var comp = {
 var sequenceParser = function(wholeSequence, i) {
     var type     = this.type,
         comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/),
-        sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/\s/g, "");
+        sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/[\s\d]?/g, "");
     comment = (comment) ? comment[0] : "";
     if (type === "unknown") {
         type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";

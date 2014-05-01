@@ -258,7 +258,7 @@ canvas {
     flex: 1 1;
 }
 
-.remove {
+.remove, .download {
     margin: 0.2em 0 0 1em;
     width: 1em;
     height: 1em;
@@ -270,7 +270,7 @@ canvas {
     cursor: pointer;
 }
 
-.remove:hover {
+.remove:hover, .download:hover {
     border: thin solid #ffffff;
 }
 

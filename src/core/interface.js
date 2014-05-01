@@ -170,7 +170,14 @@ g.executeAfterDOM(function() {
 
     g.$("sequence-list").addEventListener("click", function(e) {
         if (e.target.classList.contains("remove")) {
-            g.seqMgr.remove(parseInt(e.target.dataset.key));
+            g.seqMgr.remove(parseInt(e.target.parentElement.dataset.key));
+        } else if (e.target.classList.contains("download")) {
+            g.seqMgr.fasta(parseInt(e.target.parentElement.dataset.key), e.target.parentElement.dataset.type === "nucleic", function(url, name) {
+                var ghostAnchor      = g.$("ghost-anchor");
+                ghostAnchor.download = name + ".fasta";
+                ghostAnchor.href     = url;
+                ghostAnchor.click();
+            });
         }
     }, false);
 
