@@ -309,28 +309,57 @@ var sequenceParser = function(wholeSequence, i) {
         for (j = 0; j < interlacedProt.length; j++) {
             sequenceTrS[j % 3] += interlacedProt.charAt(j);
         }
-        self.postMessage({
-            nucleic: stringToTypedArray(interlacedNuc, normDNA),
-            nucleicS: [seq, rev, revComp],
-            proteic:  stringToTypedArray(interlacedProt, normProt),
-            proteicS: sequenceTrS,
-            name:     this.names[i],
-            type:     type,
-            comment:  comment,
-            status:   "sequence",
-            size:     seq.length
-        });
+        if (transf) {
+            self.postMessage({
+                nucleic:  stringToTypedArray(interlacedNuc, normDNA),
+                nucleicS: [seq, rev, revComp],
+                proteic:  stringToTypedArray(interlacedProt, normProt),
+                proteicS: sequenceTrS,
+                name:     this.names[i],
+                type:     type,
+                comment:  comment,
+                status:   "sequence",
+                size:     seq.length
+            });
+        } else {
+            var nucleic = stringToTypedArray(interlacedNuc, normDNA),
+                proteic = stringToTypedArray(interlacedProt, normProt);
+            self.postMessage({
+                nucleic:  nucleic,
+                nucleicS: [seq, rev, revComp],
+                proteic:  proteic,
+                proteicS: sequenceTrS,
+                name:     this.names[i],
+                type:     type,
+                comment:  comment,
+                status:   "sequence",
+                size:     seq.length
+            }, [nucleic.buffer, proteic.buffer]);
+        }
     } else {
         var seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
-        self.postMessage({
-            proteic:  stringToTypedArray(seq, normProt),
-            proteicS: seq,
-            name:     this.names[i],
-            type:     type,
-            comment:  comment,
-            status:   "sequence",
-            size:     seq.length
-        });
+        if (transf) {
+            self.postMessage({
+                proteic:  stringToTypedArray(seq, normProt),
+                proteicS: seq,
+                name:     this.names[i],
+                type:     type,
+                comment:  comment,
+                status:   "sequence",
+                size:     seq.length
+            });
+        } else {
+            var proteic = stringToTypedArray(seq, normProt);
+            self.postMessage({
+                proteic:  proteic,
+                proteicS: seq,
+                name:     this.names[i],
+                type:     type,
+                comment:  comment,
+                status:   "sequence",
+                size:     seq.length
+            }, [proteic.buffer]);
+        }
     }
 };
 
