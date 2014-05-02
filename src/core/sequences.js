@@ -28,7 +28,10 @@
 /*exported sequences*/
 var sequences = function() {
     var list = [];
-
+    /**
+      * adds to the DOM parameters of the sequences
+      * @param {string} sequences - name of the sequence to analyse
+      */
     var addDOM = function(sequences) {
         sequences.forEach(function(sequence) {
             sequence.opt1 = document.createElement("option");
@@ -49,6 +52,12 @@ var sequences = function() {
         });
     };
 
+    /**
+     * allow the user to enter a sequence to analyse
+     * @param {string} rawInput - sequence entered
+     * @param {string} proposedNames - sequence's name
+     * @param {string} type - nature of the sequence
+     */
     g.seqMgr.add = function(rawInput, proposedNames, type) {
         var w = new Worker("core/workers/seqInput.js"),
             count    = 0,
@@ -85,8 +94,13 @@ var sequences = function() {
         });
     };
 
+    /**
+     * remove sequence(s) wanted by the user from the site and the database
+     * @param {int} key - index of the targeted sequence
+     */
     g.seqMgr.remove = function(key) {
         var removed;
+	//search the sequence to remove
         for (var i = 0; i < list.length; i++) {
             if (list[i].key === key) {
                 removed = list.splice(i, 1)[0];
@@ -94,20 +108,28 @@ var sequences = function() {
             }
         }
         if (removed) {
+	    //verify if database exists
             if (g.db) {
                 var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
                 trans.addEventListener("complete", function() {
-                    console.log("removed " + removed.name);
+                    console.log("removed " + removed.name); //useless?^^
                 }, false);
                 trans.objectStore("sequences").delete(key);
                 trans.objectStore("sequencesMetadata").delete(key);
             }
+            //deleted from the DOM
             g.DOM.li.removeChild(removed.li);
             g.DOM.opt1.removeChild(removed.opt1);
             g.DOM.opt2.removeChild(removed.opt2);
         }
     };
 
+    /**
+     * importation of nucleic fasta sequence
+     * @param {int} key - index of the targeted sequence
+     * @param {bool} nucleic - if the sequence is nucleic or not
+     * @param {function} callback - function called at the next monitor 
+     */
     g.seqMgr.fasta = function(key, nucleic, callback) {
         this.get(key, nucleic, function(seq) {
             var w = new Worker("core/workers/fasta.js");
@@ -122,12 +144,18 @@ var sequences = function() {
             });
         }, true);
     };
-
+    
+    //check the existence of the database
     if (g.db) {
+	/**
+	 * cleaning sequences
+	 * @param {string} cleaned - sequence cleaned
+	 */
         var addClean = function(cleaned) {
             var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
             var seqOS = trans.objectStore("sequences");
             var request1;
+	    //sequence cleaned in terms of the sequence's nature
             if (cleaned.type === "proteic") {
                 request1 = seqOS.add({
                     proteic:  cleaned.proteic,
@@ -141,6 +169,11 @@ var sequences = function() {
                     proteicS: cleaned.proteicS
                 });
             }
+            
+            /**
+             * 
+             * @param {string} e -
+             */
             request1.addEventListener("success", function(e) {
                 var seqMetaOS = trans.objectStore("sequencesMetadata");
                 var seqTemp = {
@@ -158,6 +191,13 @@ var sequences = function() {
             }, false);
         };
 
+	/**
+         * Recuperation of the sequence
+         * @param {string} key - sequence cleaned
+	 * @param {bool} nucleic - if the sequence is nucleic or not
+	 * @param {function} callback - function called at the next monitor
+	 * @param {bool} details - get metaData or not
+         */
         g.seqMgr.get = function(key, nucleic, callback, details) {
             var type = nucleic ? "nucleic" : "proteic";
             if (details) {
@@ -183,6 +223,10 @@ var sequences = function() {
             }
         };
 
+        /**
+         * Recuperation of the sequence
+         * @param {object} e - 
+         */
         var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
         cursorGetter.addEventListener("success", function(e) {
             var cursor = e.target.result;
@@ -198,6 +242,10 @@ var sequences = function() {
             }
         }, false);
     } else {
+        /**
+         * cleaning sequences
+         * @param {string} cleaned - sequence cleaned
+         */
         var addClean = function(cleaned) {
             var item = {
                 name:     cleaned.name,
@@ -216,6 +264,13 @@ var sequences = function() {
             addDOM([item]);
         };
 
+        /**
+         * Recuperation of the sequence
+         * @param {string} key - sequence cleaned
+         * @param {bool} nucleic - if the sequence is nucleic or not
+         * @param {function} callback - function called at the next monitor
+         * @param {bool} details - get metaData or not
+         */
         g.seqMgr.get = function(key, nucleic, callback, details) {
             var type = nucleic ? "nucleic" : "proteic",
                 item;
