@@ -125,10 +125,18 @@ module.exports = function(grunt) {
                 cache: "dist/<%= pkg.version %>/**/*",
                 network: "*"
             }
+        },
+        jsdoc: {
+            dist: {
+                src: ["src/core/**/*.js"],
+                options: {
+                    destination: "dist/<%= pkg.version %>/doc"
+                }
+            }
         }
     });
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache", "replace:webapp"]);
+    grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache", "replace:webapp", "jsdoc"]);
 };

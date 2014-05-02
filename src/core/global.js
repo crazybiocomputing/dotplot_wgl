@@ -33,7 +33,6 @@
 /**
  * Global namespace for Dotplot_wgl
  */
-//custom "global" object
 var g = {
     //IndexedDB (database) version and handle
     dbVersion: 1,

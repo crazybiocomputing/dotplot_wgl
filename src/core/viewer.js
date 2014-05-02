@@ -23,12 +23,18 @@
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
  */
-/*jshint -W079 */
 
-/*exported viewer*/
-var viewer = function() {
+/*exported ViewManager*/
+function ViewManager() {
     var histData = {},
+        shaders  = {},
         gl, prog;
+
+    ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs"].forEach(function(shaderFile) {
+        g.xhr2("shaders/" + shaderFile, function(shader) {
+            shaders[shaderFile.split(".")[0]] = shader;
+        });
+    });
 
     /**
      * prepares and loads shaders for a sequence specific dotplot
@@ -36,20 +42,22 @@ var viewer = function() {
      */
     var prepareShaders = function(fragment) {
         var vert = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vert, g.viewMgr.DotPlot);
+        gl.shaderSource(vert, shaders.DotPlot);
         gl.compileShader(vert);
         gl.attachShader(prog, vert);
         var frag = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(frag, g.viewMgr[fragment]);
+        gl.shaderSource(frag, shaders[fragment]);
         gl.compileShader(frag);
         gl.attachShader(prog, frag);
     };
 
     /**
      * renders a WebGL view of the dotplot defined in the parameters
-     * @param {object} params - parameters of the dotplot
+     * @param {object} seq1 - first sequence
+     * @param {object} seq2 - second sequence
+     * @param {number} compType - comparison type (0: prot-prot, 1: prot-nuc, 2: nuc-nuc, 3: nuc-prot)
      */
-    var render = function(params) {
+    this.render = function(seq1, seq2, compType) {
         console.time("1");
         //reninit inputs and canvas when new render calculation
         g.DOM.range1.value = 255;
@@ -60,17 +68,17 @@ var viewer = function() {
         g.DOM.slider2.value = 0;
         var wS = g.DOM.windowSize.getValue(),
             w, h;
-        if (params.compType % 2) {
-            if (params.compType === 3) {
-                w = Math.floor(params.seq1.size / 3);
-                h = params.seq2.size;
+        if (compType % 2) {
+            if (compType === 3) {
+                w = Math.floor(seq1.size / 3);
+                h = seq2.size;
             } else {
-                w = params.seq1.size;
-                h = Math.floor(params.seq2.size / 3);
+                w = seq1.size;
+                h = Math.floor(seq2.size / 3);
             }
         } else {
-            w = params.seq1.size;
-            h = params.seq2.size;
+            w = seq1.size;
+            h = seq2.size;
         }
         g.$("window-viewer").style.width = wS + "ch";
         g.DOM.canvas.width         = w;
@@ -93,7 +101,7 @@ var viewer = function() {
         //new program
         prog = g.program = gl.createProgram();
 
-        switch (params.compType) {
+        switch (compType) {
             case 0:
                 prepareShaders("ProteicProteic");
                 break;
@@ -149,8 +157,8 @@ var viewer = function() {
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
         //weight matrix texture
-        var texWidth = (params.compType === 2) ? 16 : 24,
-            tex = (params.compType === 2) ? g.nucleicTex : g.proteicTex;
+        var texWidth = (compType === 2) ? 16 : 24,
+            tex      = (compType === 2) ? g.nucleicTex : g.proteicTex;
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
@@ -161,15 +169,15 @@ var viewer = function() {
 
         //sequence textures
         var texLoaded = false;
-        g.seqMgr.get(params.seq1.key, params.compType === 2, function(seq) {
-            g.DOM.slider1.max    = w - 1;
+        g.seqMgr.get(seq1.key, compType === 2, function(seq) {
+            g.DOM.slider1.max    = w - 2;
             g.DOM.pickDiv1       = document.createElement("div");
-            g.DOM.pickDiv1.title = params.seq1.name;
-            fillDivs(seq.string, params.compType, "1");
+            g.DOM.pickDiv1.title = seq1.name;
+            fillDivs(seq.string, compType, "1");
             g.DOM.pick.replaceChild(g.DOM.pickDiv1, g.DOM.pick.children[0]);
             gl.activeTexture(gl.TEXTURE1);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-            if (params.seq1.type === "nucleic") {
+            if (seq1.type === "nucleic") {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, seq.typedArray);
             } else {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, w, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, seq.typedArray);
@@ -185,15 +193,15 @@ var viewer = function() {
             }
         });
 
-        g.seqMgr.get(params.seq2.key, params.compType === 2, function(seq) {
-            g.DOM.slider2.max    = h - 1;
+        g.seqMgr.get(seq2.key, compType === 2, function(seq) {
+            g.DOM.slider2.max    = h - 2;
             g.DOM.pickDiv2       = document.createElement("div");
-            g.DOM.pickDiv2.title = params.seq2.name;
-            fillDivs(seq.string, params.compType, "2");
+            g.DOM.pickDiv2.title = seq2.name;
+            fillDivs(seq.string, compType, "2");
             g.DOM.pick.replaceChild(g.DOM.pickDiv2, g.DOM.pick.children[1]);
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-            if (params.seq2.type === "nucleic") {
+            if (seq2.type === "nucleic") {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, h, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, seq.typedArray);
             } else {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, h, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, seq.typedArray);
@@ -262,6 +270,9 @@ var viewer = function() {
         }
     };
 
+    /**
+     * computes the dotplot's pixels for the histogram
+     */
     var renderHist = function() {
         var w = new Worker("core/workers/histogram.js");
         w.addEventListener("message", function(message) {
@@ -279,38 +290,33 @@ var viewer = function() {
         });
     };
 
-    /**
-     * requestAnimationFrame polyfill
-     * @param {function} callback - function called at the next monitor refresh (or after 16ms)
-     */
-    var rAF = (function() {
-        if (window.requestAnimationFrame) {
-            return function(callback) {window.requestAnimationFrame(callback);};
-        } else if (window.webkitRequestAnimationFrame) {
-            return function(callback) {window.webkitRequestAnimationFrame(callback);};
-        } else if (window.mozRequestAnimationFrame) {
-            return function(callback) {window.mozRequestAnimationFrame(callback);};
-        } else {
-            return function(callback) {setTimeout(callback, 16)};
-        }
-    })();
+    //requestAnimationFrame polyfill
+    var rAF = window.requestAnimationFrame       ||
+              window.webkitRequestAnimationFrame ||
+              window.mozRequestAnimationFrame    ||
+              setTimeout;
 
-    g.viewMgr.draw = function(updateHist) {
+    /**
+     * draws the WebGL visualization of the dotplot
+     * @param {boolean} [updateHist] - wether to update the histogram with the rendered data or not
+     */
+    this.draw = function(updateHist) {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         if (updateHist) {
             renderHist();
             g.viewMgr.pick(0, 0);
         }
         g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
-        var webglInput      = g.$("webgl");
-        webglInput.value    = "Render WebGL graph";
         rAF(function() {
-            webglInput.disabled = false;
-        });
-        g.viewMgr.rendering = false;
+            g.viewMgr.rendering = false;
+        }, 16);
         console.timeEnd("1");
     };
 
+    /**
+     * modifies the histogram with the current pixel counts
+     * @param {string} channels - channels to represent in the histogram
+     */
     g.DOM.countHist = function(channels) {
         for (var i = 0; i < 256; i++) {
             g.DOM.hist.children[i * 2].style[g.DOM.transform] = "translate3d(0, -" + ((channels ? (histData.histCount[channels][i] / histData.maxCount[channels]) : 0) * 200) + "px, 0)";
@@ -322,32 +328,29 @@ var viewer = function() {
         }
     };
 
-    g.viewMgr.pick = function(x, y) {
-        if (x !== undefined && x < g.DOM.canvas.width) {
+    /**
+     * displays the sequences at the position picked
+     * @param {number} [x] - x coordinate on the dotplot
+     * @param {number} [y] - y coordinate on the dotplot
+     */
+    this.pick = function(x, y) {
+        if (x !== null && x < g.DOM.canvas.width) {
             g.DOM.slider1.value = Math.min(x, g.DOM.slider1.max);
             g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + x + "ch)";
             g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + x + "px)";
         }
-        if (y !== undefined && y < g.DOM.canvas.height) {
+        if (y !== null && y < g.DOM.canvas.height) {
             g.DOM.slider2.value = Math.min(y, g.DOM.slider2.max);
             g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + y + "ch)";
             g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + y + "px)";
         }
     };
 
-    ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs"].forEach(function(shaderFile) {
-        g.xhr2("shaders/" + shaderFile, function(shader) {
-            g.viewMgr[shaderFile.split(".")[0]] = shader;
-        });
-    });
-
     g.executeAfterDOM(function() {
-        var webglInput = g.$("webgl");
-        webglInput.addEventListener("click", function() {
+        //click event on the render button
+        g.$("render").addEventListener("click", function() {
             if (!g.viewMgr.rendering) {
                 g.viewMgr.rendering = true;
-                webglInput.disabled = true;
-                webglInput.value    = "Rendering…";
                 g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = false;
                 var seq1 = g.DOM.opt1.selectedOptions[0],
                     seq2 = g.DOM.opt2.selectedOptions[0],
@@ -375,23 +378,20 @@ var viewer = function() {
                         compType = 3;
                     }
                 }
-                render({
-                    seq1: {
+                g.viewMgr.render(
+                    {
                         type: seq1.dataset.type,
                         key:  parseInt(seq1.dataset.key),
                         name: seq1.textContent,
                         size: parseInt(seq1.dataset.size)
-                    },
-                    seq2: {
+                    }, {
                         type: seq2.dataset.type,
                         key:  parseInt(seq2.dataset.key),
                         name: seq2.textContent,
                         size: parseInt(seq2.dataset.size)
-                    },
-                    compType: compType
-                });
+                    }, compType
+                );
             }
         }, false);
-        webglInput.disabled = false;
     });
-};
+}

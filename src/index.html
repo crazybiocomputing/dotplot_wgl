@@ -28,20 +28,20 @@
     <section id='main' class='active-section'>
         <nav>
             <a data-target='settings' class='internal-nav'>Settings and Documentation</a>
-            <a data-target='sequences'  class='internal-nav'>Sequences</a>
+            <a data-target='sequences' class='internal-nav'>Sequences</a>
         </nav>
         <h1>{{name}}</h1>
         <div class='flex around'>
             <div>
                 <select id='seq1'></select>
-                <input type='button' data-target='sequences'  class='internal-nav' value='+'>
+                <input type='button' data-target='sequences' class='internal-nav' value='+'>
             </div>
             <div>
                 <select id='seq2'></select>
-                <input type='button' data-target='sequences'  class='internal-nav' value='+'>
+                <input type='button' data-target='sequences' class='internal-nav' value='+'>
             </div>
             <select id='mat'></select>
-            <input type='button' id='webgl' value='Render WebGL graph' disabled>
+            <input type='button' id='render' value='Render WebGL graph'>
         </div>
         <div class='flex around'>
             <div>
@@ -111,7 +111,9 @@
         </div>
         <h1>Documentation</h1>
         <a href='https://github.com/jeesay/dotplot_wgl' target='_blank'>Github repository</a>
-        <a href='' target='_blank'>Documentation</a>
+        <a href='https://github.com/jeesay/dotplot_wgl/wiki' target='_blank' rel='help'>Wiki</a>
+        <a href='doc' target='_blank'>Source documentation</a>
+        <a href='https://gnu.org/licenses/gpl.html' target='_blank' rel='license'>Work under GPLv3</a>
         <h1>Version: {{version}}</h1>
     </section>
     <section id='sequences'>

@@ -194,7 +194,7 @@ var sequences = function() {
                     addDOM(list);
                     g.matMgr.updateDOM();
                 });
-                viewer();
+                g.viewMgr = new ViewManager();
             }
         }, false);
     } else {
@@ -240,7 +240,6 @@ var sequences = function() {
                 }
             }
         };
-
-        viewer();
+        g.viewMgr = new ViewManager();
     }
 };

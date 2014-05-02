@@ -10,10 +10,10 @@
     "debug":     true,
     "esnext":    true,
     "globals":   {
-        "g":            false,
-        "sequences":    false,
-        "matrices":     false,
-        "viewer":       false
+        "g":               false,
+        "SequenceManager": false,
+        "MatriceManager":  false,
+        "ViewManager":     false
     },
     "lastsemic": true,
     "browser":   true,
