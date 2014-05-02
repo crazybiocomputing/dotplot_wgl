@@ -33,7 +33,6 @@
 //maxCount corresponds to a list of the values in each color channel(s) for short sequences
 var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
     maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
-    // Each element of maxCount and maxLog are a Unit32Array between 0 and 256                                                                              
     histCount = {
         RGB: new Uint32Array(256),
         RG:  new Uint32Array(256),
@@ -44,13 +43,13 @@ var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: nu
         B:   new Uint32Array(256)
     },
     histLog = {
-        RGB: new Uint32Array(256),
-        RG:  new Uint32Array(256),
-        GB:  new Uint32Array(256),
-        RB:  new Uint32Array(256),
-        R:   new Uint32Array(256),
-        G:   new Uint32Array(256),
-        B:   new Uint32Array(256)
+        RGB: new Uint8Array(256),
+        RG:  new Uint8Array(256),
+        GB:  new Uint8Array(256),
+        RB:  new Uint8Array(256),
+        R:   new Uint8Array(256),
+        G:   new Uint8Array(256),
+        B:   new Uint8Array(256)
     };
 
 self.addEventListener("message", function(message) {

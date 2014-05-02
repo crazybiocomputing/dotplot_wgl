@@ -102,7 +102,7 @@ var g = {
      * custom XmlHttpRequests (version 2)
      * @param {string} url - URL of the wanted resource
      * @param {function} callback - callback function
-     * @param {string} [type] - function called at the next monitor refresh (or after 16ms)
+     * @param {string} [type="text"] - function called at the next monitor refresh (or after 16ms)
      */
     xhr2: function(url, callback, type) {
         var req = new XMLHttpRequest();

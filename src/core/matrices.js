@@ -29,10 +29,10 @@
 /*exported matrices*/
 var matrices = function() {
     var list = [];
-    // matrix charged
+
     g.matMgr.updateDOM = function() {
         var type;
-	//from the nature of the sequences, type is determined (nucleic or proteic)
+        //from the nature of the sequences, matrix type is determined
         try {
             type = (
                 g.DOM.opt2.selectedOptions[0].dataset.type === "nucleic" &&
@@ -43,8 +43,8 @@ var matrices = function() {
         }
         if (this.currentType !== type) {
             /**
-             * According to the type, matrices' list are update 
-             * @param {object} mat - Object containing type, name and array
+             * According to the type, matrices list are updated
+             * @param {object} mat - DOM option tag corresponding to a matrix
              */
             list.forEach(function(mat) {
                 if (mat.dataset.type === type) {
@@ -60,10 +60,10 @@ var matrices = function() {
     };
 
     /**
-     * selection of a matrix in the WebGl texture according to the coordinates 
+     * selection of a matrix in the WebGl texture according to the coordinates
      * @param {string} mat - matrix name
-     * @param {int} i - index of the matrix
-     * @param {int} a - entire sequence
+     * @param {number} i - index of the matrix
+     * @param {number} a - entire list of matrices
      */
     var init = function(mat, i, a) {
         var dom = document.createElement("option");

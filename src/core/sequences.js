@@ -108,7 +108,7 @@ var sequences = function() {
             }
         }
         if (removed) {
-	    //verify if database exists
+            //check if database exists
             if (g.db) {
                 var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
                 trans.addEventListener("complete", function() {
@@ -144,18 +144,16 @@ var sequences = function() {
             });
         }, true);
     };
-    
-    //check the existence of the database
-    if (g.db) {
-	/**
-	 * cleaning sequences
-	 * @param {string} cleaned - sequence cleaned
-	 */
+
+    if (g.db) {//in case the browser has access to IndexedDB
+        /**
+         * adds cleaned sequences
+         * @param {string} cleaned - cleaned sequence
+         */
         var addClean = function(cleaned) {
             var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
             var seqOS = trans.objectStore("sequences");
             var request1;
-	    //sequence cleaned in terms of the sequence's nature
             if (cleaned.type === "proteic") {
                 request1 = seqOS.add({
                     proteic:  cleaned.proteic,
@@ -169,11 +167,7 @@ var sequences = function() {
                     proteicS: cleaned.proteicS
                 });
             }
-            
-            /**
-             * 
-             * @param {string} e -
-             */
+
             request1.addEventListener("success", function(e) {
                 var seqMetaOS = trans.objectStore("sequencesMetadata");
                 var seqTemp = {
@@ -191,12 +185,12 @@ var sequences = function() {
             }, false);
         };
 
-	/**
-         * Recuperation of the sequence
-         * @param {string} key - sequence cleaned
-	 * @param {bool} nucleic - if the sequence is nucleic or not
-	 * @param {function} callback - function called at the next monitor
-	 * @param {bool} details - get metaData or not
+        /**
+         * get a sequence from a key
+         * @param {number} key - sequence internal identifier
+         * @param {boolean} nucleic - if the sequence is nucleic or not
+         * @param {function} callback - function called after it got the sequence data
+         * @param {bool} [details=false] - get metadata or not
          */
         g.seqMgr.get = function(key, nucleic, callback, details) {
             var type = nucleic ? "nucleic" : "proteic";
@@ -223,10 +217,6 @@ var sequences = function() {
             }
         };
 
-        /**
-         * Recuperation of the sequence
-         * @param {object} e - 
-         */
         var cursorGetter = g.db.transaction(["sequencesMetadata"], "readonly").objectStore("sequencesMetadata").openCursor();
         cursorGetter.addEventListener("success", function(e) {
             var cursor = e.target.result;
@@ -243,8 +233,8 @@ var sequences = function() {
         }, false);
     } else {
         /**
-         * cleaning sequences
-         * @param {string} cleaned - sequence cleaned
+         * adds cleaned sequences
+         * @param {string} cleaned - cleaned sequence
          */
         var addClean = function(cleaned) {
             var item = {
@@ -265,11 +255,11 @@ var sequences = function() {
         };
 
         /**
-         * Recuperation of the sequence
-         * @param {string} key - sequence cleaned
-         * @param {bool} nucleic - if the sequence is nucleic or not
-         * @param {function} callback - function called at the next monitor
-         * @param {bool} details - get metaData or not
+         * get a sequence from a key
+         * @param {number} key - sequence internal identifier
+         * @param {boolean} nucleic - if the sequence is nucleic or not
+         * @param {function} callback - function called after it got the sequence data
+         * @param {bool} [details=false] - get metadata or not
          */
         g.seqMgr.get = function(key, nucleic, callback, details) {
             var type = nucleic ? "nucleic" : "proteic",
