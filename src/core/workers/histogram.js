@@ -28,8 +28,12 @@
 /*jshint globalstrict: true*/
 "use strict";
 
+
+//maxCount corresponds to a list of the values in each color channel(s) for long sequences
+//maxCount corresponds to a list of the values in each color channel(s) for short sequences
 var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
     maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
+    // Each element of maxCount and maxLog are a Unit32Array between 0 and 256                                                                              
     histCount = {
         RGB: new Uint32Array(256),
         RG:  new Uint32Array(256),
