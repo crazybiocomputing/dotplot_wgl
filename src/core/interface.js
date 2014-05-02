@@ -25,42 +25,19 @@
  */
 
 g.executeAfterDOM(function() {
-    var innerContainer = g.$("inner-container");
-    innerContainer.style[g.DOM.transform] = "translateZ(0) scale(1)";
+    //nav buttons
 
-    //declaring listeners
-    innerContainer.addEventListener("click", function(e) {
-        var rect = this.getBoundingClientRect();
-        g.viewMgr.pick(
-            Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
-            Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
-        );
-    }, false);
-
-    var scale = function(v) {
-        innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
+    /**
+     * navigates through sections of the site
+     */
+    var nav = function() {
+        g.$(this.dataset.target).classList.toggle("active-section");
     };
-    g.$("container").addEventListener("wheel", function(e) {
-        if (e.ctrlKey || e.altKey || e.shiftKey) {
-            e.preventDefault();
-            if (e.deltaY) {
-                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.deltaY > 0) ? 0.1 : -0.1)).toFixed(1)), 0.1));
-            }
-        }
+    Array.prototype.forEach.call(document.getElementsByClassName("internal-nav"), function(anchor) {
+        anchor.addEventListener("click", nav, false);
     });
-    document.addEventListener("keypress", function(e) {
-        if (e.charCode === 43 || e.charCode === 45) {
-            scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
-        }
-    }, false);
-    
-    g.DOM.zoom.addEventListener("input", function() {
-        scale(this.value);
-    }, false);
-    g.DOM.zoom.addEventListener("change", function() {
-        scale(this.value);
-    }, false);
 
+    //change event on the matrix selector
     g.DOM.mat.addEventListener("change", function() {
         if (g.context && !g.viewMgr.rendering) {
             g.viewMgr.rendering = true;
@@ -81,6 +58,7 @@ g.executeAfterDOM(function() {
         }
     });
 
+    //input event in the number input tag for the window
     g.DOM.windowSize.addEventListener("input", function() {
         if (g.context && !g.viewMgr.rendering) {
             g.viewMgr.rendering = true;
@@ -94,6 +72,50 @@ g.executeAfterDOM(function() {
         }
     });
 
+    var innerContainer = g.$("inner-container");
+    innerContainer.style[g.DOM.transform] = "translateZ(0) scale(1)";
+
+    //click event on the dotplot
+    innerContainer.addEventListener("click", function(e) {
+        var rect = this.getBoundingClientRect();
+        g.viewMgr.pick(
+            Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
+            Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
+        );
+    }, false);
+
+    /**
+     * scales the dotplot according to the passed value
+     * @param {number} v - zoom value
+     */
+    var scale = function(v) {
+        innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
+    };
+    //scroll event with modifier key
+    g.$("container").addEventListener("wheel", function(e) {
+        if (e.ctrlKey || e.altKey || e.shiftKey) {
+            e.preventDefault();
+            if (e.deltaY) {
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.deltaY > 0) ? 0.1 : -0.1)).toFixed(1)), 0.1));
+            }
+        }
+    });
+    //press event on + or - key
+    document.addEventListener("keypress", function(e) {
+        if (e.charCode === 43 || e.charCode === 45) {
+            scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
+        }
+    }, false);
+    //input event in the number input tag
+    g.DOM.zoom.addEventListener("input", function() {
+        scale(this.value);
+    }, false);
+    //change event in the number input tag
+    g.DOM.zoom.addEventListener("change", function() {
+        scale(this.value);
+    }, false);
+
+    //click event on the download button
     g.$("download").addEventListener("click", function() {
         var ghostAnchor      = g.$("ghost-anchor");
         ghostAnchor.download = "image.png";
@@ -108,6 +130,7 @@ g.executeAfterDOM(function() {
         }
     }, false);
 
+    //click event on the fullscreen button
     g.$("fullscreen").addEventListener("click", function() {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
@@ -118,15 +141,20 @@ g.executeAfterDOM(function() {
         }
     }, false);
 
+    //click event on the clean-up button
     g.$("clean-up").addEventListener("click", function() {
+        //empties DB
         window.indexedDB.deleteDatabase("dotplot");
         try {
+            //unset "alreadyVisited" flag
             localStorage.removeItem("alreadyVisited");
         } catch(err) {}
         location.reload(true);
     }, false);
 
+    //check if supports Notification API
     if (window.Notification && window.Notification.permission !== "granted") {
+        //click event to request use of Notifications
         g.$("notifications").addEventListener("click", function() {
             window.Notification.requestPermission(function(e) {
                 if (e === "granted") {
@@ -138,7 +166,8 @@ g.executeAfterDOM(function() {
         g.$("notifications").classList.add("hidden");
     }
 
-    if (navigator.mozApps) {//supports Open Web Apps
+    //check if supoorts Open Web Apps
+    if (navigator.mozApps) {
         var manifest = location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp";
         var req      = navigator.mozApps.checkInstalled(manifest);
         req.addEventListener("success", function(e) {
@@ -160,14 +189,7 @@ g.executeAfterDOM(function() {
         g.$("install").classList.add("hidden");
     }
 
-    //nav buttons
-    var nav = function() {
-        g.$(this.dataset.target).classList.toggle("active-section");
-    };
-    Array.prototype.forEach.call(document.getElementsByClassName("internal-nav"), function(anchor) {
-        anchor.addEventListener("click", nav, false);
-    });
-
+    //
     g.$("sequence-list").addEventListener("click", function(e) {
         if (e.target.classList.contains("remove")) {
             g.seqMgr.remove(parseInt(e.target.parentElement.dataset.key));
@@ -181,11 +203,7 @@ g.executeAfterDOM(function() {
         }
     }, false);
 
-    var cleanAfterInput = function() {
-        g.DOM.names.value     = "";
-        g.DOM.type.value      = "unknown";
-        g.DOM.inputZone.value = "";
-    };
+    //drag and drop sequence files
     g.DOM.inputZone.addEventListener("dragover", function(e) {
         e.stopPropagation();
         e.preventDefault();
@@ -204,39 +222,48 @@ g.executeAfterDOM(function() {
         Array.prototype.forEach.call(e.dataTransfer.files, function(file) {
             g.seqMgr.add(file, g.DOM.names.value, g.DOM.type.value);
         });
-        cleanAfterInput();
+        g.DOM.names.value = g.DOM.inputZone.value = "";
+        g.DOM.type.value  = "unknown";
     }, false);
 
+    //click event on the submit button on the sequence input section
     g.$("input-submit").addEventListener("click", function() {
         g.seqMgr.add(g.DOM.inputZone.value, g.DOM.names.value, g.DOM.type.value);
-        cleanAfterInput();
+        g.DOM.names.value = g.DOM.inputZone.value = "";
+        g.DOM.type.value  = "unknown";
     }, false);
 
-    var fragment = document.createDocumentFragment(),
-        barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    barCount.classList.add("count");
-    barCount.setAttribute("y1", "200.5%");
-    barCount.setAttribute("y2", "100.5%");
-    barCount.style.stroke = "#06F";
-    barCount.style.strokeWidth = 1;
-    var barLog = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    barLog.classList.add("log");
-    barLog.setAttribute("y1", "101.5%");
-    barLog.setAttribute("y2", "100.5%");
-    barLog.style.stroke = "#f0e";
-    barLog.style.strokeWidth = 1;
-    for (var i = 0.5; i < 256; i++) {//create 256 bars
-        var barC = barCount.cloneNode();//copy the one defined
-        barC.setAttribute("x1", i);
-        barC.setAttribute("x2", i);
-        fragment.appendChild(barC);
-        var barL = barLog.cloneNode();
-        barL.setAttribute("x1", i);
-        barL.setAttribute("x2", i);
-        fragment.appendChild(barL);
-    }
-    g.DOM.hist.appendChild(fragment);
+    //histogram creation
+    (function() {
+        var fragment = document.createDocumentFragment(),
+            barCount = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        barCount.classList.add("count");
+        barCount.setAttribute("y1", "200.5%");
+        barCount.setAttribute("y2", "100.5%");
+        barCount.style.stroke = "#06F";
+        barCount.style.strokeWidth = 1;
+        var barLog = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        barLog.classList.add("log");
+        barLog.setAttribute("y1", "101.5%");
+        barLog.setAttribute("y2", "100.5%");
+        barLog.style.stroke = "#f0e";
+        barLog.style.strokeWidth = 1;
+        for (var i = 0.5; i < 256; i++) {//create 256 bars
+            var barC = barCount.cloneNode();//copy the one defined
+            barC.setAttribute("x1", i);
+            barC.setAttribute("x2", i);
+            fragment.appendChild(barC);
+            var barL = barLog.cloneNode();
+            barL.setAttribute("x1", i);
+            barL.setAttribute("x2", i);
+            fragment.appendChild(barL);
+        }
+        g.DOM.hist.appendChild(fragment);
+    })();
 
+    /**
+     * updates the dotplot and the histogram background according to the color channel chosen
+     */
     var updateColor = function() {
         if (g.context && !g.viewMgr.rendering) {
             g.viewMgr.rendering = true;
@@ -259,6 +286,12 @@ g.executeAfterDOM(function() {
     g.DOM.green.addEventListener("change", updateColor, false);
     g.DOM.blue.addEventListener("change", updateColor, false);
 
+    /**
+     * gives the parameters for the transfer equation (linear equation)
+     * @param {number} y1 - abscissa of one point
+     * @param {number} y2 - abscissa of the other
+     * @returns {object} - parameters of the linear equation (a and b)
+     */
     var linearEq = function(y1, y2) {
         var a = 100 / (y2 - y1);
         return {
@@ -267,6 +300,9 @@ g.executeAfterDOM(function() {
         };
     };
 
+    /**
+     * updates the dotplot and the histogram background according to the transfer equation parameters
+     */
     var updateTransfer = function() {
         if (g.context && !g.viewMgr.rendering) {
             g.viewMgr.rendering = true;
@@ -288,6 +324,7 @@ g.executeAfterDOM(function() {
     g.DOM.range1.addEventListener("input", updateTransfer, false);
     g.DOM.range2.addEventListener("input", updateTransfer, false);
 
+    //input events on range inputs associated with the sequence displayed with picking
     g.DOM.slider1.addEventListener("input", function(e) {
         g.viewMgr.pick(e.target.value);
     }, false);

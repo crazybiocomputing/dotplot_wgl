@@ -27,10 +27,13 @@
 
 /*exported viewer*/
 var viewer = function() {
-    g.viewMgr.rendering = false;
     var histData = {},
         gl, prog;
 
+    /**
+     * prepares and loads shaders for a sequence specific dotplot
+     * @param {string} fragment - name of the fragment to use for the dotplot
+     */
     var prepareShaders = function(fragment) {
         var vert = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vert, g.viewMgr.DotPlot);
@@ -42,18 +45,21 @@ var viewer = function() {
         gl.attachShader(prog, frag);
     };
 
+    /**
+     * renders a WebGL view of the dotplot defined in the parameters
+     * @param {object} params - parameters of the dotplot
+     */
     var render = function(params) {
         console.time("1");
-        g.DOM.range1.value  = 255;
-        g.DOM.range2.value  = 0;
-        g.DOM.red.checked   = true;
-        g.DOM.green.checked = true;
-        g.DOM.blue.checked  = true;
+        //reninit inputs and canvas when new render calculation
+        g.DOM.range1.value = 255;
+        g.DOM.range2.value = 0;
+        g.DOM.red.checked = g.DOM.green.checked = g.DOM.blue.checked = true;
         g.DOM.hist.style.background = "linear-gradient(to right, #000 0, #000 0%, #fff 100%, #fff 100%)";
         g.DOM.slider1.value = 0;
         g.DOM.slider2.value = 0;
         var wS = g.DOM.windowSize.getValue(),
-        w, h;
+            w, h;
         if (params.compType % 2) {
             if (params.compType === 3) {
                 w = Math.floor(params.seq1.size / 3);
@@ -73,6 +79,8 @@ var viewer = function() {
         g.DOM.canvas.style.height  = h + "px";
         g.DOM.picker1.style.height = (h + 1 - wS) + "px";
         g.DOM.picker2.style.width  = (w + 1 - wS) + "px";
+
+        //creates and initialize new context
         gl = g.context = g.DOM.canvas.getContext(
             "webgl", {alpha: false, preserveDrawingBuffer: true}
         ) || g.DOM.canvas.getContext(
@@ -82,6 +90,7 @@ var viewer = function() {
         gl.clearColor(1.0, 1.0, 1.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
+        //new program
         prog = g.program = gl.createProgram();
 
         switch (params.compType) {
@@ -102,6 +111,7 @@ var viewer = function() {
         gl.linkProgram(prog);
         gl.useProgram(prog);
 
+        //link buffers and uniforms
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
             -1,  1,  1,  1,  1, -1,
@@ -138,6 +148,7 @@ var viewer = function() {
         gl.enableVertexAttribArray(texCoordLocation);
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
+        //weight matrix texture
         var texWidth = (params.compType === 2) ? 16 : 24,
             tex = (params.compType === 2) ? g.nucleicTex : g.proteicTex;
         gl.activeTexture(gl.TEXTURE0);
@@ -148,6 +159,7 @@ var viewer = function() {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
+        //sequence textures
         var texLoaded = false;
         g.seqMgr.get(params.seq1.key, params.compType === 2, function(seq) {
             g.DOM.slider1.max    = w - 1;
@@ -198,6 +210,12 @@ var viewer = function() {
         });
     };
 
+    /**
+     * recursively builds a group of 200 spans (max) from a sequence string and inserts it to the DOM
+     * @param {string} string - sequence string to be parsed
+     * @param {object} div - DOM element to fill
+     * @param {number} index - starting point of the sequence parsing
+     */
     var divBuilder = function(string, div, index) {
         var frag = document.createDocumentFragment(),
             i    = 0;
@@ -213,6 +231,12 @@ var viewer = function() {
         }
     };
 
+    /**
+     * starts the
+     * @param {string} string - sequence string to be parsed
+     * @param {object} div - DOM element to fill
+     * @param {number} index - starting point of the sequence parsing
+     */
     var fillDivs = function(string, compType, num) {
         var div = g.DOM["pickDiv" + num];
         div.classList.add("picking-sequences");
@@ -255,6 +279,22 @@ var viewer = function() {
         });
     };
 
+    /**
+     * requestAnimationFrame polyfill
+     * @param {function} callback - function called at the next monitor refresh (or after 16ms)
+     */
+    var rAF = (function() {
+        if (window.requestAnimationFrame) {
+            return function(callback) {window.requestAnimationFrame(callback);};
+        } else if (window.webkitRequestAnimationFrame) {
+            return function(callback) {window.webkitRequestAnimationFrame(callback);};
+        } else if (window.mozRequestAnimationFrame) {
+            return function(callback) {window.mozRequestAnimationFrame(callback);};
+        } else {
+            return function(callback) {setTimeout(callback, 16)};
+        }
+    })();
+
     g.viewMgr.draw = function(updateHist) {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         if (updateHist) {
@@ -264,7 +304,7 @@ var viewer = function() {
         g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
         var webglInput      = g.$("webgl");
         webglInput.value    = "Render WebGL graph";
-        g.rAF(function() {
+        rAF(function() {
             webglInput.disabled = false;
         });
         g.viewMgr.rendering = false;

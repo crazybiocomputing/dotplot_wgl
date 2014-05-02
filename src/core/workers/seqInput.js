@@ -309,7 +309,7 @@ var sequenceParser = function(wholeSequence, i) {
         for (j = 0; j < interlacedProt.length; j++) {
             sequenceTrS[j % 3] += interlacedProt.charAt(j);
         }
-        if (transf) {
+        if (!transf) {
             self.postMessage({
                 nucleic:  stringToTypedArray(interlacedNuc, normDNA),
                 nucleicS: [seq, rev, revComp],

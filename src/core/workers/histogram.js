@@ -84,7 +84,7 @@ self.addEventListener("message", function(message) {
         maxLog.B         = Math.max(maxLog.B, histLog.B[i]);
     }
 
-    if (message.data.transf) {
+    if (!message.data.transf) {
         self.postMessage({
             maxCount:   maxCount,
             maxLog:     maxLog,
