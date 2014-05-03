@@ -31,10 +31,11 @@
             g.$("compatibility").classList.add("hidden");
         });
     } else {
-        document.addEventListener("click", function() {
+        var eventListener = function() {
             g.$("compatibility").classList.add("hidden");
-            document.removeEventListener("click", arguments.callee, false);
-        }, false);
+            document.removeEventListener("click", eventListener, false);
+        };
+        document.addEventListener("click", eventListener, false);
     }
     var firstLoad = function() {
         var script = document.createElement("script");

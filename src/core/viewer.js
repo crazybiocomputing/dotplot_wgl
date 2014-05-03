@@ -364,6 +364,7 @@ function ViewManager() {
     };
 
     g.executeAfterDOM(function() {
+        var colorDesc = g.$("hist").firstChild;
         //click event on the render button
         g.$("render").addEventListener("click", function() {
             if (!g.viewMgr.rendering) {
@@ -375,17 +376,17 @@ function ViewManager() {
                 if (seq1.dataset.type === seq2.dataset.type) {
                     if (seq2.dataset.type === "nucleic") {
                         compType = 2;
-                        g.DOM.colors.textContent = "Nucleic strand:";
+                        colorDesc.textContent = "Nucleic strand:";
                         g.DOM.red.nextElementSibling.textContent   = "forward";
                         g.DOM.green.nextElementSibling.textContent = "reverse";
                         g.DOM.blue.nextElementSibling.textContent  = "reverse comp.";
                     } else {
                         compType = 0;
                         g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = true;
-                        g.DOM.colors.textContent = g.DOM.red.nextElementSibling.textContent = g.DOM.green.nextElementSibling.textContent = g.DOM.blue.nextElementSibling.textContent = "";
+                        colorDesc.textContent = g.DOM.red.nextElementSibling.textContent = g.DOM.green.nextElementSibling.textContent = g.DOM.blue.nextElementSibling.textContent = "";
                     }
                 } else {
-                    g.DOM.colors.textContent = "Reading frame offsets:";
+                    colorDesc.textContent = "Reading frame offsets:";
                     g.DOM.red.nextElementSibling.textContent   = "0";
                     g.DOM.green.nextElementSibling.textContent = "1";
                     g.DOM.blue.nextElementSibling.textContent  = "2";

@@ -34,7 +34,6 @@ module.exports = function(grunt) {
             },
             core: {
                 src: [
-                    "dist/<%= pkg.version %>/core/global.js",
                     "dist/<%= pkg.version %>/core/interface.js",
                     "dist/<%= pkg.version %>/core/viewer.js",
                     "dist/<%= pkg.version %>/core/sequences.js",

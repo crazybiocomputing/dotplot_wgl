@@ -28,7 +28,21 @@
 /** @constructor */
 function SequenceManager() {
     /** List of all stored sequences @type {Object[]} */
-    var list = [];
+    var list    = [],
+        li      = g.$("sequence-list"),
+        liTempl = (function() {
+            var li  = document.createElement("li");
+            for (var i = 0; i < 4; i++) {
+                li.appendChild(document.createElement("div"));
+            }
+            li.children[2].classList.add("download");
+            li.children[2].title = "save as fasta file";
+            li.children[2].textContent = "↓";
+            li.children[3].classList.add("remove");
+            li.children[3].title = "remove";
+            li.children[3].textContent = "×";
+            return li;
+        })();
     /**
      * Adds the provided sequences to the DOM
      * @param {string[]} sequences - name of the sequence to analyse
@@ -44,12 +58,12 @@ function SequenceManager() {
             sequence.opt2 = sequence.opt1.cloneNode(true);
             g.DOM.opt1.appendChild(sequence.opt1);
             g.DOM.opt2.appendChild(sequence.opt2);
-            sequence.li = g.DOM.liTempl.cloneNode(true);
+            sequence.li = liTempl.cloneNode(true);
             sequence.li.dataset.key = sequence.key;
             sequence.li.children[1].textContent = "(" + sequence.size + ((sequence.type === "proteic") ? " aa)" : " bp)");
             sequence.li.children[0].textContent = sequence.name;
             sequence.li.dataset.type = sequence.type;
-            g.DOM.li.appendChild(sequence.li);
+            li.appendChild(sequence.li);
         });
     };
 
@@ -95,6 +109,7 @@ function SequenceManager() {
         });
     };
 
+
     /**
      * Removes a sequence from all internal storage
      * @param {number} key - identifier of the to-be-removed sequence
@@ -119,7 +134,7 @@ function SequenceManager() {
                 trans.objectStore("sequencesMetadata").delete(key);
             }
             //deletes from the DOM
-            g.DOM.li.removeChild(removed.li);
+            li.removeChild(removed.li);
             g.DOM.opt1.removeChild(removed.opt1);
             g.DOM.opt2.removeChild(removed.opt2);
         }
@@ -194,7 +209,7 @@ function SequenceManager() {
                     type:     cleaned.type,
                     size:     cleaned.size,
                     comment:  cleaned.comment,
-                    key:      Date.now(),
+                    key:      Date.now() + parseInt(Math.random() * 10),
                     proteic:  cleaned.proteic,
                     proteicS: cleaned.proteicS
                 };
