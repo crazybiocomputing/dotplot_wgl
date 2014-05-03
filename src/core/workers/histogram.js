@@ -52,6 +52,11 @@ var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: nu
         B:   new Uint8Array(256)
     };
 
+    
+/**
+ * Calculation of the histogram's values
+ * @param {string} message - Gives informations about values of maxCount, maxLog, histCount ad histLog
+ */
 self.addEventListener("message", function(message) {
     var pixels = message.data.pixels;
     for (var i = 0; i < pixels.length; i+=4){
@@ -59,6 +64,7 @@ self.addEventListener("message", function(message) {
         histCount.G[pixels[i+1]]++;
         histCount.B[pixels[i+2]]++;
     }
+    //To each type of channel (or group of channels), is attributed the number of pixels corresponding
     for (var i = 0; i < 256; i++){
         histCount.RG[i]  = histCount.R[i] + histCount.G[i];
         histCount.GB[i]  = histCount.G[i] + histCount.B[i];
