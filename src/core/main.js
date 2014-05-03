@@ -42,7 +42,7 @@
         document.head.appendChild(script);
     };
     if (window.indexedDB) {
-        var request = window.indexedDB.open("dotplot", g.dbVersion);
+        var request = window.indexedDB.open("dotplot", 1);
         request.addEventListener("error", function() {
             console.log("Error opening the DB, loading data in memory");
             setTimeout(function() {

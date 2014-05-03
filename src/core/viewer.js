@@ -29,7 +29,6 @@
 function ViewManager() {
     var histData  = {},
         shaders   = {},
-        matrixTex = {},
         gl, prog;
     /**
      * Flag informing if a view is currently being rendered
@@ -38,16 +37,10 @@ function ViewManager() {
     this.rendering = false;
 
     ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs"].forEach(function(shaderFile) {
-        g.xhr2("shaders/" + shaderFile, function(shader) {
-            shaders[shaderFile.split(".")[0]] = shader;
+        g.xhr2("shaders/" + shaderFile, function(r) {
+            shaders[shaderFile.split(".")[0]] = r;
         });
     });
-    g.xhr2("matrices/NucleicMatrices.texture", function(r) {
-        matrixTex.nucleic = new Uint8Array(r);
-    }, "arraybuffer");
-    g.xhr2("matrices/ProteicMatrices.texture", function(r) {
-        matrixTex.proteic = new Uint8Array(r);
-    }, "arraybuffer");
 
     /**
      * Prepares and loads shaders for a sequence specific dotplot
@@ -179,7 +172,7 @@ function ViewManager() {
 
         //weight matrix texture
         var texWidth = (compType === 2) ? 16 : 24,
-            tex      = (compType === 2) ? matrixTex.nucleic : matrixTex.proteic;
+            tex      = g.matMgr.getTexture(compType);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);

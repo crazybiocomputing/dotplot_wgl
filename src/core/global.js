@@ -32,16 +32,6 @@
 
 /** @namespace */
 var g = {
-    //IndexedDB (database) version and handle
-    dbVersion: 1,
-    db:        null,
-    //WebGL variables
-    context:   null,
-    program:   null,
-    //Managers
-    seqMgr:    {},
-    matMgr:    {},
-    viewMgr:   {},
     //Document Object Model handles and variables
     DOM:       {
         liTempl: (function() {
@@ -67,8 +57,11 @@ var g = {
             }
         })()
     },
-    //Support for transferable objects in Workers
     //TODO check if fails with non-supporting browsers
+    /**
+     * Support for transferable objects in Workers
+     * @type {boolean}
+     */
     transf:    (function() {
         var ab = new ArrayBuffer(1),
             w  = new Worker(URL.createObjectURL(new Blob([""], {type: "application/javascript"})));
@@ -76,7 +69,7 @@ var g = {
         return ab.byteLength === 0;
     })(),
     /**
-     * execute the callback function after the DOM has loaded
+     * Executes the callback function after the DOM has loaded
      * @param {function} callback - function called as callback
      */
     executeAfterDOM: function(callback) {
@@ -87,7 +80,7 @@ var g = {
         }
     },
     /**
-     * document.getElementById shortcut
+     * Shortcut for document.getElementById
      * @param {string} id - id of the DOM element wanted
      */
     //shortcut for getElementById
@@ -95,9 +88,9 @@ var g = {
         return document.getElementById(id);
     },
     /**
-     * custom XmlHttpRequests (version 2)
+     * Performs a custom XmlHttpRequest (version 2)
      * @param {string} url - URL of the wanted resource
-     * @param {function} callback - callback function
+     * @param {function} callback - function called when the response has been received
      * @param {string} [type="text"] - function called at the next monitor refresh (or after 16ms)
      */
     xhr2: function(url, callback, type) {

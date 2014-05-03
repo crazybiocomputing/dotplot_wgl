@@ -27,7 +27,16 @@
 /*exported MatrixManager*/
 /** @constructor */
 function MatrixManager() {
-    var list = [];
+    var list    = [];
+    var nucTex  = null;
+    var protTex = null;
+
+    g.xhr2("matrices/NucleicMatrices.texture", function(r) {
+        nucTex = new Uint8Array(r);
+    }, "arraybuffer");
+    g.xhr2("matrices/ProteicMatrices.texture", function(r) {
+        protTex = new Uint8Array(r);
+    }, "arraybuffer");
 
     this.updateDOM = function() {
         var type;
@@ -52,6 +61,10 @@ function MatrixManager() {
             });
             this.currentType = type;
         }
+    };
+
+    this.getTexture = function(compType) {
+        return (compType === 2) ? nucTex : protTex;
     };
 
     /**

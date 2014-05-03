@@ -226,26 +226,6 @@ var geneticCode = function(codon) {
 };
 var transf;
 
-var xhr2 = function(url, names, type, callback) {
-    var req = new XMLHttpRequest();
-    req.open("GET", url, true);
-    req.responseType = "blob";
-    req.addEventListener("load", function() {
-        if (this.status === 200) {
-            if (/^\nNothing has been found\n$/g.test(this.response)) {//genbank response when not found
-                self.postMessage({status: "error"});
-                self.close();
-            } else {
-                callback(new Blob([this.response]), names, type);
-            }
-        } else if (/^4/.test(this.status)) {//e.g. 404 not found
-            self.postMessage({status: "error", message: "could not load file"});
-            self.close();
-        }
-    }, false);
-    req.send();
-};
-
 var comp = {
     "A": "T",
     "T": "A",
@@ -378,6 +358,25 @@ var sequenceSeparator = function(string, names, type) {
 };
 
 var sequenceLoader = function(id, website, names, type) {
+    var xhr2 = function(url, names, type, callback) {
+        var req = new XMLHttpRequest();
+        req.open("GET", url, true);
+        req.responseType = "blob";
+        req.addEventListener("load", function() {
+            if (this.status === 200) {
+                if (/^\nNothing has been found\n$/g.test(this.response)) {//genbank response when not found
+                    self.postMessage({status: "error"});
+                    self.close();
+                } else {
+                    callback(new Blob([this.response]), names, type);
+                }
+            } else if (/^4/.test(this.status)) {//e.g. 404 not found
+                self.postMessage({status: "error", message: "could not load file"});
+                self.close();
+            }
+        }, false);
+        req.send();
+    };
     switch (website) {
         case "NCBI":
             xhr2(
