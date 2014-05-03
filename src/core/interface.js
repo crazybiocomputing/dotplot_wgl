@@ -69,6 +69,7 @@ var g = {
     /**
      * Shortcut for document.getElementById
      * @param {string} id - id of the DOM element wanted
+     * @return {object} DOMNode
      */
     //shortcut for getElementById
     $: function(id) {

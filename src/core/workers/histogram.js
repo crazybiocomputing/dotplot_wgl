@@ -23,22 +23,30 @@
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
  */
-
-/**
- * histogram worker
- * @module histogram.js
- */
-
 /*jshint worker: true*/
 /*jshint globalstrict: true*/
 "use strict";
 
+/**
+ * WebWorker - Analyzes data from an array of pixels
+ * @module Histogram
+ */
 
-//maxCount corresponds to a list of the values in each color channel(s) for long sequences
-//maxCount corresponds to a list of the values in each color channel(s) for short sequences
-var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
-    maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null},
-    histCount = {
+/**
+ * max count value for every channel or group of channels
+ * @type {Object.<string, number>}
+ */
+var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null};
+/**
+ * max log value for every channel or group of channels
+ * @type {Object.<string, number>}
+ */
+var maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null};
+/**
+ * count values for every channel or group of channels
+ * @type {Object.<string, TypedArray>}
+ */
+var histCount = {
         RGB: new Uint32Array(256),
         RG:  new Uint32Array(256),
         GB:  new Uint32Array(256),
@@ -46,8 +54,12 @@ var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: nu
         R:   new Uint32Array(256),
         G:   new Uint32Array(256),
         B:   new Uint32Array(256)
-    },
-    histLog = {
+    };
+/**
+ * count values for every channel or group of channels
+ * @type {Object.<string, TypedArray>}
+ */
+var histLog = {
         RGB: new Uint8Array(256),
         RG:  new Uint8Array(256),
         GB:  new Uint8Array(256),
@@ -57,19 +69,19 @@ var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: nu
         B:   new Uint8Array(256)
     };
 
-    
-/**
- * Calculation of the histogram's values
- * @param {string} message - Gives informations about values of maxCount, maxLog, histCount ad histLog
- */
 self.addEventListener("message", function(message) {
+    /**
+     * Array of pixel values four by four (R0, G0, B0, A0, R1, G1, …)
+     * @type {TypedArray}
+     */
     var pixels = message.data.pixels;
+    //Loop through all pixels and increment corresponding value
     for (var i = 0; i < pixels.length; i+=4){
         histCount.R[pixels[i]]++;
         histCount.G[pixels[i+1]]++;
         histCount.B[pixels[i+2]]++;
     }
-    //To each type of channel (or group of channels), is attributed the number of pixels corresponding
+    //To each type of channel (or group of channels) is attributed the count of each pixels
     for (var i = 0; i < 256; i++){
         histCount.RG[i]  = histCount.R[i] + histCount.G[i];
         histCount.GB[i]  = histCount.G[i] + histCount.B[i];
@@ -105,7 +117,7 @@ self.addEventListener("message", function(message) {
             histCount:  histCount,
             histLog:    histLog,
         });
-    } else {
+    } else {//support transferable objects
         self.postMessage({
             maxCount:   maxCount,
             maxLog:     maxLog,

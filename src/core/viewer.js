@@ -72,7 +72,6 @@ function ViewManager() {
      * @param {number} compType - comparison type (0: prot-prot, 1: prot-nuc, 2: nuc-nuc, 3: nuc-prot)
      */
     this.render = function(seq1, seq2, compType) {
-        console.time("1");
         //reninit inputs and canvas when new render calculation
         g.DOM.range1.value = 255;
         g.DOM.range2.value = 0;
@@ -266,7 +265,7 @@ function ViewManager() {
             case "22":
                 var innerDiv = document.createElement("div");
                 div.appendChild(innerDiv);
-                divBuilder(string[0], innerDiv, 1);
+                divBuilder(string[0], innerDiv, 0);
                 break;
             case "12":
             case "21":
@@ -274,13 +273,13 @@ function ViewManager() {
                 string.forEach(function(string) {
                     var innerDiv = document.createElement("div");
                     div.appendChild(innerDiv);
-                    divBuilder(string, innerDiv, 1);
+                    divBuilder(string, innerDiv, 0);
                 });
                 break;
             default:
                 var innerDiv = document.createElement("div");
                 div.appendChild(innerDiv);
-                divBuilder(string, innerDiv, 1);
+                divBuilder(string, innerDiv, 0);
         }
     };
 
@@ -327,7 +326,6 @@ function ViewManager() {
         rAF(function() {
             g.viewMgr.rendering = false;
         }, 16);
-        console.timeEnd("1");
     };
 
     /**

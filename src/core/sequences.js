@@ -81,8 +81,11 @@ function SequenceManager() {
         w.addEventListener("message", function(message) {
             switch (message.data.status) {
                 case "error":
+                    //important information, try using Notifications
                     if (window.Notification && window.Notification.permission === "granted") {
-                        new window.Notification("Error", {body: "message.data.message", icon: "images/favicon-128.png"});
+                        new window.Notification("Error", {body: message.data.message, icon: "images/favicon-128.png"});
+                    } else {//otherwise, inform through alert
+                        alert("Error: " + message.data.message);
                     }
                     break;
                 case "sequence":

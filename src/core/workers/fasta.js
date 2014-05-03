@@ -28,8 +28,8 @@
 "use strict";
 
 /**
- * fasta worker
- * @module fasta.js
+ * WebWorker - Generates a file from a given sequence
+ * @module Fasta
  */
 
 /* creates a fasta file of the sequence cleaned */

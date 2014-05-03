@@ -23,34 +23,44 @@
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
  */
-
 /*jshint worker: true*/
 /*global FileReaderSync: false*/
 /*jshint globalstrict: true*/
 "use strict";
 
 /**
- * seqInput worker
- * @module seqInput.js
+ * WebWorker - Generates a sequence from a raw input
+ * @module SeqInput
  */
 
 /**
- * Calculates the position of each element in the dotplot
- * @param {string} e - name of the element of the array
- * @param {number} i - index of the element of the array
- * @param {array} arr - array
+ * Generates a lookup table for internal use from an element's position normalizing it's value between 0 and 255
+ * @param {string} e - element from an array
+ * @param {number} i - this element's index
+ * @param {array} arr - this element's array
  */
 var norm = function(e, i, arr) {
     this[e] = Math.round(i * 255 / arr.length + (127.5 / arr.length));
 };
 
-//normProt is the list of all the proteins
-//normDNA is the list of all the nucleic bases
+/**
+ * Nucleic lookup table
+ * @type {Object.<string, number>}
+ */
 var normProt = {};
+/**
+ * Proteic lookup table
+ * @type {Object.<string, number>}
+ */
 var normDNA = {};
 ["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X", "*"].forEach(norm, normProt);
 ["A", "T", "G", "C", "S", "W", "R", "Y", "K", "M", "B", "V", "H", "D", "N", "U"].forEach(norm, normDNA);
-normDNA.U = normDNA.T;
+//normDNA.U = normDNA.T;
+
+/**
+ * Genetic code lookup table
+ * @type {Object.<string, string>}
+ */
 var code = {
     "AAA": "K",
     "AAC": "N",
@@ -231,6 +241,11 @@ var code = {
     "UAR": "*",
     "URA": "*",
 };
+/**
+ * Returns the letter corresponding to the biological translation of a codon
+ * @param {string} codon - a nucleic codon, a three-letter string
+ * @return {string} Corresponding amino acid
+ */
 var geneticCode = function(codon) {
     if (codon.replace(/T/g, "U") in code) {
         return code[codon.replace(/T/g, "U")];
@@ -238,8 +253,11 @@ var geneticCode = function(codon) {
         return "X";
     }
 };
-var transf;
 
+/**
+ * Complementary lookup table
+ * @type {Object.<string, string>}
+ */
 var comp = {
     "A": "T",
     "T": "A",
@@ -259,36 +277,49 @@ var comp = {
     "N": "N"
 };
 
+/**
+ * Support for transferable objects in Workers
+ * @type {boolean}
+ */
+var transf;
 
 /**
- * Parses the sequence
- * @param {string} wholeSequence - the initial sequence entered
- * @param {number} i - the position of a caracter in the sequence
+ * Parses a sequence
+ * @param {string} wholeSequence - part of the raw input corresponding to one sequence with its comment
+ * @param {number} i - index of this sequence in the raw input
  */
 var sequenceParser = function(wholeSequence, i) {
-    var type     = this.type,
-        comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/),
-        sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/[\s\d]?/g, "");
+    //comment part of the sequence
+    var comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/);
+    //empty string comment in case there was none
     comment = (comment) ? comment[0] : "";
-    if (type === "unknown") {
-        type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
+    //sequence part, cleaned of spaces and numbers
+    var sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/[\s\d]?/g, "");
+    if (this.type === "unknown") {
+        //we look for an exclusively proteic letter
+        this.type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
     }
-    if (type === "unknown") {
-        self.postMessage({status: "error", message: "Could not determine type"});
-        self.close();
+    if (this.type === "unknown") {
+        self.postMessage({
+            status: "error",
+            message: "Could not determine type, try specifying one before loading the sequence"
+        });
     } else {
         if (typeof this.names[i] === "undefined") {
+            //no name is defined for this sequence
             try {
-                this.names[i] = comment.match(/[^|]*$/)[0].substr(0, 25);
+                //try extracting it from the comment part
+                this.names[i] = comment.match(/[^|]*$/)[0].trim().substr(0, 25);
                 if (!this.names[i]) {
                     throw "no name found";
                 }
             }
             catch(err) {
-                this.names[i] = "sequence " + (i + 1);
+                //default name
+                this.names[i] = (new Date()).toLocaleString() + " " + this.type + " sequence " + (i + 1);
             }
         }
-        if (type === "nucleic") {
+        if (this.type === "nucleic") {
             var seq = sequence.toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N"),
                 interlacedProt = "";
             for (var j = 0; j < seq.length - 2; j++) {
@@ -322,7 +353,7 @@ var sequenceParser = function(wholeSequence, i) {
                     proteic:  stringToTypedArray(interlacedProt, normProt),
                     proteicS: sequenceTrS,
                     name:     this.names[i],
-                    type:     type,
+                    type:     this.type,
                     comment:  comment,
                     status:   "sequence",
                     size:     seq.length
@@ -336,7 +367,7 @@ var sequenceParser = function(wholeSequence, i) {
                     proteic:  proteic,
                     proteicS: sequenceTrS,
                     name:     this.names[i],
-                    type:     type,
+                    type:     this.type,
                     comment:  comment,
                     status:   "sequence",
                     size:     seq.length
@@ -349,18 +380,18 @@ var sequenceParser = function(wholeSequence, i) {
                     proteic:  stringToTypedArray(seq, normProt),
                     proteicS: seq,
                     name:     this.names[i],
-                    type:     type,
+                    type:     this.type,
                     comment:  comment,
                     status:   "sequence",
                     size:     seq.length
                 });
-            } else {
+            } else {//support transferable objects
                 var proteic = stringToTypedArray(seq, normProt);
                 self.postMessage({
                     proteic:  proteic,
                     proteicS: seq,
                     name:     this.names[i],
-                    type:     type,
+                    type:     this.type,
                     comment:  comment,
                     status:   "sequence",
                     size:     seq.length
@@ -369,8 +400,6 @@ var sequenceParser = function(wholeSequence, i) {
         }
     }
 };
-
-
 
 /**
  * Transforms each character of the string sequence in elements of an array
