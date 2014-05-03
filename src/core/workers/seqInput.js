@@ -29,9 +29,13 @@
 /*jshint globalstrict: true*/
 "use strict";
 
+/**
+ * seqInput worker
+ * @module seqInput.js
+ */
 
 /**
- * Calculates the position of each element in the dotplot 
+ * Calculates the position of each element in the dotplot
  * @param {string} e - name of the element of the array
  * @param {number} i - index of the element of the array
  * @param {array} arr - array
@@ -39,7 +43,6 @@
 var norm = function(e, i, arr) {
     this[e] = Math.round(i * 255 / arr.length + (127.5 / arr.length));
 };
-
 
 //normProt is the list of all the proteins
 //normDNA is the list of all the nucleic bases
@@ -271,94 +274,98 @@ var sequenceParser = function(wholeSequence, i) {
         type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
     }
     if (type === "unknown") {
-        self.postMessage({status: "error", message: "could not determine type"});
+        self.postMessage({status: "error", message: "Could not determine type"});
         self.close();
-    }
-    if (typeof this.names[i] === "undefined") {
-        try {
-            this.names[i] = comment.match(/^./g)[0];
-        }
-        catch(err) {
-            this.names[i] = "sequence " + (i + 1);
-        }
-    }
-    if (type === "nucleic") {
-        var seq = sequence.toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N"),
-            interlacedProt = "";
-        for (var j = 0; j < seq.length - 2; j++) {
-            interlacedProt += geneticCode(seq.charAt(j) + seq.charAt(j + 1) + seq.charAt(j + 2));
-        }
-        interlacedProt += "XX";
-        var rev = "";
-        //Sequence's reverse
-        for (j = seq.length; j; j--) {
-            rev += seq.charAt(j - 1);
-        }
-        var revComp = "";
-        //Sequence's reverse complementary
-        for (j = 0; j < rev.length; j++){
-            revComp += comp[rev.charAt(j)];
-        }
-        var interlacedNuc = "";
-        //If the sequence's type is nucleic, obtains its "traduction" with the three open reading frame interlaced
-        for (j = 0; j < seq.length; j++) {
-            interlacedNuc += seq.charAt(j) + rev.charAt(j) + revComp.charAt(j);
-        }
-        var sequenceTrS = ["", "", ""];
-        //Separates the interlaced sequence in three proteic sequences 
-        for (j = 0; j < interlacedProt.length; j++) {
-            sequenceTrS[j % 3] += interlacedProt.charAt(j);
-        }
-        if (!transf) {
-            self.postMessage({
-                nucleic:  stringToTypedArray(interlacedNuc, normDNA),
-                nucleicS: [seq, rev, revComp],
-                proteic:  stringToTypedArray(interlacedProt, normProt),
-                proteicS: sequenceTrS,
-                name:     this.names[i],
-                type:     type,
-                comment:  comment,
-                status:   "sequence",
-                size:     seq.length
-            });
-        } else {
-            var nucleic = stringToTypedArray(interlacedNuc, normDNA),
-                proteic = stringToTypedArray(interlacedProt, normProt);
-            self.postMessage({
-                nucleic:  nucleic,
-                nucleicS: [seq, rev, revComp],
-                proteic:  proteic,
-                proteicS: sequenceTrS,
-                name:     this.names[i],
-                type:     type,
-                comment:  comment,
-                status:   "sequence",
-                size:     seq.length
-            }, [nucleic.buffer, proteic.buffer]);
-        }
     } else {
-        var seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
-        if (transf) {
-            self.postMessage({
-                proteic:  stringToTypedArray(seq, normProt),
-                proteicS: seq,
-                name:     this.names[i],
-                type:     type,
-                comment:  comment,
-                status:   "sequence",
-                size:     seq.length
-            });
+        if (typeof this.names[i] === "undefined") {
+            try {
+                this.names[i] = comment.match(/[^|]*$/)[0].substr(0, 25);
+                if (!this.names[i]) {
+                    throw "no name found";
+                }
+            }
+            catch(err) {
+                this.names[i] = "sequence " + (i + 1);
+            }
+        }
+        if (type === "nucleic") {
+            var seq = sequence.toUpperCase().replace(/[^ATGCSWRYKMBVHDNU]/g, "N"),
+                interlacedProt = "";
+            for (var j = 0; j < seq.length - 2; j++) {
+                interlacedProt += geneticCode(seq.charAt(j) + seq.charAt(j + 1) + seq.charAt(j + 2));
+            }
+            interlacedProt += "XX";
+            var rev = "";
+            //Sequence's reverse
+            for (j = seq.length; j; j--) {
+                rev += seq.charAt(j - 1);
+            }
+            var revComp = "";
+            //Sequence's reverse complementary
+            for (j = 0; j < rev.length; j++){
+                revComp += comp[rev.charAt(j)];
+            }
+            var interlacedNuc = "";
+            //If the sequence's type is nucleic, obtains its "traduction" with the three open reading frame interlaced
+            for (j = 0; j < seq.length; j++) {
+                interlacedNuc += seq.charAt(j) + rev.charAt(j) + revComp.charAt(j);
+            }
+            var sequenceTrS = ["", "", ""];
+            //Separates the interlaced sequence in three proteic sequences
+            for (j = 0; j < interlacedProt.length; j++) {
+                sequenceTrS[j % 3] += interlacedProt.charAt(j);
+            }
+            if (!transf) {
+                self.postMessage({
+                    nucleic:  stringToTypedArray(interlacedNuc, normDNA),
+                    nucleicS: [seq, rev, revComp],
+                    proteic:  stringToTypedArray(interlacedProt, normProt),
+                    proteicS: sequenceTrS,
+                    name:     this.names[i],
+                    type:     type,
+                    comment:  comment,
+                    status:   "sequence",
+                    size:     seq.length
+                });
+            } else {
+                var nucleic = stringToTypedArray(interlacedNuc, normDNA),
+                    proteic = stringToTypedArray(interlacedProt, normProt);
+                self.postMessage({
+                    nucleic:  nucleic,
+                    nucleicS: [seq, rev, revComp],
+                    proteic:  proteic,
+                    proteicS: sequenceTrS,
+                    name:     this.names[i],
+                    type:     type,
+                    comment:  comment,
+                    status:   "sequence",
+                    size:     seq.length
+                }, [nucleic.buffer, proteic.buffer]);
+            }
         } else {
-            var proteic = stringToTypedArray(seq, normProt);
-            self.postMessage({
-                proteic:  proteic,
-                proteicS: seq,
-                name:     this.names[i],
-                type:     type,
-                comment:  comment,
-                status:   "sequence",
-                size:     seq.length
-            }, [proteic.buffer]);
+            var seq = sequence.toUpperCase().replace(/[^ARNDCQEGHILKMFPSTWYVBZX\*]/g, "X");
+            if (transf) {
+                self.postMessage({
+                    proteic:  stringToTypedArray(seq, normProt),
+                    proteicS: seq,
+                    name:     this.names[i],
+                    type:     type,
+                    comment:  comment,
+                    status:   "sequence",
+                    size:     seq.length
+                });
+            } else {
+                var proteic = stringToTypedArray(seq, normProt);
+                self.postMessage({
+                    proteic:  proteic,
+                    proteicS: seq,
+                    name:     this.names[i],
+                    type:     type,
+                    comment:  comment,
+                    status:   "sequence",
+                    size:     seq.length
+                }, [proteic.buffer]);
+            }
         }
     }
 };
@@ -390,7 +397,6 @@ var sequenceSeparator = function(string, names, type) {
     self.postMessage({status: "done"});
     self.close();
 };
-
 
 /**
  * Loads the sequence
@@ -437,7 +443,7 @@ var sequenceLoader = function(id, website, names, type) {
             //FIXME Fails with Firefox, but not with Chrome
             xhr2(
                 "//www.uniprot.org/uniprot/" + id.toUpperCase() + ".fasta",
-                names, "proteic", sequenceSeparator
+                names, "proteic", fileToString
             );
             break;
     }

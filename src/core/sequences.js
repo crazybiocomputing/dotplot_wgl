@@ -82,7 +82,7 @@ function SequenceManager() {
             switch (message.data.status) {
                 case "error":
                     if (window.Notification && window.Notification.permission === "granted") {
-                        new window.Notification("Error", {body: message.data.message, icon: "images/favicon-128.png"});
+                        new window.Notification("Error", {body: "message.data.message", icon: "images/favicon-128.png"});
                     }
                     break;
                 case "sequence":

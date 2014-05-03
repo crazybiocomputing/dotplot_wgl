@@ -23,23 +23,28 @@
  * Quentin Riché-Piotaix
  * Mathieu Schaeffer
  */
-
 /*jshint worker: true*/
 /*jshint globalstrict: true*/
 "use strict";
-/* if called, create a fasta file of the sequence cleaned */
+
+/**
+ * fasta worker
+ * @module fasta.js
+ */
+
+/* creates a fasta file of the sequence cleaned */
 self.addEventListener("message", function(message) {
     //recognize comments & sequence
     /** 
      * string of the sequence
      * @type {string}
      */
-    var string     = message.data.string;
+    var string = message.data.string;
     /** 
      * Comment of the sequence
      * @type {string[]}
      */
-    var comments   = message.data.comment.match(/[>;].*/g);
+    var comments = message.data.comment.match(/[>;].*/g);
     comments = comments || [];
     var headerSize = comments.length + 1;
     /** 
@@ -52,7 +57,7 @@ self.addEventListener("message", function(message) {
      * string of each line
      * @type {string}
      */
-     var temp = "";
+    var temp = "";
     //New comment with sequence infos at the beginning
     seq[0] = ">" + message.data.name + "|" + (message.data.nucleic ? "nucleic" : "proteic") + "|length:" + string.length + "\r\n";
     comments.forEach(function(comment, i) {

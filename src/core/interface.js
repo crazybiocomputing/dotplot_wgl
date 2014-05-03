@@ -28,8 +28,8 @@
 "use strict";
 
 /**
- * @namespace
  * Global namespace for custom variables and functions
+ * @namespace
  */
 var g = {
     //Document Object Model handles and variables

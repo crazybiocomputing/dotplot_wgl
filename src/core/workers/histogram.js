@@ -24,6 +24,11 @@
  * Mathieu Schaeffer
  */
 
+/**
+ * histogram worker
+ * @module histogram.js
+ */
+
 /*jshint worker: true*/
 /*jshint globalstrict: true*/
 "use strict";
