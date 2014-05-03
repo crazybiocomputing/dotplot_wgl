@@ -1,9 +1,10 @@
 CACHE MANIFEST
-# rev 1 - 2014-04-30T13:18:33.959Z
+# rev 1 - 2014-05-03T21:13:46.861Z
 
 CACHE:
 core/Dotplot_wgl.min.js
 core/firstLoad.min.js
+core/workers/fasta.min.js
 core/workers/histogram.min.js
 core/workers/seqInput.min.js
 images/favicon-128.png
