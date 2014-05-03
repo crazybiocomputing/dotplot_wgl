@@ -27,18 +27,39 @@
 /*jshint worker: true*/
 /*jshint globalstrict: true*/
 "use strict";
-
+/* if called, create a fasta file of the sequence cleaned */
 self.addEventListener("message", function(message) {
-    var string     = message.data.string,
-        comments   = message.data.comment.match(/[>;].*/g);
+    //recognize comments & sequence
+    /** 
+     * string of the sequence
+     * @type {string}
+     */
+    var string     = message.data.string;
+    /** 
+     * Comment of the sequence
+     * @type {string[]}
+     */
+    var comments   = message.data.comment.match(/[>;].*/g);
     comments = comments || [];
     var headerSize = comments.length + 1;
-    var seq        = new Array(headerSize + Math.floor(string.length / 70)),
-        temp       = "";
+    /** 
+     * List of each futur line of the sequence with 70 chars max
+     * @type {Array[]}
+     */
+    /*Divide sequence in multiple string of 70 characters*/
+    var seq = new Array(headerSize + Math.floor(string.length / 70));
+    /** 
+     * string of each line
+     * @type {string}
+     */
+     var temp = "";
+    //New comment with sequence infos at the beginning
     seq[0] = ">" + message.data.name + "|" + (message.data.nucleic ? "nucleic" : "proteic") + "|length:" + string.length + "\r\n";
     comments.forEach(function(comment, i) {
+        //Add each old comments with an index in seq
         seq[i + 1] = comment + "\r\n";
     });
+    // Add string of sequence  to the Array with spaces each 10 chars and backslash each 70 chars in order to improve visibility
     for (var i = 0; i < string.length; i += 10) {
         switch (i % 70) {
             case 60://end of line
@@ -51,6 +72,7 @@ self.addEventListener("message", function(message) {
         }
     }
     seq[headerSize + parseInt(i / 70)] = temp + "\r\n\r\n";
+    //Once worker is done, return a new file of the sequence, fasta-like
     self.postMessage({
         blob: new Blob(seq, {type: "text/plain"}),
         name: message.data.name.replace(/\s/g, "_")
