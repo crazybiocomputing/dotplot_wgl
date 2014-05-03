@@ -290,7 +290,7 @@ g.executeAfterDOM(function() {
      * gives the parameters for the transfer equation (linear equation)
      * @param {number} y1 - abscissa of one point
      * @param {number} y2 - abscissa of the other
-     * @returns {object} - parameters of the linear equation (a and b)
+     * @returns {{number: a, number: b}} - parameters of the linear equation
      */
     var linearEq = function(y1, y2) {
         var a = 100 / (y2 - y1);

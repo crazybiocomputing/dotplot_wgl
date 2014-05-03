@@ -46,14 +46,16 @@
         request.addEventListener("error", function() {
             console.log("Error opening the DB, loading data in memory");
             setTimeout(function() {
-                matrices();
+                g.matMgr = new MatrixManager();
+                g.seqMgr = new SequenceManager();
                 firstLoad();
             }, 100);
         }, false);
 
         request.addEventListener("success", function(e) {
-            g.db = e.target.result;
-            matrices();
+            g.db     = e.target.result;
+            g.matMgr = new MatrixManager();
+            g.seqMgr = new SequenceManager();
             if (!localStorage.getItem("alreadyVisited")) {
                 firstLoad();
             }
@@ -69,7 +71,8 @@
             }
         }, false);
     } else {
-        matrices();
+        g.matMgr = new MatrixManager();
+        g.seqMgr = new SequenceManager();
         firstLoad();
     }
 })();

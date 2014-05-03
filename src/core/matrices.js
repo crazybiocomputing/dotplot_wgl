@@ -24,13 +24,12 @@
  * Mathieu Schaeffer
  */
 
-/*jshint -W079 */
-
-/*exported matrices*/
-var matrices = function() {
+/*exported MatrixManager*/
+/** @constructor */
+function MatrixManager() {
     var list = [];
 
-    g.matMgr.updateDOM = function() {
+    this.updateDOM = function() {
         var type;
         //from the nature of the sequences, matrix type is determined
         try {
@@ -42,10 +41,6 @@ var matrices = function() {
             return;
         }
         if (this.currentType !== type) {
-            /**
-             * According to the type, matrices list are updated
-             * @param {object} mat - DOM option tag corresponding to a matrix
-             */
             list.forEach(function(mat) {
                 if (mat.dataset.type === type) {
                     g.DOM.mat.appendChild(mat);
@@ -76,11 +71,11 @@ var matrices = function() {
     ["Blosum 30", "Blosum 35", "Blosum 40", "Blosum 45", "Blosum 50", "Blosum 55", "Blosum 60", "Blosum 62-12", "Blosum 62", "Blosum 65", "Blosum 70", "Blosum 75", "Blosum 80", "Blosum 85", "Blosum 90", "Blosum N", "Identity", "PAM 10", "PAM 20", "PAM 30", "PAM 40", "PAM 50", "PAM 60", "PAM 70", "PAM 80", "PAM 90", "PAM 100", "PAM 110", "PAM 120", "PAM 130", "PAM 140", "PAM 150", "PAM 160", "PAM 170", "PAM 180", "PAM 190", "PAM 200", "PAM 210", "PAM 220", "PAM 230", "PAM 240", "PAM 250", "PAM 260", "PAM 270", "PAM 280", "PAM 290", "PAM 300", "PAM 310", "PAM 320", "PAM 330", "PAM 340", "PAM 350", "PAM 360", "PAM 370", "PAM 380", "PAM 390", "PAM 400", "PAM 410", "PAM 420", "PAM 430", "PAM 440", "PAM 450", "PAM 460", "PAM 470", "PAM 480", "PAM 490", "PAM 500"].forEach(init, {type: "proteic", size: 24 * 24});
     ["DNA Full", "Identity"].forEach(init, {type: "nucleic", size: 16 * 16});
 
-    g.executeAfterDOM(function() {
-        g.matMgr.updateDOM();
-        g.DOM.opt1.addEventListener("change", g.matMgr.updateDOM, false);
-        g.DOM.opt2.addEventListener("change", g.matMgr.updateDOM, false);
-    });
-
-    sequences();
-};
+    (function(mgr) {
+        g.executeAfterDOM(function() {
+            mgr.updateDOM();
+            g.DOM.opt1.addEventListener("change", mgr.updateDOM, false);
+            g.DOM.opt2.addEventListener("change", mgr.updateDOM, false);
+        });
+    })(this);
+}

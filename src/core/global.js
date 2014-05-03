@@ -30,9 +30,7 @@
 //miscellaneous functions and variables to be used across the whole application
 "use strict";
 
-/**
- * Global namespace for Dotplot_wgl
- */
+/** @namespace */
 var g = {
     //IndexedDB (database) version and handle
     dbVersion: 1,
@@ -43,9 +41,7 @@ var g = {
     //Managers
     seqMgr:    {},
     matMgr:    {},
-    viewMgr:   {
-        rendering: false
-    },
+    viewMgr:   {},
     //Document Object Model handles and variables
     DOM:       {
         liTempl: (function() {
@@ -150,10 +146,3 @@ g.executeAfterDOM(function() {
     g.DOM.picker1    = pickers[0];
     g.DOM.picker2    = pickers[1];
 });
-
-g.xhr2("matrices/NucleicMatrices.texture", function(r) {
-    g.nucleicTex = new Uint8Array(r);
-}, "arraybuffer");
-g.xhr2("matrices/ProteicMatrices.texture", function(r) {
-    g.proteicTex = new Uint8Array(r);
-}, "arraybuffer");

@@ -1,4 +1,4 @@
-/*
+/** @license
  *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
  *  Copyright (C) 2014  Jean-Christophe Taveau.
  *
@@ -25,19 +25,32 @@
  */
 
 /*exported ViewManager*/
+/** @constructor */
 function ViewManager() {
-    var histData = {},
-        shaders  = {},
+    var histData  = {},
+        shaders   = {},
+        matrixTex = {},
         gl, prog;
+    /**
+     * Flag informing if a view is currently being rendered
+     * @type {boolean}
+     */
+    this.rendering = false;
 
     ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs"].forEach(function(shaderFile) {
         g.xhr2("shaders/" + shaderFile, function(shader) {
             shaders[shaderFile.split(".")[0]] = shader;
         });
     });
+    g.xhr2("matrices/NucleicMatrices.texture", function(r) {
+        matrixTex.nucleic = new Uint8Array(r);
+    }, "arraybuffer");
+    g.xhr2("matrices/ProteicMatrices.texture", function(r) {
+        matrixTex.proteic = new Uint8Array(r);
+    }, "arraybuffer");
 
     /**
-     * prepares and loads shaders for a sequence specific dotplot
+     * Prepares and loads shaders for a sequence specific dotplot
      * @param {string} fragment - name of the fragment to use for the dotplot
      */
     var prepareShaders = function(fragment) {
@@ -52,9 +65,17 @@ function ViewManager() {
     };
 
     /**
-     * renders a WebGL view of the dotplot defined in the parameters
-     * @param {object} seq1 - first sequence
-     * @param {object} seq2 - second sequence
+     * Renders a WebGL view of the dotplot defined in the parameters
+     * @param {Object} seq1 - first sequence
+     * @param {string} seq1.type - sequence type
+     * @param {number} seq1.key - sequence internal identifier
+     * @param {string} seq1.name - sequence name
+     * @param {number} seq1.size - sequence length
+     * @param {Object} seq2 - second sequence
+     * @param {string} seq2.type - sequence type
+     * @param {number} seq2.key - sequence internal identifier
+     * @param {string} seq2.name - sequence name
+     * @param {number} seq2.size - sequence length
      * @param {number} compType - comparison type (0: prot-prot, 1: prot-nuc, 2: nuc-nuc, 3: nuc-prot)
      */
     this.render = function(seq1, seq2, compType) {
@@ -158,7 +179,7 @@ function ViewManager() {
 
         //weight matrix texture
         var texWidth = (compType === 2) ? 16 : 24,
-            tex      = (compType === 2) ? g.nucleicTex : g.proteicTex;
+            tex      = (compType === 2) ? matrixTex.nucleic : matrixTex.proteic;
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
@@ -219,9 +240,9 @@ function ViewManager() {
     };
 
     /**
-     * recursively builds a group of 200 spans (max) from a sequence string and inserts it to the DOM
+     * Recursively builds a group of 200 spans (max) from a sequence string and inserts it to the DOM
      * @param {string} string - sequence string to be parsed
-     * @param {object} div - DOM element to fill
+     * @param {Object} div - DOM element to fill
      * @param {number} index - starting point of the sequence parsing
      */
     var divBuilder = function(string, div, index) {
@@ -240,9 +261,9 @@ function ViewManager() {
     };
 
     /**
-     * starts the
+     * Builds a container for a sequence's letters
      * @param {string} string - sequence string to be parsed
-     * @param {object} div - DOM element to fill
+     * @param {Object} div - DOM element to fill
      * @param {number} index - starting point of the sequence parsing
      */
     var fillDivs = function(string, compType, num) {
@@ -271,7 +292,7 @@ function ViewManager() {
     };
 
     /**
-     * computes the dotplot's pixels for the histogram
+     * Computes the dotplot's pixels for the histogram
      */
     var renderHist = function() {
         var w = new Worker("core/workers/histogram.js");
@@ -281,8 +302,8 @@ function ViewManager() {
             });
             g.DOM.countHist("RGB");
         }, false);
-        var wS = g.DOM.windowSize.getValue();
-        var pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
+        var wS = g.DOM.windowSize.getValue(),
+            pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
         gl.readPixels(0, wS - 1, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
         w.postMessage({
             pixels: pixels,
@@ -290,15 +311,18 @@ function ViewManager() {
         });
     };
 
-    //requestAnimationFrame polyfill
+    /**
+     * requestAnimationFrame polyfill
+     * @method
+     */
     var rAF = window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
               window.mozRequestAnimationFrame    ||
               setTimeout;
 
     /**
-     * draws the WebGL visualization of the dotplot
-     * @param {boolean} [updateHist] - wether to update the histogram with the rendered data or not
+     * Draws the WebGL visualization of the dotplot
+     * @param {boolean} [updateHist] - whether to update the histogram with the rendered data or not
      */
     this.draw = function(updateHist) {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -314,7 +338,7 @@ function ViewManager() {
     };
 
     /**
-     * modifies the histogram with the current pixel counts
+     * Modifies the histogram with the current pixel counts
      * @param {string} channels - channels to represent in the histogram
      */
     g.DOM.countHist = function(channels) {
@@ -329,8 +353,8 @@ function ViewManager() {
     };
 
     /**
-     * displays the sequences at the position picked
-     * @param {number} [x] - x coordinate on the dotplot
+     * Displays the sequences at the position picked
+     * @param {?number} x - x coordinate on the dotplot
      * @param {number} [y] - y coordinate on the dotplot
      */
     this.pick = function(x, y) {

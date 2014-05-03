@@ -12,7 +12,7 @@
     "globals":   {
         "g":               false,
         "SequenceManager": false,
-        "MatriceManager":  false,
+        "MatrixManager":  false,
         "ViewManager":     false
     },
     "lastsemic": true,
