@@ -29,9 +29,20 @@
 /*jshint globalstrict: true*/
 "use strict";
 
+
+/**
+ * Calculates the position of each element in the dotplot 
+ * @param {string} e - name of the element of the array
+ * @param {number} i - index of the element of the array
+ * @param {array} arr - array
+ */
 var norm = function(e, i, arr) {
     this[e] = Math.round(i * 255 / arr.length + (127.5 / arr.length));
 };
+
+
+//normProt is the list of all the proteins
+//normDNA is the list of all the nucleic bases
 var normProt = {};
 var normDNA = {};
 ["A", "R", "N", "D", "C", "Q", "E", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "B", "Z", "X", "*"].forEach(norm, normProt);
@@ -245,6 +256,12 @@ var comp = {
     "N": "N"
 };
 
+
+/**
+ * Parses the sequence
+ * @param {string} wholeSequence - the initial sequence entered
+ * @param {number} i - the position of a caracter in the sequence
+ */
 var sequenceParser = function(wholeSequence, i) {
     var type     = this.type,
         comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/),
@@ -253,7 +270,6 @@ var sequenceParser = function(wholeSequence, i) {
     if (type === "unknown") {
         type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
     }
-    //Possible to add new tests (stats, comment-based, etc)
     if (type === "unknown") {
         self.postMessage({status: "error", message: "could not determine type"});
         self.close();
@@ -274,18 +290,22 @@ var sequenceParser = function(wholeSequence, i) {
         }
         interlacedProt += "XX";
         var rev = "";
+        //Sequence's reverse
         for (j = seq.length; j; j--) {
             rev += seq.charAt(j - 1);
         }
         var revComp = "";
+        //Sequence's reverse complementary
         for (j = 0; j < rev.length; j++){
             revComp += comp[rev.charAt(j)];
         }
         var interlacedNuc = "";
+        //If the sequence's type is nucleic, obtains its "traduction" with the three open reading frame interlaced
         for (j = 0; j < seq.length; j++) {
             interlacedNuc += seq.charAt(j) + rev.charAt(j) + revComp.charAt(j);
         }
         var sequenceTrS = ["", "", ""];
+        //Separates the interlaced sequence in three proteic sequences 
         for (j = 0; j < interlacedProt.length; j++) {
             sequenceTrS[j % 3] += interlacedProt.charAt(j);
         }
@@ -343,6 +363,13 @@ var sequenceParser = function(wholeSequence, i) {
     }
 };
 
+
+
+/**
+ * Transforms each character of the string sequence in elements of an array
+ * @param {string} sequence - the sequence
+ * @param {array} dict - contains each character of the sequence
+ */
 var stringToTypedArray = function(sequence, dict) {
     var typedArray = new Uint8Array(sequence.length);
     for (var i = 0; i < sequence.length; i++) {
@@ -351,13 +378,35 @@ var stringToTypedArray = function(sequence, dict) {
     return typedArray;
 };
 
+
+/**
+ * Separates sequences in an array and then parses them
+ * @param {string} string - the sequence
+ * @param {string} names - name of the sequence
+ * @param {string} type - nature of the sequence
+ */
 var sequenceSeparator = function(string, names, type) {
     string.match(/([>;][^\n]*\n)*[^>;]*/g).filter(function(s) {return s}).forEach(sequenceParser, {names: names, type: type});
     self.postMessage({status: "done"});
     self.close();
 };
 
+
+/**
+ * Loads the sequence
+ * @param {string} id - the sequence
+ * @param {string} website - sequence website's origin 
+ * @param {string} names - name of the sequence
+ * @param {string} type - nature of the sequence
+ */
 var sequenceLoader = function(id, website, names, type) {
+    /**
+     * 
+     * @param {string} url - url
+     * @param {string} names - name of the sequence
+     * @param {string} type - nature of the sequence
+     * @param {function} callback - function called at the next monitor
+     */
     var xhr2 = function(url, names, type, callback) {
         var req = new XMLHttpRequest();
         req.open("GET", url, true);
@@ -394,16 +443,26 @@ var sequenceLoader = function(id, website, names, type) {
     }
 };
 
+/**
+ * Separates sequences in an array and then parses them
+ * @param {string} file - file containing the sequence to transform in string
+ * @param {string} names - name of the sequence
+ * @param {string} type - nature of the sequence
+ */
 var fileToString = function(file, names, type) {
     var reader = new FileReaderSync();
     sequenceSeparator(reader.readAsText(file), names, type);
 };
 
+/**
+ * Sends a message to specify the type of sequence if a file was passed or its origin
+ * @param {string} message - 
+ */
 self.addEventListener("message", function(message) {
     transf = message.data.transf;
     //gets and cleans up names passed by user
     var names = message.data.proposedNames.split(/\s*,\s*/).filter(function(e) {return e;});
-    if (typeof message.data.rawInput !== "string") {//A File was passed
+    if (typeof message.data.rawInput !== "string") {
         var type = message.data.type;
         if (type === "unknown") {
             if (message.data.rawInput.name.match(/\.(fna|ffn|frn)$/i)) {
