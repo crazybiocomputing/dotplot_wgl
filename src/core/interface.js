@@ -127,8 +127,6 @@ g.executeAfterDOM(function() {
 });
 
 g.executeAfterDOM(function() {
-    //nav buttons
-
     /**
      * navigates through sections of the site
      */
@@ -180,10 +178,10 @@ g.executeAfterDOM(function() {
     //click event on the dotplot
     innerContainer.addEventListener("click", function(e) {
         var rect = this.getBoundingClientRect();
-        g.viewMgr.pick(
-            Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
-            Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
-        );
+        g.viewMgr.pick({
+            x: Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
+            y: Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
+        });
     }, false);
 
     /**
@@ -202,10 +200,22 @@ g.executeAfterDOM(function() {
             }
         }
     });
-    //press event on + or - key
+
+    var pickDeltas = {
+        37: {dx: -1},
+        38: {dy: -1},
+        39: {dx: 1},
+        40: {dy: 1}
+    };
+    //keypress event on the document for some keys
     document.addEventListener("keypress", function(e) {
-        if (e.charCode === 43 || e.charCode === 45) {
-            scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
+        try {//arrow keys
+            g.viewMgr.pick(pickDeltas[e.keyCode]);
+            e.preventDefault();
+        } catch (err) {
+            if (e.charCode === 43 || e.charCode === 45) {//+ or -
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
+            }
         }
     }, false);
     //input event in the number input tag
@@ -268,30 +278,6 @@ g.executeAfterDOM(function() {
         g.$("notifications").classList.add("hidden");
     }
 
-    //check if supoorts Open Web Apps
-    if (navigator.mozApps) {
-        var manifest = location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp";
-        var req      = navigator.mozApps.checkInstalled(manifest);
-        req.addEventListener("success", function(e) {
-            if (e.result) {//already installed
-                g.$("install").classList.add("hidden");
-            } else {//propose to install on click
-                g.$("install").addEventListener("click", function() {
-                    var req = navigator.mozApps.install(manifest);
-                    req.addEventListener("success", function() {
-                        alert("Installed successfully. Tou can now close this tab and open your application like any other application");
-                    }, false);
-                    req.addEventListener("error", function(err) {
-                        alert("Error: " + err.name);
-                    }, false);
-                }, false);
-            }
-        }, false);
-    } else {
-        g.$("install").classList.add("hidden");
-    }
-
-    //
     g.$("sequence-list").addEventListener("click", function(e) {
         if (e.target.classList.contains("remove")) {
             g.seqMgr.remove(parseInt(e.target.parentElement.dataset.key));
@@ -428,9 +414,9 @@ g.executeAfterDOM(function() {
 
     //input events on range inputs associated with the sequence displayed with picking
     g.DOM.slider1.addEventListener("input", function(e) {
-        g.viewMgr.pick(e.target.value);
+        g.viewMgr.pick({x: e.target.value});
     }, false);
     g.DOM.slider2.addEventListener("input", function(e) {
-        g.viewMgr.pick(null, e.target.value);
+        g.viewMgr.pick({y: e.target.value});
     }, false);
 });

@@ -96,15 +96,6 @@ module.exports = function(grunt) {
                     {from: /(".*).js/g, to: "$1.min.js"}
                 ]
             },
-            webapp: {
-                src: ["dist/<%= pkg.version %>/manifest.webapp"],
-                overwrite: true,
-                replacements: [
-                    {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"},
-                    {from: /\{\{name\}\}/g, to: "<%= pkg.name %>"},
-                    {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"}
-                ]
-            },
             appcache : {
                 src: ["dist/<%= pkg.version %>/manifest.appcache"],
                 overwrite: true,
@@ -137,5 +128,5 @@ module.exports = function(grunt) {
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache", "replace:webapp", "jsdoc"]);
+    grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache", "jsdoc"]);
 };

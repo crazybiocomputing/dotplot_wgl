@@ -29,6 +29,7 @@
 function ViewManager() {
     var histData  = {},
         shaders   = {},
+        pickX, pickY,
         gl, prog;
     /**
      * Flag informing if a view is currently being rendered
@@ -320,7 +321,7 @@ function ViewManager() {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         if (updateHist) {
             renderHist();
-            g.viewMgr.pick(0, 0);
+            g.viewMgr.pick({x: 0, y: 0});
         }
         g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
         rAF(function() {
@@ -345,19 +346,43 @@ function ViewManager() {
 
     /**
      * Displays the sequences at the position picked
-     * @param {?number} x - x coordinate on the dotplot
-     * @param {number} [y] - y coordinate on the dotplot
+     * @param {Object} params - parameters of the picking
+     * @param {number} [params.x] - absolute x coordinate on the dotplot
+     * @param {number} [params.y] - absolute y coordinate on the dotplot
+     * @param {number} [params.dx] - relative x coordinate on the dotplot
+     * @param {number} [params.dy] - relative y coordinate on the dotplot
      */
-    this.pick = function(x, y) {
-        if (x !== null && x < g.DOM.canvas.width) {
-            g.DOM.slider1.value = Math.min(x, g.DOM.slider1.max);
-            g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + x + "ch)";
-            g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + x + "px)";
+    this.pick = function(params) {
+        var modifiedX = false,
+            modifiedY = false;
+        if ((params.x || params.x === 0) && params.x < g.DOM.canvas.width && params.x !== pickX) {
+            pickX = params.x;
+            modifiedX = true;
         }
-        if (y !== null && y < g.DOM.canvas.height) {
-            g.DOM.slider2.value = Math.min(y, g.DOM.slider2.max);
-            g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + y + "ch)";
-            g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + y + "px)";
+        if (params.dx && params.dx + pickX < g.DOM.canvas.width) {
+            pickX += params.dx;
+            modifiedX = true;
+        }
+        if (modifiedX) {
+            g.DOM.slider1.value = pickX;
+            g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + pickX + "ch)";
+            g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + pickX + "px)";
+        }
+        if ((params.y || params.y === 0) && params.y < g.DOM.canvas.height && params.y !== pickY) {
+            pickY = params.y;
+            modifiedY = true;
+        }
+        if (params.dy && params.dy + pickY < g.DOM.canvas.height) {
+            pickY += params.dy;
+            modifiedY = true;
+        }
+        if (modifiedY) {
+            g.DOM.slider1.value = pickX;
+            g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + pickY + "ch)";
+            g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + pickY + "px)";
+        }
+        if (modifiedX || modifiedY) {
+            //update score colors
         }
     };
 
