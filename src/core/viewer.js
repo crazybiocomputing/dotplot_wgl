@@ -30,6 +30,7 @@ function ViewManager() {
     var histData  = {},
         shaders   = {},
         pickX, pickY,
+        picked = [],
         gl, prog;
     /**
      * Flag informing if a view is currently being rendered
@@ -298,15 +299,24 @@ function ViewManager() {
         var wS = g.DOM.windowSize.getValue(),
             pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
         gl.readPixels(0, wS - 1, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-        w.postMessage({
-            pixels: pixels,
-            transf: g.transf
-        });
+        if (g.transf) {
+            w.postMessage({
+                pixels: pixels,
+                transf: g.transf
+            }, [pixels.buffer]);
+        } else {
+            w.postMessage({
+                pixels: pixels,
+                transf: g.transf
+            });
+        }
     };
 
     /**
      * requestAnimationFrame polyfill
      * @method
+     * @param {function} callback - function called at next monitor refresh
+     * @param {number} [delay] - delay to use in case requestAnimationFrame is not supported
      */
     var rAF = window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
@@ -382,7 +392,26 @@ function ViewManager() {
             g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + pickY + "px)";
         }
         if (modifiedX || modifiedY) {
-            //update score colors
+            var pixel = new Uint8Array(4);
+            gl.readPixels(pickX, g.DOM.canvas.height - pickY - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            picked.forEach(function(span) {
+                span.style.background = span.style.textShadow = "";
+            });
+            picked = [];
+            var cont = (g.DOM.pickDiv2.childElementCount === 3) ? g.DOM.pickDiv2 : g.DOM.pickDiv1;
+            var pX = (g.DOM.pickDiv2.childElementCount === 3) ? pickY : pickX;
+            Array.prototype.forEach.call(cont.children, function(div) {
+                var span = div.children[pX];
+                span.style.textShadow = "1px 1px white";
+                picked.push(span);
+            });
+            if (picked.length === 1) {
+                picked[0].style.background = "rgb(" + pixel[0] + ", " + pixel[1] + ", " + pixel[2] + ")";
+            } else {
+                picked[0].style.background = "rgb(" + pixel[0] + ", 0, 0)";
+                picked[1].style.background = "rgb(0, " + pixel[1] + ", 0)";
+                picked[2].style.background = "rgb(0, 0, " + pixel[2] + ")";
+            }
         }
     };
 

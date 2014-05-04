@@ -194,7 +194,8 @@ canvas {
 }
 
 .picking-sequences span {
-    background: lightgrey;
+    background: white;
+    transition: 0.5s;
 }
 
 #window-viewer {
