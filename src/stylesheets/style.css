@@ -194,8 +194,7 @@ canvas {
 }
 
 .picking-sequences span {
-    background: white;
-    transition: 0.5s;
+    background: lightgrey;
 }
 
 #window-viewer {
@@ -269,7 +268,6 @@ canvas {
     text-align: center;
     line-height: 0.8em;
     cursor: pointer;
-    user-select: none;
 }
 
 .remove:hover, .download:hover {
@@ -282,7 +280,12 @@ canvas {
     flex-grow: 1;
 }
 
-#input-zone.hovering {
-    border: thick dashed grey;
-    padding: 1em;
+img {
+    background: transparent;
+    border: 10px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    display: block;
+    margin: 1.3em auto;
+    max-width: 30%;
+    -webkit-animation: colorize 2s cubic-bezier(0, 0, .78, .36) 1;
 }

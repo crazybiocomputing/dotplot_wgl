@@ -11,6 +11,7 @@
     <link rel='icon' href='images/favicon-128.png' sizes='128x128'>
     <link rel='stylesheet' href='stylesheets/style.css'>
     <title>{{name}} | {{description}}</title>
+    <script src='core/global.js'></script>
     <script src='core/interface.js'></script>
     <script src='core/viewer.js'></script>
     <script src='core/sequences.js'></script>
@@ -104,11 +105,16 @@
             <input type='button' value='Request permission'>
             <label>Use notifications</label>
         </div>
+        <div id='install'>
+            <input type='button' value='Install'>
+            <label>Install as an Open Web App (beta)</label>
+        </div>
         <h1>Documentation</h1>
         <a href='https://github.com/jeesay/dotplot_wgl' target='_blank'>Github repository</a>
         <a href='https://github.com/jeesay/dotplot_wgl/wiki' target='_blank' rel='help'>Wiki</a>
         <a href='doc' target='_blank'>Source documentation</a>
         <a href='https://gnu.org/licenses/gpl.html' target='_blank' rel='license'>Work under GPLv3</a>
+        <a href="examples.html">Dotplot_wgl examples</a>
         <h1>Version: {{version}}</h1>
     </section>
     <section id='sequences'>
