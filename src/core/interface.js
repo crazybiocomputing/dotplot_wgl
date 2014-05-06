@@ -44,7 +44,6 @@ var g = {
             }
         })()
     },
-    //TODO check if fails with non-supporting browsers
     /**
      * Support for transferable objects in Workers
      * @type {boolean}
@@ -95,7 +94,6 @@ var g = {
 };
 
 g.executeAfterDOM(function() {
-    //TODO clean rarely used variables
     g.DOM.canvas     = g.$("canvas");
     var selects  = document.getElementsByTagName("select");
     g.DOM.opt1       = selects[0];
@@ -115,7 +113,7 @@ g.executeAfterDOM(function() {
     g.DOM.zoom       = g.$("zoom");
     g.DOM.windowSize = g.$("window");
     g.DOM.windowSize.getValue = function() {
-        return Math.max(Math.round(this.value), 1);
+        return Math.max(Math.round((this.value - 1) / 2), 0);
     };
     var sliders  = document.getElementsByClassName("picking-slider");
     g.DOM.slider1    = sliders[0];
@@ -151,8 +149,8 @@ g.executeAfterDOM(function() {
             g.context.uniform3i(g.context.getUniformLocation(g.program, "uColors"), 1, 1, 1);
             g.context.uniform2f(
                 g.context.getUniformLocation(g.program, "uOffset"),
-                parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
-                parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset1)
+                parseFloat(g.DOM.mat.Options[g.DOM.mat.selectedIndex].dataset.offset0),
+                parseFloat(g.DOM.mat.Options[g.DOM.mat.selectedIndex].dataset.offset1)
             );
             g.viewMgr.draw(true);
         }
@@ -189,6 +187,13 @@ g.executeAfterDOM(function() {
      * @param {number} v - zoom value
      */
     var scale = function(v) {
+        if (g.DOM.zoom.value > 1 && v < 1) {
+	    innerContainer.style.imageRendering = "-moz-crisp-edges";
+	    innerContainer.style.imageRendering = "-webkit-optimize-contrast";
+	    innerContainer.style.imageRendering = "pixelate";
+	} else if (g.DOM.zoom.value < 1 && v > 1) {
+	    innerContainer.style.imageRendering = "";
+	}
         innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
     };
     //scroll event with modifier key
@@ -208,13 +213,15 @@ g.executeAfterDOM(function() {
         40: {dy: 1}
     };
     //keypress event on the document for some keys
-    document.addEventListener("keypress", function(e) {
+    document.addEventListener("keydown", function(e) {
         try {//arrow keys
             g.viewMgr.pick(pickDeltas[e.keyCode]);
             e.preventDefault();
         } catch (err) {
-            if (e.charCode === 43 || e.charCode === 45) {//+ or -
-                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
+            if (e.keyCode === 109) {//+
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + (0.1)).toFixed(1)), 0.1));
+            } else if (e.keyCode === 107) {//-
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + (-0.1)).toFixed(1)), 0.1));
             }
         }
     }, false);

@@ -30,6 +30,7 @@ function MatrixManager() {
     var list    = [];
     var nucTex  = null;
     var protTex = null;
+    var currentType;
 
     g.xhr2("matrices/NucleicMatrices.texture", function(r) {
         nucTex = new Uint8Array(r);
@@ -43,13 +44,11 @@ function MatrixManager() {
         //from the nature of the sequences, matrix type is determined
         try {
             type = (
-                g.DOM.opt2.selectedOptions[0].dataset.type === "nucleic" &&
-                g.DOM.opt1.selectedOptions[0].dataset.type === "nucleic"
+                g.DOM.opt2.options[g.DOM.opt2.selectedIndex].dataset.type === "nucleic" &&
+                g.DOM.opt1.options[g.DOM.opt1.selectedIndex].dataset.type === "nucleic"
             ) ? "nucleic" : "proteic";
-        } catch(err) {
-            return;
-        }
-        if (this.currentType !== type) {
+        } catch(err) {}
+        if (currentType !== type) {
             list.forEach(function(mat) {
                 if (mat.dataset.type === type) {
                     g.DOM.mat.appendChild(mat);
@@ -59,7 +58,7 @@ function MatrixManager() {
                     } catch(err) {}
                 }
             });
-            this.currentType = type;
+            currentType = type;
         }
     };
 

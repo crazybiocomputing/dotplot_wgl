@@ -197,11 +197,18 @@ canvas {
     background: lightgrey;
 }
 
-#window-viewer {
+#window-viewer-container {
     position: absolute;
     top: 0;
-    left: 50%;
+    width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#window-viewer {
+    margin-left: 1ch;
+    width: 0;
     border: thin solid red;
     transition: width 0.2s linear;
 }

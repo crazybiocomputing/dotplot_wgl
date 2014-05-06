@@ -332,8 +332,8 @@ var sequenceParser = function(wholeSequence, i) {
             }
             var revComp = "";
             //Sequence's reverse complementary
-            for (j = 0; j < rev.length; j++){
-                revComp += comp[rev.charAt(j)];
+            for (j = 0; j < seq.length; j++){
+                revComp += comp[seq.charAt(j)];
             }
             var interlacedNuc = "";
             //If the sequence's type is nucleic, obtains its "traduction" with the three open reading frame interlaced

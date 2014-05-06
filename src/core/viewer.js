@@ -152,8 +152,8 @@ function ViewManager() {
 
         gl.uniform2f(
             gl.getUniformLocation(prog, "uOffset"),
-            parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
-            parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset1)
+            parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset0),
+            parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset1)
         );
 
         gl.uniform1i(gl.getUniformLocation(prog, "uWindow"), wS);
@@ -298,7 +298,7 @@ function ViewManager() {
         }, false);
         var wS = g.DOM.windowSize.getValue(),
             pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
-        gl.readPixels(0, wS - 1, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        gl.readPixels(wS, wS, g.DOM.canvas.width - wS * 2, g.DOM.canvas.height + 1 - wS *2, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
         if (g.transf) {
             w.postMessage({
                 pixels: pixels,
@@ -323,6 +323,7 @@ function ViewManager() {
               window.mozRequestAnimationFrame    ||
               setTimeout;
 
+    var windowViewer;
     /**
      * Draws the WebGL visualization of the dotplot
      * @param {boolean} [updateHist] - whether to update the histogram with the rendered data or not
@@ -333,7 +334,7 @@ function ViewManager() {
             renderHist();
             g.viewMgr.pick({x: 0, y: 0});
         }
-        g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
+        windowViewer.style.width = g.DOM.windowSize.getValue() * 2 + 1 + "ch";
         rAF(function() {
             g.viewMgr.rendering = false;
         }, 16);
@@ -422,8 +423,8 @@ function ViewManager() {
             if (!g.viewMgr.rendering) {
                 g.viewMgr.rendering = true;
                 g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = false;
-                var seq1 = g.DOM.opt1.selectedOptions[0],
-                    seq2 = g.DOM.opt2.selectedOptions[0],
+                var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
+                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex],
                     compType;
                 if (seq1.dataset.type === seq2.dataset.type) {
                     if (seq2.dataset.type === "nucleic") {
@@ -463,5 +464,6 @@ function ViewManager() {
                 );
             }
         }, false);
+	windowViewer = g.$("window-viewer");
     });
 }

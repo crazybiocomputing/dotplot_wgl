@@ -306,5 +306,6 @@ function SequenceManager() {
         }, false);
     } else {
         g.viewMgr = new ViewManager();
+	g.matMgr.updateDOM();
     }
 }
