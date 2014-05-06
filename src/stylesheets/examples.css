@@ -1,0 +1,7 @@
+img {
+    display: block;
+    margin: 1em auto;
+    max-width: 50%;
+    border: 10px solid lightgrey;
+    border-radius: 4px;
+}
