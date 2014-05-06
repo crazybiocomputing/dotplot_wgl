@@ -305,7 +305,9 @@ function SequenceManager() {
             }
         }, false);
     } else {
+        g.executeAfterDOM(function() {
+            g.matMgr.updateDOM();
+        });
         g.viewMgr = new ViewManager();
-	g.matMgr.updateDOM();
     }
 }

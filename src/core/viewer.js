@@ -464,6 +464,6 @@ function ViewManager() {
                 );
             }
         }, false);
-	windowViewer = g.$("window-viewer");
+        windowViewer = g.$("window-viewer");
     });
 }

@@ -19,12 +19,12 @@ void main() {
         discard;
     }
     vec4 color = vec4(texture2D(uSamplerMat, vec2(
-	texture2D(
-	    uSampler1, vTexCoord.xy
-	).r,
-	texture2D(
-	    uSampler2, vTexCoord.yx
-	).r * uOffset[1] + uOffset[0]
+        texture2D(
+            uSampler1, vTexCoord.xy
+        ).r,
+        texture2D(
+            uSampler2, vTexCoord.yx
+        ).r * uOffset[1] + uOffset[0]
     )).rrr, 1.0);
     for (int i = 0; i != -1; i++) {
         if (i == uWindow) {

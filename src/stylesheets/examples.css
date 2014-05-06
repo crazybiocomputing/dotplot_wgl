@@ -1,7 +1,37 @@
+*, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body {
+    color: #2e2e4e;
+    font-family: Verdana, Geneva, sans-serif;
+    background: #eeeeee;
+}
+
+article {
+    margin: 0.2em 10%;
+    padding: 0.5em;
+    background: #dbdbdb;
+    border-radius: 0.5em;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+h1 {
+    margin: 0 1em;
+}
+
+p {
+    text-indent: 1.5em;
+    margin: 0.5em 0;
+}
+
 img {
     display: block;
-    margin: 1em auto;
-    max-width: 50%;
-    border: 10px solid lightgrey;
-    border-radius: 4px;
+    margin: 0.2em auto;
+    max-width: 75%;
+    border: 0.5em solid lightgrey;
+    border-radius: 0.3em;
 }

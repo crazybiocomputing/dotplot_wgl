@@ -149,8 +149,8 @@ g.executeAfterDOM(function() {
             g.context.uniform3i(g.context.getUniformLocation(g.program, "uColors"), 1, 1, 1);
             g.context.uniform2f(
                 g.context.getUniformLocation(g.program, "uOffset"),
-                parseFloat(g.DOM.mat.Options[g.DOM.mat.selectedIndex].dataset.offset0),
-                parseFloat(g.DOM.mat.Options[g.DOM.mat.selectedIndex].dataset.offset1)
+                parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset0),
+                parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset1)
             );
             g.viewMgr.draw(true);
         }
@@ -187,13 +187,13 @@ g.executeAfterDOM(function() {
      * @param {number} v - zoom value
      */
     var scale = function(v) {
-        if (g.DOM.zoom.value > 1 && v < 1) {
-	    innerContainer.style.imageRendering = "-moz-crisp-edges";
-	    innerContainer.style.imageRendering = "-webkit-optimize-contrast";
-	    innerContainer.style.imageRendering = "pixelate";
-	} else if (g.DOM.zoom.value < 1 && v > 1) {
-	    innerContainer.style.imageRendering = "";
-	}
+        if (g.DOM.zoom.value > 1 && v < 1) {//pixelate when zooming in
+            innerContainer.style.imageRendering = "-moz-crisp-edges";
+            innerContainer.style.imageRendering = "-webkit-optimize-contrast";
+            innerContainer.style.imageRendering = "pixelate";
+        } else if (g.DOM.zoom.value < 1 && v > 1) {//linear when zooming out
+            innerContainer.style.imageRendering = "";
+        }
         innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
     };
     //scroll event with modifier key
