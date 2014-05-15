@@ -69,6 +69,21 @@ g.seqMgr.add(
     "SERA_PLAFG (P13823)",
     "proteic"
 );
+g.seqMgr.add(
+    "MALWTRLLPLLALLALWAPAPAQAFVNQHLCGSHLVEALYLVCGERGFFYTPKARREAENPQAGAVELGGGLGGLQALALEGPPQKRGIVEQCCTSICSLYQLENYCN",
+    "INS_PIG Insulin",
+    "proteic"
+);
+g.seqMgr.add(
+    "MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN",
+    "INS_HUMAN Insulin",
+    "proteic"
+);
+g.seqMgr.add(
+    "AGCTCCTTGTTGGAGAAGCAGGGCACGTGCAAGTCTCTTGGATCTCAAATGCCACTGAACCCTTTGCACGTGCTCCCCTTCTCCAACACGGGTTT",
+    "Glycine max microRNA MIR164",
+    "nucleic"
+);
 try {
     localStorage.setItem("alreadyVisited", true);
 } catch(err) {}
@@ -76,7 +91,7 @@ try {
 var timeOut = 5000,
     time    = 0;
 var interval = setInterval(function() {
-    if (g.DOM.opt1.options.length > 8 || time > timeOut) {
+    if (g.DOM.opt1.options.length > 9 || time > timeOut) {
         clearInterval(interval);
         g.matMgr.updateDOM();
     } else {

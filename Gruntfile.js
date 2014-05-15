@@ -86,7 +86,14 @@ module.exports = function(grunt) {
                     {from: /(<\/head>)/g, to: "    <script src='core/<%= pkg.name %>.min.js' async></script>\n$1"},
                     {from: /\{\{name\}\}/g, to: "<%= pkg.name %>"},
                     {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"},
-                    {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"},
+                    {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"}
+                ]
+            },
+            html2: {
+                src: ["dist/<%= pkg.version %>/examples/*.html"],
+                overwrite: true,
+                replacements: [
+                    {from: /href='(.*).css'/g, to: "href='$1.min.css'"}
                 ]
             },
             js: {
