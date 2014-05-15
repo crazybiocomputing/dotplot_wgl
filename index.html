@@ -5,7 +5,7 @@
     <meta name='viewport' content='width=device-width'>
     <meta name='apple-mobile-web-app-capable' content='yes'>
     <meta name='mobile-web-app-capable' content='yes'>
-    <link rel='icon' href='images/favicon-16.png' sizes='16x16' >
+    <link rel='icon' href='images/favicon-16.png' sizes='16x16'>
     <link rel='icon' href='images/favicon-32.png' sizes='32x32'>
     <link rel='icon' href='images/favicon-64.png' sizes='64x64'>
     <link rel='icon' href='images/favicon-128.png' sizes='128x128'>
@@ -41,7 +41,7 @@
         <div class='flex around'>
             <div>
                 <label for='window'>Window size: </label>
-                <input type='number' id='window' min='1' step='1' value='1'>
+                <input type='number' id='window' min='1' step='2' value='1'>
             </div>
             <div>
                 <label for='zoom'>Zoom 1:</label>
@@ -82,7 +82,9 @@
             <div id='picking-sequences-cont'>
                 <div class='picking-sequences'></div>
                 <div class='picking-sequences'></div>
-                <div id='window-viewer'></div>
+                <div id='window-viewer-container'>
+                    <div id='window-viewer'></div>
+                </div>
             </div>
             <input type='range' class='picking-slider' min='0' max='0' value='0' data-num='2'><br>
         </div>
@@ -100,16 +102,12 @@
             <input type='button' value='Request permission'>
             <label>Use notifications</label>
         </div>
-        <div id='install'>
-            <input type='button' value='Install'>
-            <label>Install as an Open Web App (beta)</label>
-        </div>
         <h1>Documentation</h1>
+        <a href="examples">Dotplot examples</a>
         <a href='https://github.com/jeesay/dotplot_wgl' target='_blank'>Github repository</a>
-        <a href='https://github.com/jeesay/dotplot_wgl/wiki' target='_blank' rel='help'>Wiki</a>
         <a href='doc' target='_blank'>Source documentation</a>
         <a href='https://gnu.org/licenses/gpl.html' target='_blank' rel='license'>Work under GPLv3</a>
-        <h1>Version: 0.9.5</h1>
+        <h1>Version: 1.0.0</h1>
     </section>
     <section id='sequences'>
         <nav>

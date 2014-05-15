@@ -56,6 +56,8 @@
 function ViewManager() {
     var histData  = {},
         shaders   = {},
+        pickX, pickY,
+        picked = [],
         gl, prog;
     /**
      * Flag informing if a view is currently being rendered
@@ -177,8 +179,8 @@ function ViewManager() {
 
         gl.uniform2f(
             gl.getUniformLocation(prog, "uOffset"),
-            parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
-            parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset1)
+            parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset0),
+            parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset1)
         );
 
         gl.uniform1i(gl.getUniformLocation(prog, "uWindow"), wS);
@@ -323,22 +325,32 @@ function ViewManager() {
         }, false);
         var wS = g.DOM.windowSize.getValue(),
             pixels = new Uint8Array((g.DOM.canvas.width + 1 - wS) * (g.DOM.canvas.height + 1 - wS) * 4);
-        gl.readPixels(0, wS - 1, g.DOM.canvas.width + 1 - wS, g.DOM.canvas.height + 1 - wS, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-        w.postMessage({
-            pixels: pixels,
-            transf: g.transf
-        });
+        gl.readPixels(wS, wS, g.DOM.canvas.width - wS * 2, g.DOM.canvas.height + 1 - wS *2, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        if (g.transf) {
+            w.postMessage({
+                pixels: pixels,
+                transf: g.transf
+            }, [pixels.buffer]);
+        } else {
+            w.postMessage({
+                pixels: pixels,
+                transf: g.transf
+            });
+        }
     };
 
     /**
      * requestAnimationFrame polyfill
      * @method
+     * @param {function} callback - function called at next monitor refresh
+     * @param {number} [delay] - delay to use in case requestAnimationFrame is not supported
      */
     var rAF = window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
               window.mozRequestAnimationFrame    ||
               setTimeout;
 
+    var windowViewer;
     /**
      * Draws the WebGL visualization of the dotplot
      * @param {boolean} [updateHist] - whether to update the histogram with the rendered data or not
@@ -347,9 +359,9 @@ function ViewManager() {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         if (updateHist) {
             renderHist();
-            g.viewMgr.pick(0, 0);
+            g.viewMgr.pick({x: 0, y: 0});
         }
-        g.$("window-viewer").style.width = g.DOM.windowSize.getValue() + "ch";
+        windowViewer.style.width = g.DOM.windowSize.getValue() * 2 + 1 + "ch";
         rAF(function() {
             g.viewMgr.rendering = false;
         }, 16);
@@ -372,19 +384,62 @@ function ViewManager() {
 
     /**
      * Displays the sequences at the position picked
-     * @param {?number} x - x coordinate on the dotplot
-     * @param {number} [y] - y coordinate on the dotplot
+     * @param {Object} params - parameters of the picking
+     * @param {number} [params.x] - absolute x coordinate on the dotplot
+     * @param {number} [params.y] - absolute y coordinate on the dotplot
+     * @param {number} [params.dx] - relative x coordinate on the dotplot
+     * @param {number} [params.dy] - relative y coordinate on the dotplot
      */
-    this.pick = function(x, y) {
-        if (x !== null && x &lt; g.DOM.canvas.width) {
-            g.DOM.slider1.value = Math.min(x, g.DOM.slider1.max);
-            g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + x + "ch)";
-            g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + x + "px)";
+    this.pick = function(params) {
+        var modifiedX = false,
+            modifiedY = false;
+        if ((params.x || params.x === 0) && params.x &lt; g.DOM.canvas.width && params.x !== pickX) {
+            pickX = params.x;
+            modifiedX = true;
         }
-        if (y !== null && y &lt; g.DOM.canvas.height) {
-            g.DOM.slider2.value = Math.min(y, g.DOM.slider2.max);
-            g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + y + "ch)";
-            g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + y + "px)";
+        if (params.dx && params.dx + pickX &lt; g.DOM.canvas.width) {
+            pickX += params.dx;
+            modifiedX = true;
+        }
+        if (modifiedX) {
+            g.DOM.slider1.value = pickX;
+            g.DOM.pickDiv1.style[g.DOM.transform] = "translateZ(0) translateX(-" + pickX + "ch)";
+            g.DOM.picker1.style[g.DOM.transform] = "translateZ(0) translateX(" + pickX + "px)";
+        }
+        if ((params.y || params.y === 0) && params.y &lt; g.DOM.canvas.height && params.y !== pickY) {
+            pickY = params.y;
+            modifiedY = true;
+        }
+        if (params.dy && params.dy + pickY &lt; g.DOM.canvas.height) {
+            pickY += params.dy;
+            modifiedY = true;
+        }
+        if (modifiedY) {
+            g.DOM.slider1.value = pickX;
+            g.DOM.pickDiv2.style[g.DOM.transform] = "translateZ(0) translateX(-" + pickY + "ch)";
+            g.DOM.picker2.style[g.DOM.transform] = "translateZ(0) translateY(" + pickY + "px)";
+        }
+        if (modifiedX || modifiedY) {
+            var pixel = new Uint8Array(4);
+            gl.readPixels(pickX, g.DOM.canvas.height - pickY - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            picked.forEach(function(span) {
+                span.style.background = span.style.textShadow = "";
+            });
+            picked = [];
+            var cont = (g.DOM.pickDiv2.childElementCount === 3) ? g.DOM.pickDiv2 : g.DOM.pickDiv1;
+            var pX = (g.DOM.pickDiv2.childElementCount === 3) ? pickY : pickX;
+            Array.prototype.forEach.call(cont.children, function(div) {
+                var span = div.children[pX];
+                span.style.textShadow = "1px 1px white";
+                picked.push(span);
+            });
+            if (picked.length === 1) {
+                picked[0].style.background = "rgb(" + pixel[0] + ", " + pixel[1] + ", " + pixel[2] + ")";
+            } else {
+                picked[0].style.background = "rgb(" + pixel[0] + ", 0, 0)";
+                picked[1].style.background = "rgb(0, " + pixel[1] + ", 0)";
+                picked[2].style.background = "rgb(0, 0, " + pixel[2] + ")";
+            }
         }
     };
 
@@ -395,8 +450,8 @@ function ViewManager() {
             if (!g.viewMgr.rendering) {
                 g.viewMgr.rendering = true;
                 g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = false;
-                var seq1 = g.DOM.opt1.selectedOptions[0],
-                    seq2 = g.DOM.opt2.selectedOptions[0],
+                var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
+                    seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex],
                     compType;
                 if (seq1.dataset.type === seq2.dataset.type) {
                     if (seq2.dataset.type === "nucleic") {
@@ -436,6 +491,7 @@ function ViewManager() {
                 );
             }
         }, false);
+        windowViewer = g.$("window-viewer");
     });
 }
 </code></pre>
@@ -454,7 +510,7 @@ function ViewManager() {
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat May 03 2014 23:13:52 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Thu May 15 2014 10:13:16 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

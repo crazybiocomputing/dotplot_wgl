@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# rev 1 - 2014-05-03T21:13:46.861Z
+# rev 1 - 2014-05-15T08:13:11.496Z
 
 CACHE:
 core/Dotplot_wgl.min.js
@@ -7,6 +7,15 @@ core/firstLoad.min.js
 core/workers/fasta.min.js
 core/workers/histogram.min.js
 core/workers/seqInput.min.js
+examples/Conserved_Domains.html
+examples/Exons_Introns.html
+examples/Repeated_Domains.html
+examples/Stem-Loops.html
+examples/index.html
+images/ConservedDomainsScreenshot.png
+images/ExonsIntrons.png
+images/RepeatedDomainsScreenshot.png
+images/StemLoopsScreenshot.jpg
 images/favicon-128.png
 images/favicon-16.png
 images/favicon-32.png
@@ -19,6 +28,7 @@ shaders/NucleicNucleic.fs
 shaders/NucleicProteic.fs
 shaders/ProteicNucleic.fs
 shaders/ProteicProteic.fs
+stylesheets/examples.min.css
 stylesheets/style.min.css
 
 NETWORK:

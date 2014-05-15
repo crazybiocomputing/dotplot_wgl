@@ -71,7 +71,6 @@ var g = {
             }
         })()
     },
-    //TODO check if fails with non-supporting browsers
     /**
      * Support for transferable objects in Workers
      * @type {boolean}
@@ -122,7 +121,6 @@ var g = {
 };
 
 g.executeAfterDOM(function() {
-    //TODO clean rarely used variables
     g.DOM.canvas     = g.$("canvas");
     var selects  = document.getElementsByTagName("select");
     g.DOM.opt1       = selects[0];
@@ -142,7 +140,7 @@ g.executeAfterDOM(function() {
     g.DOM.zoom       = g.$("zoom");
     g.DOM.windowSize = g.$("window");
     g.DOM.windowSize.getValue = function() {
-        return Math.max(Math.round(this.value), 1);
+        return Math.max(Math.round((this.value - 1) / 2), 0);
     };
     var sliders  = document.getElementsByClassName("picking-slider");
     g.DOM.slider1    = sliders[0];
@@ -154,8 +152,6 @@ g.executeAfterDOM(function() {
 });
 
 g.executeAfterDOM(function() {
-    //nav buttons
-
     /**
      * navigates through sections of the site
      */
@@ -180,8 +176,8 @@ g.executeAfterDOM(function() {
             g.context.uniform3i(g.context.getUniformLocation(g.program, "uColors"), 1, 1, 1);
             g.context.uniform2f(
                 g.context.getUniformLocation(g.program, "uOffset"),
-                parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset0),
-                parseFloat(g.DOM.mat.selectedOptions[0].dataset.offset1)
+                parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset0),
+                parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset1)
             );
             g.viewMgr.draw(true);
         }
@@ -207,10 +203,10 @@ g.executeAfterDOM(function() {
     //click event on the dotplot
     innerContainer.addEventListener("click", function(e) {
         var rect = this.getBoundingClientRect();
-        g.viewMgr.pick(
-            Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
-            Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
-        );
+        g.viewMgr.pick({
+            x: Math.floor((e.clientX - rect.left - e.target.clientLeft + e.target.scrollLeft) * g.DOM.zoom.value),
+            y: Math.floor((e.clientY - rect.top - e.target.clientTop + e.target.scrollTop) * g.DOM.zoom.value)
+        });
     }, false);
 
     /**
@@ -218,6 +214,13 @@ g.executeAfterDOM(function() {
      * @param {number} v - zoom value
      */
     var scale = function(v) {
+        if (g.DOM.zoom.value > 1 && v &lt; 1) {//pixelate when zooming in
+            innerContainer.style.imageRendering = "-moz-crisp-edges";
+            innerContainer.style.imageRendering = "-webkit-optimize-contrast";
+            innerContainer.style.imageRendering = "pixelate";
+        } else if (g.DOM.zoom.value &lt; 1 && v > 1) {//linear when zooming out
+            innerContainer.style.imageRendering = "";
+        }
         innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
     };
     //scroll event with modifier key
@@ -229,10 +232,24 @@ g.executeAfterDOM(function() {
             }
         }
     });
-    //press event on + or - key
-    document.addEventListener("keypress", function(e) {
-        if (e.charCode === 43 || e.charCode === 45) {
-            scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + ((e.charCode === 45) ? 0.1 : -0.1)).toFixed(1)), 0.1));
+
+    var pickDeltas = {
+        37: {dx: -1},
+        38: {dy: -1},
+        39: {dx: 1},
+        40: {dy: 1}
+    };
+    //keypress event on the document for some keys
+    document.addEventListener("keydown", function(e) {
+        try {//arrow keys
+            g.viewMgr.pick(pickDeltas[e.keyCode]);
+            e.preventDefault();
+        } catch (err) {
+            if (e.keyCode === 109) {//+
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + (0.1)).toFixed(1)), 0.1));
+            } else if (e.keyCode === 107) {//-
+                scale(g.DOM.zoom.value = Math.max(parseFloat((parseFloat(g.DOM.zoom.value) + (-0.1)).toFixed(1)), 0.1));
+            }
         }
     }, false);
     //input event in the number input tag
@@ -295,30 +312,6 @@ g.executeAfterDOM(function() {
         g.$("notifications").classList.add("hidden");
     }
 
-    //check if supoorts Open Web Apps
-    if (navigator.mozApps) {
-        var manifest = location.href.substring(0, location.href.lastIndexOf("/")) + "/manifest.webapp";
-        var req      = navigator.mozApps.checkInstalled(manifest);
-        req.addEventListener("success", function(e) {
-            if (e.result) {//already installed
-                g.$("install").classList.add("hidden");
-            } else {//propose to install on click
-                g.$("install").addEventListener("click", function() {
-                    var req = navigator.mozApps.install(manifest);
-                    req.addEventListener("success", function() {
-                        alert("Installed successfully. Tou can now close this tab and open your application like any other application");
-                    }, false);
-                    req.addEventListener("error", function(err) {
-                        alert("Error: " + err.name);
-                    }, false);
-                }, false);
-            }
-        }, false);
-    } else {
-        g.$("install").classList.add("hidden");
-    }
-
-    //
     g.$("sequence-list").addEventListener("click", function(e) {
         if (e.target.classList.contains("remove")) {
             g.seqMgr.remove(parseInt(e.target.parentElement.dataset.key));
@@ -455,10 +448,10 @@ g.executeAfterDOM(function() {
 
     //input events on range inputs associated with the sequence displayed with picking
     g.DOM.slider1.addEventListener("input", function(e) {
-        g.viewMgr.pick(e.target.value);
+        g.viewMgr.pick({x: e.target.value});
     }, false);
     g.DOM.slider2.addEventListener("input", function(e) {
-        g.viewMgr.pick(null, e.target.value);
+        g.viewMgr.pick({y: e.target.value});
     }, false);
 });
 </code></pre>
@@ -477,7 +470,7 @@ g.executeAfterDOM(function() {
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat May 03 2014 23:13:52 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Thu May 15 2014 10:13:16 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
