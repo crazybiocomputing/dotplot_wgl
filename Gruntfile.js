@@ -89,13 +89,6 @@ module.exports = function(grunt) {
                     {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"}
                 ]
             },
-            html2: {
-                src: ["dist/<%= pkg.version %>/examples/*.html"],
-                overwrite: true,
-                replacements: [
-                    {from: /href='(.*).css'/g, to: "href='$1.min.css'"}
-                ]
-            },
             js: {
                 src: ["dist/<%= pkg.version %>/core/*.js"],
                 overwrite: true,
