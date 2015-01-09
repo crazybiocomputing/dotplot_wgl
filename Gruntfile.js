@@ -86,6 +86,15 @@ module.exports = function(grunt) {
                     {from: /(<\/head>)/g, to: "    <script src='core/<%= pkg.name %>.min.js' async></script>\n$1"},
                     {from: /\{\{name\}\}/g, to: "<%= pkg.name %>"},
                     {from: /\{\{description\}\}/g, to: "<%= pkg.description %>"},
+                    {from: /\{\{repository\}\}/g, to: "<%= pkg.repository.url %>"},
+                    {
+                        from: /\{\{contributors\}\}/g,
+                        to: function() {
+                            return grunt.file.readJSON("package.json").contributors.map(function(c) {
+                                return "<a href=\"" + c.url + "\">" + c.name + "</a>";
+                            }).join("\n        ");
+                        }
+                    },
                     {from: /\{\{version\}\}/g, to: "<%= pkg.version %>"}
                 ]
             },

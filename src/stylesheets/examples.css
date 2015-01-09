@@ -5,15 +5,15 @@
 }
 
 body {
-    color: #2e2e4e;
+    color: #222;
     font-family: Verdana, Geneva, sans-serif;
-    background: #eeeeee;
+    background: #212121;
 }
 
 article {
     margin: 0.2em 10%;
     padding: 0.5em;
-    background: #dbdbdb;
+    background: #f2f2f2;
     border-radius: 0.5em;
     text-align: justify;
     text-justify: inter-word;
@@ -32,6 +32,7 @@ img {
     display: block;
     margin: 0.2em auto;
     max-width: 75%;
-    border: 0.5em solid lightgrey;
+    border: 0.5em solid white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 0.3em;
 }
