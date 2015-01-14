@@ -187,11 +187,11 @@ g.executeAfterDOM(function() {
      * @param {number} v - zoom value
      */
     var scale = function(v) {
-        if (g.DOM.zoom.value > 1 && v < 1) {//pixelate when zooming in
+        if (v < 1) {//pixelate when zooming in
             innerContainer.style.imageRendering = "-moz-crisp-edges";
             innerContainer.style.imageRendering = "-webkit-optimize-contrast";
             innerContainer.style.imageRendering = "pixelate";
-        } else if (g.DOM.zoom.value < 1 && v > 1) {//linear when zooming out
+        } else if (v > 1) {//linear when zooming out
             innerContainer.style.imageRendering = "";
         }
         innerContainer.style[g.DOM.transform] = innerContainer.style[g.DOM.transform].replace(/scale\(\d+\.?\d*\)/, "scale(" + (1 / v) + ")");
