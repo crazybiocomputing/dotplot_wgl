@@ -65,6 +65,10 @@ function SequenceManager() {
             sequence.li.dataset.type = sequence.type;
             li.appendChild(sequence.li);
         });
+        if (g.DOM.opt1.childElementCount === sequences.length) {
+            // Added one or more sequence, need to update the matrix selector
+            g.matMgr.updateDOM();
+        }
     };
 
     /**

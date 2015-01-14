@@ -292,11 +292,19 @@ var sequenceParser = function(wholeSequence, i) {
     var comment  = wholeSequence.match(/(^[>;][\s\S]*?)\n(?![>;])/);
     //empty string comment in case there was none
     comment = (comment) ? comment[0] : "";
-    //sequence part, cleaned of spaces and numbers
-    var sequence = wholeSequence.match(/(^[^>;][\s\S]*)/m)[0].replace(/[\s\d]?/g, "");
+    //sequence part, cleaned of comments, spaces and numbers
+    var sequence = wholeSequence.replace(/^\s*[>;][^\n]*$/gm, "").replace(/[\s\d]?/g, "");
     if (this.type === "unknown") {
         //we look for an exclusively proteic letter
         this.type = /[EFILOPQZ\*]/i.test(sequence) ? "proteic" : "unknown";
+    }
+    if (this.type === "unknown") {
+        //we look in the comment for a keyword
+        if (/(protei[cn])|(amino)|([\d ]aas?\W)/i.test(comment)) {
+            this.type = "proteic";
+        } else if (/(nucleic)|([DR]NA)|([\d ]bps?\W)/i.test(comment)) {
+            this.type = "nucleic";
+        }
     }
     if (this.type === "unknown") {
         self.postMessage({
