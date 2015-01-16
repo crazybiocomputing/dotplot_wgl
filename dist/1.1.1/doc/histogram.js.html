@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: workers/histogram.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: workers/histogram.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/*
+ *  dotplot_wgl: Dot-Plot implementation in JavaScript and WebGL..
+ *  Copyright (C) 2014  Jean-Christophe Taveau.
+ *
+ *  This file is part of dotplot_wgl.
+ *
+ *  dotplot_wgl is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  dotplot_wgl is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with dotplot_wgl.  If not, see &lt;http://www.gnu.org/licenses/>
+ *
+ * Authors:
+ * Rania Assab
+ * Aurélien Luciani
+ * Quentin Riché-Piotaix
+ * Mathieu Schaeffer
+ */
+/*jshint worker: true*/
+/*jshint globalstrict: true*/
+"use strict";
+
+/**
+ * WebWorker - Analyzes data from an array of pixels
+ * @module Histogram
+ */
+
+/**
+ * max count value for every channel or group of channels
+ * @type {Object.&lt;string, number>}
+ */
+var maxCount = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null};
+/**
+ * max log value for every channel or group of channels
+ * @type {Object.&lt;string, number>}
+ */
+var maxLog   = {RGB: null, RG: null, GB: null, RB: null, R: null, G: null, B: null};
+/**
+ * count values for every channel or group of channels
+ * @type {Object.&lt;string, TypedArray>}
+ */
+var histCount = {
+        RGB: new Uint32Array(256),
+        RG:  new Uint32Array(256),
+        GB:  new Uint32Array(256),
+        RB:  new Uint32Array(256),
+        R:   new Uint32Array(256),
+        G:   new Uint32Array(256),
+        B:   new Uint32Array(256)
+    };
+/**
+ * count values for every channel or group of channels
+ * @type {Object.&lt;string, TypedArray>}
+ */
+var histLog = {
+        RGB: new Uint8Array(256),
+        RG:  new Uint8Array(256),
+        GB:  new Uint8Array(256),
+        RB:  new Uint8Array(256),
+        R:   new Uint8Array(256),
+        G:   new Uint8Array(256),
+        B:   new Uint8Array(256)
+    };
+
+self.addEventListener("message", function(message) {
+    /**
+     * Array of pixel values four by four (R0, G0, B0, A0, R1, G1, …)
+     * @type {TypedArray}
+     */
+    var pixels = message.data.pixels;
+    //Loop through all pixels and increment corresponding value
+    for (var i = 0; i &lt; pixels.length; i+=4){
+        histCount.R[pixels[i]]++;
+        histCount.G[pixels[i+1]]++;
+        histCount.B[pixels[i+2]]++;
+    }
+    //To each type of channel (or group of channels) is attributed the count of each pixels
+    for (var i = 0; i &lt; 256; i++){
+        histCount.RG[i]  = histCount.R[i] + histCount.G[i];
+        histCount.GB[i]  = histCount.G[i] + histCount.B[i];
+        histCount.RB[i]  = histCount.R[i] + histCount.B[i];
+        histCount.RGB[i] = histCount.RG[i] + histCount.B[i];
+        histLog.R[i]     = Math.log(histCount.R[i]);
+        histLog.G[i]     = Math.log(histCount.G[i]);
+        histLog.B[i]     = Math.log(histCount.B[i]);
+        histLog.RG[i]    = Math.log(histCount.RG[i]);
+        histLog.GB[i]    = Math.log(histCount.GB[i]);
+        histLog.RB[i]    = Math.log(histCount.RB[i]);
+        histLog.RGB[i]   = Math.log(histCount.RGB[i]);
+        maxCount.RGB     = Math.max(maxCount.RGB, histCount.RGB[i]);
+        maxCount.RG      = Math.max(maxCount.RG, histCount.RG[i]);
+        maxCount.GB      = Math.max(maxCount.GB, histCount.GB[i]);
+        maxCount.RB      = Math.max(maxCount.RB, histCount.RB[i]);
+        maxCount.R       = Math.max(maxCount.R, histCount.R[i]);
+        maxCount.G       = Math.max(maxCount.G, histCount.G[i]);
+        maxCount.B       = Math.max(maxCount.B, histCount.B[i]);
+        maxLog.RGB       = Math.max(maxLog.RGB, histLog.RGB[i]);
+        maxLog.RG        = Math.max(maxLog.RG, histLog.RG[i]);
+        maxLog.GB        = Math.max(maxLog.GB, histLog.GB[i]);
+        maxLog.RB        = Math.max(maxLog.RB, histLog.RB[i]);
+        maxLog.R         = Math.max(maxLog.R, histLog.R[i]);
+        maxLog.G         = Math.max(maxLog.G, histLog.G[i]);
+        maxLog.B         = Math.max(maxLog.B, histLog.B[i]);
+    }
+
+    if (!message.data.transf) {
+        self.postMessage({
+            maxCount:   maxCount,
+            maxLog:     maxLog,
+            histCount:  histCount,
+            histLog:    histLog,
+        });
+    } else {//support transferable objects
+        self.postMessage({
+            maxCount:   maxCount,
+            maxLog:     maxLog,
+            histCount:  histCount,
+            histLog:    histLog,
+        }, [
+            histCount.RGB.buffer,
+            histCount.RG.buffer,
+            histCount.GB.buffer,
+            histCount.RB.buffer,
+            histCount.R.buffer,
+            histCount.G.buffer,
+            histCount.B.buffer,
+            histLog.RGB.buffer,
+            histLog.RG.buffer,
+            histLog.GB.buffer,
+            histLog.RB.buffer,
+            histLog.R.buffer,
+            histLog.G.buffer,
+            histLog.B.buffer
+        ]);
+    }
+    self.close();
+}, false);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="module-Fasta.html">Fasta</a></li><li><a href="module-Histogram.html">Histogram</a></li><li><a href="module-SeqInput.html">SeqInput</a></li></ul><h3>Classes</h3><ul><li><a href="MatrixManager.html">MatrixManager</a></li><li><a href="SequenceManager.html">SequenceManager</a></li><li><a href="ViewManager.html">ViewManager</a></li></ul><h3>Namespaces</h3><ul><li><a href="g.html">g</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Fri Jan 16 2015 13:51:13 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

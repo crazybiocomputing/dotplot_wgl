@@ -132,10 +132,18 @@ module.exports = function(grunt) {
                     destination: "dist/<%= pkg.version %>/doc"
                 }
             }
+        },
+        "gh-pages": {
+            options: {
+                base: "dist/<%= pkg.version %>",
+                tag: "v<%= pkg.version %>"
+            },
+            src: ["**"]
         }
     });
 
     require("load-grunt-tasks")(grunt);
 
     grunt.registerTask("default", ["clean:begin", "copy", "replace:html", "replace:js", "uglify", "autoprefixer", "cssmin", "clean:end", "appcache", "replace:appcache", "jsdoc"]);
+    grunt.registerTask("deploy", ["gh-pages"]);
 };
