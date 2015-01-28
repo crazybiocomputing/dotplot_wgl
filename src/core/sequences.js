@@ -29,6 +29,11 @@
 function SequenceManager() {
     /** List of all stored sequences @type {Object[]} */
     var list    = [],
+        units   = {
+            proteic: "aa",
+            nucleic: "bp",
+            text:    " letters"
+        },
         li      = g.$("sequence-list"),
         liTempl = (function() {
             var li  = document.createElement("li");
@@ -36,7 +41,7 @@ function SequenceManager() {
                 li.appendChild(document.createElement("div"));
             }
             li.children[2].classList.add("download");
-            li.children[2].title = "save as fasta file";
+            li.children[2].title = "save in a file";
             li.children[2].textContent = "↓";
             li.children[3].classList.add("remove");
             li.children[3].title = "remove";
@@ -60,7 +65,7 @@ function SequenceManager() {
             g.DOM.opt2.appendChild(sequence.opt2);
             sequence.li = liTempl.cloneNode(true);
             sequence.li.dataset.key = sequence.key;
-            sequence.li.children[1].textContent = "(" + sequence.size + ((sequence.type === "proteic") ? " aa)" : " bp)");
+            sequence.li.children[1].textContent = "(" + sequence.size + units[sequence.type] + ")";
             sequence.li.children[0].textContent = sequence.name;
             sequence.li.dataset.type = sequence.type;
             li.appendChild(sequence.li);
@@ -81,7 +86,8 @@ function SequenceManager() {
         var w = new Worker("core/workers/seqInput.js"),
             count    = 0,
             proteics = 0,
-            nucleics = 0;
+            nucleics = 0,
+            texts    = 0;
         w.addEventListener("message", function(message) {
             switch (message.data.status) {
                 case "error":
@@ -96,14 +102,23 @@ function SequenceManager() {
                     count++;
                     if (message.data.type === "proteic") {
                         proteics++;
-                    } else {
+                    } else if (message.data.type === "nucleic") {
                         nucleics++;
+                    } else {
+                        texts++;
                     }
                     addClean(message.data);
                     break;
                 case "done":
                     if (window.Notification && window.Notification.permission === "granted") {
-                        new window.Notification(count + " sequence" + ((count > 1) ? "s" : "") + " imported", {body: "nucleic: " + nucleics + " ; proteic: " + proteics, tag: parseInt(Date.now() / 2000), icon: "images/favicon-128.png"});
+                        new window.Notification(
+                            count + " sequence" + ((count > 1) ? "s" : "") + " imported",
+                            {
+                                body: "nucleic: " + nucleics + " ; proteic: " + proteics + " ; text: " + texts,
+                                tag: parseInt(Date.now() / 2000),
+                                icon: "images/favicon-128.png"
+                            }
+                        );
                     }
                     break;
             }
@@ -179,7 +194,7 @@ function SequenceManager() {
                 var trans = g.db.transaction(["sequences", "sequencesMetadata"], "readwrite");
                 var seqOS = trans.objectStore("sequences");
                 var request1;
-                if (cleaned.type === "proteic") {
+                if (cleaned.type === "proteic" || cleaned.type === "text") {
                     request1 = seqOS.add({
                         proteic:  cleaned.proteic,
                         proteicS: cleaned.proteicS
@@ -240,8 +255,7 @@ function SequenceManager() {
      */
     this.get = (function() {
         if (g.db) {
-            return function(key, nucleic, callback, details) {
-                var type = nucleic ? "nucleic" : "proteic";
+            return function(key, type, callback, details) {
                 if (details) {
                     var transaction = g.db.transaction(["sequences", "sequencesMetadata"], "readonly"),
                         callbackObj = {};
@@ -265,9 +279,8 @@ function SequenceManager() {
                 }
             };
         } else {
-            return function(key, nucleic, callback, details) {
-                var type = nucleic ? "nucleic" : "proteic",
-                    item;
+            return function(key, type, callback, details) {
+                var item;
                 for (var i = 0; i < list.length; i++) {
                     if (list[i].key === key) {
                         item = list[i];

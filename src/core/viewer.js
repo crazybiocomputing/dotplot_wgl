@@ -38,7 +38,7 @@ function ViewManager() {
      */
     this.rendering = false;
 
-    ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs"].forEach(function(shaderFile) {
+    ["DotPlot.vs", "NucleicNucleic.fs", "NucleicProteic.fs", "ProteicNucleic.fs", "ProteicProteic.fs", "TextText.fs"].forEach(function(shaderFile) {
         g.xhr2("shaders/" + shaderFile, function(r) {
             shaders[shaderFile.split(".")[0]] = r;
         });
@@ -71,7 +71,7 @@ function ViewManager() {
      * @param {number} seq2.key - sequence internal identifier
      * @param {string} seq2.name - sequence name
      * @param {number} seq2.size - sequence length
-     * @param {number} compType - comparison type (0: prot-prot, 1: prot-nuc, 2: nuc-nuc, 3: nuc-prot)
+     * @param {number} compType - comparison type (0: prot-prot, 1: prot-nuc, 2: nuc-nuc, 3: nuc-prot, 4: *-text or text-*)
      */
     this.render = function(seq1, seq2, compType) {
         //reninit inputs and canvas when new render calculation
@@ -129,6 +129,9 @@ function ViewManager() {
             case 3:
                 prepareShaders("NucleicProteic");
                 break;
+            case 4:
+                prepareShaders("TextText");
+                break;
         }
 
         gl.linkProgram(prog);
@@ -144,17 +147,21 @@ function ViewManager() {
         gl.enableVertexAttribArray(vertexPosAttrib);
         gl.vertexAttribPointer(vertexPosAttrib, 2, gl.FLOAT, false, 0, 0);
 
-        gl.uniform1i(gl.getUniformLocation(prog, "uSamplerMat"), 0);
+        if (compType !== 4) {
+            gl.uniform1i(gl.getUniformLocation(prog, "uSamplerMat"), 0);
+        }
         gl.uniform1i(gl.getUniformLocation(prog, "uSampler1"), 1);
         gl.uniform1i(gl.getUniformLocation(prog, "uSampler2"), 2);
 
         gl.uniform2f(gl.getUniformLocation(prog, "uSizes"), w, h);
 
-        gl.uniform2f(
-            gl.getUniformLocation(prog, "uOffset"),
-            parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset0),
-            parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset1)
-        );
+        if (compType !== 4) {
+            gl.uniform2f(
+                gl.getUniformLocation(prog, "uOffset"),
+                parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset0),
+                parseFloat(g.DOM.mat.options[g.DOM.mat.selectedIndex].dataset.offset1)
+            );
+        }
 
         gl.uniform1i(gl.getUniformLocation(prog, "uWindow"), wS);
 
@@ -171,20 +178,22 @@ function ViewManager() {
         gl.enableVertexAttribArray(texCoordLocation);
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
+        if (compType !== 4) {
         //weight matrix texture
-        var texWidth = (compType === 2) ? 16 : 24,
-            tex      = g.matMgr.getTexture(compType);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            var texWidth = (compType === 2) ? 16 : 24,
+                tex      = g.matMgr.getTexture(compType);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, texWidth, tex.length / texWidth, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        }
 
         //sequence textures
         var texLoaded = false;
-        g.seqMgr.get(seq1.key, compType === 2, function(seq) {
+        g.seqMgr.get(seq1.key, compType === 2 ? "nucleic" : "proteic", function(seq) {
             g.DOM.slider1.max    = w - 2;
             g.DOM.pickDiv1       = document.createElement("div");
             g.DOM.pickDiv1.title = seq1.name;
@@ -208,7 +217,7 @@ function ViewManager() {
             }
         });
 
-        g.seqMgr.get(seq2.key, compType === 2, function(seq) {
+        g.seqMgr.get(seq2.key, compType === 2 ? "nucleic" : "proteic", function(seq) {
             g.DOM.slider2.max    = h - 2;
             g.DOM.pickDiv2       = document.createElement("div");
             g.DOM.pickDiv2.title = seq2.name;
@@ -257,8 +266,8 @@ function ViewManager() {
     /**
      * Builds a container for a sequence's letters
      * @param {string} string - sequence string to be parsed
-     * @param {Object} div - DOM element to fill
-     * @param {number} index - starting point of the sequence parsing
+     * @param {number} compType -
+     * @param {number} num -
      */
     var fillDivs = function(string, compType, num) {
         var div = g.DOM["pickDiv" + num];
@@ -429,27 +438,33 @@ function ViewManager() {
                 var seq1 = g.DOM.opt1.options[g.DOM.opt1.selectedIndex],
                     seq2 = g.DOM.opt2.options[g.DOM.opt2.selectedIndex],
                     compType;
-                if (seq1.dataset.type === seq2.dataset.type) {
-                    if (seq2.dataset.type === "nucleic") {
-                        compType = 2;
-                        colorDesc.textContent = "Nucleic strand:";
-                        g.DOM.red.nextElementSibling.textContent   = "forward";
-                        g.DOM.green.nextElementSibling.textContent = "reverse";
-                        g.DOM.blue.nextElementSibling.textContent  = "reverse comp.";
-                    } else {
-                        compType = 0;
-                        g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = true;
-                        colorDesc.textContent = g.DOM.red.nextElementSibling.textContent = g.DOM.green.nextElementSibling.textContent = g.DOM.blue.nextElementSibling.textContent = "";
-                    }
+                if (seq1.dataset.type === "text" || seq2.dataset.type === "text") {
+                    compType = 4;
+                    colorDesc.textContent = g.DOM.red.nextElementSibling.textContent = g.DOM.green.nextElementSibling.textContent = g.DOM.blue.nextElementSibling.textContent = "";
+                    g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = true;
                 } else {
-                    colorDesc.textContent = "Reading frame offsets:";
-                    g.DOM.red.nextElementSibling.textContent   = "0";
-                    g.DOM.green.nextElementSibling.textContent = "1";
-                    g.DOM.blue.nextElementSibling.textContent  = "2";
-                    if (seq2.dataset.type === "nucleic") {
-                        compType = 1;
+                    if (seq1.dataset.type === seq2.dataset.type) {
+                        if (seq2.dataset.type === "nucleic") {
+                            compType = 2;
+                            colorDesc.textContent = "Nucleic strand:";
+                            g.DOM.red.nextElementSibling.textContent   = "forward";
+                            g.DOM.green.nextElementSibling.textContent = "reverse";
+                            g.DOM.blue.nextElementSibling.textContent  = "reverse comp.";
+                        } else {
+                            compType = 0;
+                            g.DOM.red.disabled = g.DOM.green.disabled = g.DOM.blue.disabled = true;
+                            colorDesc.textContent = g.DOM.red.nextElementSibling.textContent = g.DOM.green.nextElementSibling.textContent = g.DOM.blue.nextElementSibling.textContent = "";
+                        }
                     } else {
-                        compType = 3;
+                        colorDesc.textContent = "Reading frame offsets:";
+                        g.DOM.red.nextElementSibling.textContent   = "0";
+                        g.DOM.green.nextElementSibling.textContent = "1";
+                        g.DOM.blue.nextElementSibling.textContent  = "2";
+                        if (seq2.dataset.type === "nucleic") {
+                            compType = 1;
+                        } else {
+                            compType = 3;
+                        }
                     }
                 }
                 g.viewMgr.render(

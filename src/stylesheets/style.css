@@ -62,6 +62,10 @@ option[data-type="proteic"] {
     background: lightblue;
 }
 
+option[data-type="text"] {
+    background: #ff405f;
+}
+
 .grow {
     flex-grow: 1;
 }
@@ -257,6 +261,10 @@ canvas {
 
 #sequence-list > li[data-type="proteic"] {
     background: lightblue;
+}
+
+#sequence-list > li[data-type="text"] {
+    background: #ff405f;
 }
 
 #sequence-list div:first-child {
