@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# rev 1 - 2015-01-16T12:51:09.855Z
+# rev 1 - 2015-01-30T12:49:04.778Z
 
 CACHE:
 core/Dotplot_wgl.min.js
@@ -21,6 +21,8 @@ images/favicon-16.png
 images/favicon-32.png
 images/favicon-64.png
 index.html
+matrices/EBLOSUM45.txt
+matrices/EBLOSUM62.txt
 matrices/NucleicMatrices.texture
 matrices/ProteicMatrices.texture
 shaders/DotPlot.vs
@@ -28,6 +30,7 @@ shaders/NucleicNucleic.fs
 shaders/NucleicProteic.fs
 shaders/ProteicNucleic.fs
 shaders/ProteicProteic.fs
+shaders/TextText.fs
 stylesheets/examples.min.css
 stylesheets/style.min.css
 
