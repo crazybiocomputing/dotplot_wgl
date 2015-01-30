@@ -165,11 +165,12 @@ function SequenceManager() {
     /**
      * Generates a fasta file from a stored sequence
      * @param {number} key - identifier of the wanted sequence
-     * @param {boolean} nucleic - if the sequence is nucleic or not
+     * @param {string} nucleic - type of the sequence
      * @param {function} callback - function called at the next monitor 
      */
-    this.fasta = function(key, nucleic, callback) {
-        this.get(key, nucleic, function(seq) {
+    this.fasta = function(key, type, callback) {
+        var nucleic = (type === "nucleic");
+        this.get(key, type === "text" ? "proteic" : "nucleic", function(seq) {
             var w = new Worker("core/workers/fasta.js");
             w.addEventListener("message", function(message) {
                 callback(window.URL.createObjectURL(message.data.blob), message.data.name);

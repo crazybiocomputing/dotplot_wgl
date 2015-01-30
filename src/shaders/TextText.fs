@@ -1,11 +1,9 @@
 precision mediump float;
 varying vec2 vTexCoord;
-//uniform sampler2D uSamplerMat;
 uniform sampler2D uSampler1;
 uniform sampler2D uSampler2;
 uniform int uWindow;
 uniform vec2 uTransfer;
-//uniform vec2 uOffset;
 uniform vec2 uSizes;
 
 void main() {
