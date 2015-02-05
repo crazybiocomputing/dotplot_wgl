@@ -109,7 +109,7 @@ function ViewManager() {
         ) || g.DOM.canvas.getContext(
             "experimental-webgl", {alpha: false, preserveDrawingBuffer: true}
         );
-        gl.viewport(0, 0, w, h);
+        gl.viewport(0, h - 40, 50, 40);
         gl.clearColor(1.0, 1.0, 1.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
